@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Pusher</title>
+    <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+</head>
+<body>
+    <h1>Teste de Conexão Pusher</h1>
+    <button onclick="testPusher()">Testar Conexão</button>
+    <button onclick="subscribeToChannel()">Inscrever no Canal</button>
+    <div id="status"></div>
+    <div id="messages"></div>
+
+    <script>
+        // Configuração do Pusher
+        const pusher = new Pusher('b395ac035994ca7af583', {
+            cluster: 'eu',
+            forceTLS: true,
+            encrypted: true
+        });
+
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML += '<p>' + message + '</p>';
+        }
+
+        function testPusher() {
+            updateStatus('🔌 Testando conexão com Pusher...');
+            
+            pusher.connection.bind('connected', () => {
+                updateStatus('✅ Conectado ao Pusher!');
+                updateStatus('🔗 Connection ID: ' + pusher.connection.connection.id);
+            });
+
+            pusher.connection.bind('error', (err) => {
+                updateStatus('❌ Erro de conexão: ' + err.message);
+            });
+
+            pusher.connection.bind('disconnected', () => {
+                updateStatus('🔌 Desconectado do Pusher');
+            });
+        }
+
+        function subscribeToChannel() {
+            updateStatus('📡 Inscrevendo no canal chat.33...');
+            
+            const channel = pusher.subscribe('chat.33');
+            
+            channel.bind('pusher:subscription_succeeded', () => {
+                updateStatus('✅ Inscrito no canal chat.33 com sucesso!');
+            });
+
+            channel.bind('pusher:subscription_error', (status) => {
+                updateStatus('❌ Erro na inscrição: ' + JSON.stringify(status));
+            });
+
+            channel.bind('MessageSent', (data) => {
+                updateStatus('🔔 Mensagem recebida: ' + JSON.stringify(data));
+                document.getElementById('messages').innerHTML += '<p><strong>Nova mensagem:</strong> ' + data.content + '</p>';
+            });
+
+            updateStatus('📡 Aguardando eventos no canal chat.33...');
+        }
+
+        // Testar automaticamente ao carregar
+        window.onload = function() {
+            updateStatus('🚀 Página carregada, iniciando teste...');
+            testPusher();
+        };
+    </script>
+</body>
+</html>
