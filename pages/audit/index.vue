@@ -1,0 +1,607 @@
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue';
+import UiChildCard from '@/components/shared/UiChildCard.vue';
+import type { AuditLogFilters } from '~/types/api';
+
+// Definir middleware de autenticação
+definePageMeta({
+  middleware: 'auth'
+});
+
+// Usar o composable de auditoria
+const {
+  logs,
+  pagination,
+  loading,
+  error,
+  loadLogs,
+  nextPage,
+  prevPage,
+  goToPage,
+  changePerPage,
+  canGoNext,
+  canGoPrev,
+  pageNumbers,
+  formatDate,
+  getActionColor,
+  getActionIcon,
+  getModelName,
+  loadLogById
+} = useAudit();
+
+// Estados reativos para filtros
+const filters = ref<AuditLogFilters>({
+  action: '',
+  model_type: '',
+  user_type: undefined,
+  date_from: '',
+  date_to: '',
+  tags: '',
+  per_page: 20,
+  page: 1
+});
+
+// Estados para diálogos
+const showLogDetailsDialog = ref(false);
+const selectedLogId = ref<number | null>(null);
+const selectedLogDetails = ref<any>(null);
+
+// Opções de filtros
+const actionOptions = [
+  { value: '', label: 'Todas as ações' },
+  { value: 'created', label: 'Criado' },
+  { value: 'updated', label: 'Atualizado' },
+  { value: 'deleted', label: 'Deletado' },
+  { value: 'login', label: 'Login' },
+  { value: 'viewed', label: 'Visualizado' }
+];
+
+const modelTypeOptions = [
+  { value: '', label: 'Todos os modelos' },
+  { value: 'App\\Models\\User', label: 'User' },
+  { value: 'App\\Models\\Admin', label: 'Admin' },
+  { value: 'App\\Models\\Role', label: 'Role' },
+  { value: 'App\\Models\\Permission', label: 'Permission' }
+];
+
+const userTypeOptions = [
+  { value: '', label: 'Todos os tipos' },
+  { value: 'Admin', label: 'Admin' },
+  { value: 'User', label: 'User' }
+];
+
+// Função para aplicar filtros
+const applyFilters = () => {
+  filters.value.page = 1; // Resetar para primeira página
+  loadLogs(filters.value);
+};
+
+// Função para limpar filtros
+const clearFilters = () => {
+  filters.value = {
+    action: '',
+    model_type: '',
+    user_type: undefined,
+    date_from: '',
+    date_to: '',
+    tags: '',
+    per_page: 20,
+    page: 1
+  };
+  loadLogs(filters.value);
+};
+
+// Função para ver detalhes de um log
+const viewLogDetails = async (logId: number) => {
+  selectedLogId.value = logId;
+  showLogDetailsDialog.value = true;
+  
+  const log = await loadLogById(logId);
+  if (log) {
+    selectedLogDetails.value = log;
+  }
+};
+
+// Função para navegar páginas com filtros
+const handleNextPage = () => {
+  nextPage(filters.value);
+};
+
+const handlePrevPage = () => {
+  prevPage(filters.value);
+};
+
+const handleGoToPage = (page: number) => {
+  goToPage(page, filters.value);
+};
+
+const handleChangePerPage = (perPage: number) => {
+  changePerPage(perPage, filters.value);
+};
+
+// Computed para contar logs filtrados
+const logsCount = computed(() => {
+  return pagination.value?.total || logs.value.length;
+});
+
+// Carregar logs quando a página for montada
+onMounted(() => {
+  loadLogs(filters.value);
+});
+</script>
+
+<template>
+  <div>
+    <!-- Header -->
+    <v-row class="mb-4">
+      <v-col cols="12">
+        <div class="d-flex align-center justify-space-between">
+          <div>
+            <h1 class="text-h4 font-weight-bold">Auditoria</h1>
+            <p class="text-body-1 text-medium-emphasis">
+              Visualize todos os logs de auditoria do sistema
+            </p>
+          </div>
+        </div>
+      </v-col>
+    </v-row>
+
+    <!-- Filtros -->
+    <v-row class="mb-6">
+      <v-col cols="12">
+        <UiChildCard title="Filtros">
+          <v-row>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="filters.action"
+                :items="actionOptions"
+                item-title="label"
+                item-value="value"
+                label="Ação"
+                variant="outlined"
+                density="compact"
+                clearable
+              />
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="filters.model_type"
+                :items="modelTypeOptions"
+                item-title="label"
+                item-value="value"
+                label="Modelo"
+                variant="outlined"
+                density="compact"
+                clearable
+              />
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="filters.user_type"
+                :items="userTypeOptions"
+                item-title="label"
+                item-value="value"
+                label="Tipo de Usuário"
+                variant="outlined"
+                density="compact"
+                clearable
+              />
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-text-field
+                v-model="filters.tags"
+                label="Tags (separadas por vírgula)"
+                variant="outlined"
+                density="compact"
+                clearable
+                placeholder="security,critical"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="3">
+              <v-text-field
+                v-model="filters.date_from"
+                label="Data Inicial"
+                type="date"
+                variant="outlined"
+                density="compact"
+                clearable
+              />
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-text-field
+                v-model="filters.date_to"
+                label="Data Final"
+                type="date"
+                variant="outlined"
+                density="compact"
+                clearable
+              />
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="filters.per_page"
+                :items="[10, 20, 50, 100]"
+                label="Itens por página"
+                variant="outlined"
+                density="compact"
+              />
+            </v-col>
+            <v-col cols="12" md="3" class="d-flex align-end gap-2">
+              <v-btn
+                color="primary"
+                @click="applyFilters"
+                prepend-icon="mdi-filter"
+                block
+              >
+                Aplicar Filtros
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12">
+              <div class="d-flex gap-2">
+                <v-btn
+                  variant="outlined"
+                  @click="clearFilters"
+                  prepend-icon="mdi-refresh"
+                >
+                  Limpar Filtros
+                </v-btn>
+                <v-chip
+                  color="primary"
+                  variant="tonal"
+                  class="ml-auto"
+                >
+                  {{ logsCount }} logs encontrados
+                </v-chip>
+              </div>
+            </v-col>
+          </v-row>
+        </UiChildCard>
+      </v-col>
+    </v-row>
+
+    <!-- Loading -->
+    <v-row v-if="loading">
+      <v-col cols="12">
+        <UiChildCard>
+          <div class="d-flex justify-center align-center py-8">
+            <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+          </div>
+        </UiChildCard>
+      </v-col>
+    </v-row>
+
+    <!-- Erro -->
+    <v-row v-else-if="error">
+      <v-col cols="12">
+        <UiChildCard>
+          <v-alert type="error" variant="tonal" class="mb-0">
+            {{ error }}
+          </v-alert>
+        </UiChildCard>
+      </v-col>
+    </v-row>
+
+    <!-- Tabela de Logs -->
+    <v-row v-else>
+      <v-col cols="12">
+        <UiChildCard title="Logs de Auditoria">
+          <v-table fixed-header height="600px">
+            <thead>
+              <tr>
+                <th class="text-left">Data/Hora</th>
+                <th class="text-left">Usuário</th>
+                <th class="text-left">Ação</th>
+                <th class="text-left">Modelo</th>
+                <th class="text-left">Descrição</th>
+                <th class="text-left">Tags</th>
+                <th class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="log in logs" :key="log.id">
+                <td>
+                  <div class="text-body-2">{{ formatDate(log.created_at) }}</div>
+                </td>
+                <td>
+                  <div>
+                    <div class="font-weight-medium">{{ log.user.name }}</div>
+                    <div class="text-caption text-medium-emphasis">
+                      {{ log.user.type }} #{{ log.user.id }}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <v-chip
+                    :color="getActionColor(log.action)"
+                    variant="tonal"
+                    size="small"
+                    :prepend-icon="getActionIcon(log.action)"
+                  >
+                    {{ log.action }}
+                  </v-chip>
+                </td>
+                <td>
+                  <div>
+                    <div class="font-weight-medium">{{ getModelName(log.model.type) }}</div>
+                    <div class="text-caption text-medium-emphasis" v-if="log.model.id">
+                      ID: {{ log.model.id }}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="text-body-2" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">
+                    {{ log.description || '-' }}
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex gap-1 flex-wrap" v-if="log.tags && log.tags.length > 0">
+                    <v-chip
+                      v-for="tag in log.tags"
+                      :key="tag"
+                      :color="tag === 'critical' ? 'error' : tag === 'security' ? 'warning' : 'default'"
+                      variant="tonal"
+                      size="x-small"
+                    >
+                      {{ tag }}
+                    </v-chip>
+                  </div>
+                  <span v-else class="text-medium-emphasis">-</span>
+                </td>
+                <td>
+                  <div class="d-flex justify-center">
+                    <v-btn
+                      icon
+                      size="small"
+                      variant="text"
+                      color="primary"
+                      @click="viewLogDetails(log.id)"
+                      title="Ver Detalhes"
+                    >
+                      <v-icon>mdi-eye</v-icon>
+                    </v-btn>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="logs.length === 0">
+                <td colspan="7" class="text-center py-8 text-medium-emphasis">
+                  Nenhum log encontrado
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+
+          <!-- Paginação -->
+          <div v-if="pagination" class="d-flex align-center justify-space-between mt-4">
+            <div class="text-body-2 text-medium-emphasis">
+              Mostrando {{ pagination.from }} a {{ pagination.to }} de {{ pagination.total }} logs
+            </div>
+            
+            <div class="d-flex align-center gap-2">
+              <!-- Itens por página -->
+              <v-select
+                :model-value="pagination.per_page"
+                @update:model-value="handleChangePerPage"
+                :items="[10, 20, 50, 100]"
+                variant="outlined"
+                density="compact"
+                hide-details
+                style="width: 80px"
+              />
+              
+              <!-- Navegação -->
+              <v-btn
+                icon
+                variant="text"
+                :disabled="!canGoPrev"
+                @click="handlePrevPage"
+                title="Página anterior"
+              >
+                <v-icon>mdi-chevron-left</v-icon>
+              </v-btn>
+              
+              <!-- Números das páginas -->
+              <div class="d-flex gap-1">
+                <v-btn
+                  v-for="page in pageNumbers"
+                  :key="page"
+                  :color="page === pagination.current_page ? 'primary' : undefined"
+                  variant="text"
+                  size="small"
+                  @click="handleGoToPage(page)"
+                >
+                  {{ page }}
+                </v-btn>
+              </div>
+              
+              <v-btn
+                icon
+                variant="text"
+                :disabled="!canGoNext"
+                @click="handleNextPage"
+                title="Próxima página"
+              >
+                <v-icon>mdi-chevron-right</v-icon>
+              </v-btn>
+            </div>
+          </div>
+        </UiChildCard>
+      </v-col>
+    </v-row>
+
+    <!-- Dialog de Detalhes do Log -->
+    <v-dialog v-model="showLogDetailsDialog" max-width="900px" scrollable>
+      <v-card v-if="selectedLogDetails">
+        <v-card-title class="d-flex align-center justify-space-between">
+          <div>
+            <div class="text-h5">Detalhes do Log de Auditoria</div>
+            <div class="text-caption text-medium-emphasis">ID: {{ selectedLogDetails.id }}</div>
+          </div>
+          <v-btn
+            icon
+            variant="text"
+            @click="showLogDetailsDialog = false"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        
+        <v-divider />
+        
+        <v-card-text class="pa-4">
+          <!-- Informações Básicas -->
+          <v-row class="mb-4">
+            <v-col cols="12">
+              <h3 class="text-h6 mb-2">Informações Básicas</h3>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="text-body-2 text-medium-emphasis">Data/Hora</div>
+              <div class="text-body-1">{{ formatDate(selectedLogDetails.created_at) }}</div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="text-body-2 text-medium-emphasis">Ação</div>
+              <v-chip
+                :color="getActionColor(selectedLogDetails.action)"
+                variant="tonal"
+                :prepend-icon="getActionIcon(selectedLogDetails.action)"
+              >
+                {{ selectedLogDetails.action }}
+              </v-chip>
+            </v-col>
+          </v-row>
+
+          <!-- Usuário -->
+          <v-row class="mb-4">
+            <v-col cols="12">
+              <h3 class="text-h6 mb-2">Usuário</h3>
+            </v-col>
+            <v-col cols="12" md="4">
+              <div class="text-body-2 text-medium-emphasis">Nome</div>
+              <div class="text-body-1">{{ selectedLogDetails.user.name }}</div>
+            </v-col>
+            <v-col cols="12" md="4">
+              <div class="text-body-2 text-medium-emphasis">Tipo</div>
+              <div class="text-body-1">{{ selectedLogDetails.user.type }}</div>
+            </v-col>
+            <v-col cols="12" md="4">
+              <div class="text-body-2 text-medium-emphasis">ID</div>
+              <div class="text-body-1">{{ selectedLogDetails.user.id }}</div>
+            </v-col>
+          </v-row>
+
+          <!-- Modelo -->
+          <v-row class="mb-4">
+            <v-col cols="12">
+              <h3 class="text-h6 mb-2">Modelo</h3>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="text-body-2 text-medium-emphasis">Tipo</div>
+              <div class="text-body-1">{{ selectedLogDetails.model.type }}</div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="text-body-2 text-medium-emphasis">ID</div>
+              <div class="text-body-1">{{ selectedLogDetails.model.id || 'N/A' }}</div>
+            </v-col>
+          </v-row>
+
+          <!-- Descrição -->
+          <v-row class="mb-4" v-if="selectedLogDetails.description">
+            <v-col cols="12">
+              <h3 class="text-h6 mb-2">Descrição</h3>
+              <div class="text-body-1">{{ selectedLogDetails.description }}</div>
+            </v-col>
+          </v-row>
+
+          <!-- Tags -->
+          <v-row class="mb-4" v-if="selectedLogDetails.tags && selectedLogDetails.tags.length > 0">
+            <v-col cols="12">
+              <h3 class="text-h6 mb-2">Tags</h3>
+              <div class="d-flex gap-2 flex-wrap">
+                <v-chip
+                  v-for="tag in selectedLogDetails.tags"
+                  :key="tag"
+                  :color="tag === 'critical' ? 'error' : tag === 'security' ? 'warning' : 'default'"
+                  variant="tonal"
+                >
+                  {{ tag }}
+                </v-chip>
+              </div>
+            </v-col>
+          </v-row>
+
+          <!-- Mudanças -->
+          <v-row class="mb-4" v-if="selectedLogDetails.changes">
+            <v-col cols="12">
+              <h3 class="text-h6 mb-2">Mudanças</h3>
+              <v-row>
+                <v-col cols="12" md="6" v-if="selectedLogDetails.changes.old">
+                  <div class="text-body-2 text-medium-emphasis mb-2">Valores Anteriores</div>
+                  <v-card variant="outlined" class="pa-3">
+                    <pre class="text-body-2" style="white-space: pre-wrap; word-break: break-word;">{{ JSON.stringify(selectedLogDetails.changes.old, null, 2) }}</pre>
+                  </v-card>
+                </v-col>
+                <v-col cols="12" md="6" v-if="selectedLogDetails.changes.new">
+                  <div class="text-body-2 text-medium-emphasis mb-2">Valores Novos</div>
+                  <v-card variant="outlined" class="pa-3">
+                    <pre class="text-body-2" style="white-space: pre-wrap; word-break: break-word;">{{ JSON.stringify(selectedLogDetails.changes.new, null, 2) }}</pre>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
+
+          <!-- Contexto -->
+          <v-row class="mb-4" v-if="selectedLogDetails.context">
+            <v-col cols="12">
+              <h3 class="text-h6 mb-2">Contexto</h3>
+              <v-row>
+                <v-col cols="12" md="6" v-if="selectedLogDetails.context.ip">
+                  <div class="text-body-2 text-medium-emphasis">IP</div>
+                  <div class="text-body-1">{{ selectedLogDetails.context.ip }}</div>
+                </v-col>
+                <v-col cols="12" md="6" v-if="selectedLogDetails.context.method">
+                  <div class="text-body-2 text-medium-emphasis">Método HTTP</div>
+                  <div class="text-body-1">{{ selectedLogDetails.context.method }}</div>
+                </v-col>
+                <v-col cols="12" v-if="selectedLogDetails.context.url">
+                  <div class="text-body-2 text-medium-emphasis">URL</div>
+                  <div class="text-body-1">{{ selectedLogDetails.context.url }}</div>
+                </v-col>
+                <v-col cols="12" v-if="selectedLogDetails.context.user_agent">
+                  <div class="text-body-2 text-medium-emphasis">User Agent</div>
+                  <div class="text-body-1 text-caption">{{ selectedLogDetails.context.user_agent }}</div>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
+
+          <!-- Metadata -->
+          <v-row v-if="selectedLogDetails.metadata">
+            <v-col cols="12">
+              <h3 class="text-h6 mb-2">Metadata</h3>
+              <v-card variant="outlined" class="pa-3">
+                <pre class="text-body-2" style="white-space: pre-wrap; word-break: break-word;">{{ JSON.stringify(selectedLogDetails.metadata, null, 2) }}</pre>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        
+        <v-divider />
+        
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            @click="showLogDetailsDialog = false"
+          >
+            Fechar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
+</template>
+

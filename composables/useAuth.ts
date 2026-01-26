@@ -38,7 +38,7 @@ export const useAuth = () => {
         // Salvar dados do usuário no localStorage
         if (process.client) {
           localStorage.setItem('user', JSON.stringify(loginData.admin));
-          localStorage.setItem('token', loginData.token);
+          localStorage.setItem('auth_token', loginData.token);
         }
         
         return { success: true };

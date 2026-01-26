@@ -60,6 +60,12 @@ const sidebarItem: menu[] = [
     to: "/roles",
     permission: "role-assign",
   },
+  {
+    title: "Auditoria",
+    icon: "clipboard-text-linear",
+    to: "/audit",
+    permission: "audit-read",
+  },
   { header: "ui" },
   {
     title: "Alert",

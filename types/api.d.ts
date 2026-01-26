@@ -146,4 +146,65 @@ export interface AdminsListResponse {
   success: boolean;
   data: Admin[];
   pagination: Pagination;
+}
+
+// Tipos para Auditoria
+export interface AuditLogUser {
+  id: number;
+  type: 'Admin' | 'User';
+  name: string;
+}
+
+export interface AuditLogModel {
+  type: string; // Ex: "App\\Models\\User"
+  id: number | null;
+}
+
+export interface AuditLogChanges {
+  old: Record<string, any> | null;
+  new: Record<string, any> | null;
+}
+
+export interface AuditLogContext {
+  ip: string | null;
+  user_agent: string | null;
+  url: string | null;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | null;
+}
+
+export interface AuditLog {
+  id: number;
+  user: AuditLogUser;
+  action: 'created' | 'updated' | 'deleted' | 'viewed' | 'login' | string;
+  model: AuditLogModel;
+  changes: AuditLogChanges;
+  description: string | null;
+  context: AuditLogContext;
+  tags: string[] | null;
+  metadata: Record<string, any> | null;
+  created_at: string;
+}
+
+export interface AuditLogsResponse {
+  success: boolean;
+  data: AuditLog[];
+  pagination: Pagination;
+}
+
+export interface AuditLogResponse {
+  success: boolean;
+  data: AuditLog;
+}
+
+export interface AuditLogFilters {
+  user_id?: number;
+  user_type?: 'Admin' | 'User';
+  model_type?: string;
+  model_id?: number;
+  action?: string;
+  tags?: string; // Separado por vírgula
+  date_from?: string; // YYYY-MM-DD
+  date_to?: string; // YYYY-MM-DD
+  per_page?: number;
+  page?: number;
 } 
