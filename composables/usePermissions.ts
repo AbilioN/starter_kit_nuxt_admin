@@ -173,6 +173,7 @@ export const usePermissions = () => {
     isSuperAdmin: readonly(isSuperAdmin),
     
     // Funções de verificação de permissões
+    can: hasPermission,
     hasPermission,
     canAccess,
     hasAllPermissions,

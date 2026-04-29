@@ -70,7 +70,7 @@ export const useAuth = () => {
       
       if (process.client) {
         localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        localStorage.removeItem('auth_token');
       }
       navigateTo('/auth/login');
     }

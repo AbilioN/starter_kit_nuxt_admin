@@ -196,6 +196,45 @@ export interface AuditLogResponse {
   data: AuditLog;
 }
 
+// Tipos para Settings
+export type SettingType = 'string' | 'boolean' | 'integer' | 'json';
+export type SettingGroup = 'general' | 'features' | 'email' | 'storage' | string;
+
+export interface Setting {
+  key: string;
+  value: string | boolean | number | null;
+  group: SettingGroup;
+  type: SettingType;
+  label: string;
+  description: string | null;
+  is_public: boolean;
+}
+
+export interface SettingsResponse {
+  success: boolean;
+  data: Setting[];
+}
+
+export interface SettingResponse {
+  success: boolean;
+  data: Setting;
+}
+
+export type PublicSettings = Record<string, any>;
+
+export interface PublicSettingsResponse {
+  success: boolean;
+  data: PublicSettings;
+}
+
+export interface UpdateSettingRequest {
+  value: string | boolean | number | null;
+}
+
+export interface UpdateManySettingsRequest {
+  settings: Array<{ key: string; value: string | boolean | number | null }>;
+}
+
 export interface AuditLogFilters {
   user_id?: number;
   user_type?: 'Admin' | 'User';

@@ -61,10 +61,31 @@ const sidebarItem: menu[] = [
     permission: "role-assign",
   },
   {
-    title: "Auditoria",
+    title: "Audit Logs",
     icon: "clipboard-text-linear",
     to: "/audit",
     permission: "audit-read",
+  },
+  {
+    title: "Notifications",
+    icon: "bell-outline",
+    to: "/notifications",
+  },
+  {
+    title: "Settings",
+    icon: "settings-linear",
+    to: "/settings",
+    permission: "setting-read",
+    children: [
+      {
+        title: "General",
+        to: "/settings",
+      },
+      {
+        title: "Feature Flags",
+        to: "/settings/features",
+      },
+    ],
   },
   { header: "ui" },
   {

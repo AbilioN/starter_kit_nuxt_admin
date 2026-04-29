@@ -69,7 +69,15 @@ export class ApiClient implements IHttpClient {
       const isJson = contentType && contentType.includes('application/json');
       
       if (!response.ok) {
-        // Tentar extrair mensagem de erro da API
+        if (response.status === 401) {
+          if (process.client) {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+            window.location.href = '/auth/login';
+          }
+          throw new Error('Unauthenticated');
+        }
+
         if (isJson) {
           const errorData = await response.json() as ApiErrorResponse;
           throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
