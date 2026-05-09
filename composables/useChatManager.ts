@@ -13,6 +13,11 @@ export const useChatManager = () => {
   const error = ref<string | null>(null);
   const pagination = ref<any>(null);
 
+  // Tracks channels that already have a MESSAGE_SENT handler bound.
+  // Pusher.bind() stacks handlers — calling it twice on the same channel
+  // causes every incoming event to fire twice.
+  const boundChannels = new Set<string>();
+
   // Usuário atual
   const currentUser = useAuth().user;
 
@@ -265,45 +270,44 @@ export const useChatManager = () => {
         
         // Escutar todos os chats do usuário
         chats.value.forEach(chat => {
-          // Verificar se já existe um listener para este chat
           const channelName = PUSHER_CHANNELS.CHAT(chat.id);
           console.log('🔔 Configurando listener para canal:', channelName);
 
           try {
-            // Verificar se já está inscrito no canal
-            if ($pusher.channel(channelName)) {
-              console.log(`🔔 Já inscrito no canal ${channelName}, pulando...`);
+            if (boundChannels.has(channelName)) {
+              console.log(`🔔 Handler já registrado para ${channelName}, pulando...`);
               return;
             }
 
             const channel = $pusher.subscribe(channelName);
             console.log('🔔 Canal inscrito:', channel);
-            
+
             channel.bind(PUSHER_EVENTS.MESSAGE_SENT, (event: PusherMessageSentEvent) => {
               console.log('🔔 Nova mensagem recebida via Pusher:', event);
-              
-              // Tratar data de forma mais robusta
+
+              // Guard against duplicates — same ID can arrive from both
+              // setupPusherListener and setupPusherListenerForChat if called in sequence.
+              if (messages.value.some(m => m.id === event.id)) {
+                console.log('🔔 Mensagem duplicada ignorada (id:', event.id, ')');
+                return;
+              }
+
               let createdAt = event.created_at;
               try {
-                if (createdAt) {
-                  const date = new Date(createdAt);
-                  if (isNaN(date.getTime())) {
-                    console.warn('⚠️ Data inválida recebida do Pusher:', createdAt);
-                    createdAt = new Date().toISOString(); // Usar data atual como fallback
-                  }
+                if (createdAt && isNaN(new Date(createdAt).getTime())) {
+                  createdAt = new Date().toISOString();
                 }
-              } catch (err) {
-                console.warn('⚠️ Erro ao processar data do Pusher:', err);
-                createdAt = new Date().toISOString(); // Usar data atual como fallback
+              } catch {
+                createdAt = new Date().toISOString();
               }
-              
+
               const newMessage: ChatMessage = {
                 id: event.id,
                 chat_id: event.chat_id,
                 content: event.content,
                 sender_id: event.sender_id,
                 sender_type: event.sender_type,
-                message_type: 'text', // Padrão para mensagens de texto
+                message_type: 'text',
                 metadata: null,
                 is_read: event.is_read,
                 read_at: null,
@@ -311,25 +315,21 @@ export const useChatManager = () => {
                 updated_at: createdAt
               };
 
-              // Adicionar mensagem ao estado
               messages.value.push(newMessage);
               console.log('🔔 Mensagem adicionada ao estado:', newMessage);
 
-              // Atualizar último mensagem no chat correspondente
               const chatIndex = chats.value.findIndex(c => c.id === event.chat_id);
               if (chatIndex !== -1) {
                 chats.value[chatIndex].last_message = newMessage;
                 chats.value[chatIndex].unread_count = (chats.value[chatIndex].unread_count || 0) + 1;
-                console.log('🔔 Chat atualizado com nova mensagem');
               }
 
-              // Se a mensagem é para o chat atual, fazer scroll para baixo
               if (currentChat.value?.id === event.chat_id) {
-                // Emitir evento para fazer scroll (será capturado pelo ChatInterface)
                 window.dispatchEvent(new CustomEvent('scroll-to-bottom'));
               }
             });
 
+            boundChannels.add(channelName);
             console.log(`✅ Listener configurado para chat ${chat.id} no canal ${channelName}`);
           } catch (channelError) {
             console.error(`❌ Erro ao configurar listener para chat ${chat.id}:`, channelError);
@@ -364,34 +364,38 @@ export const useChatManager = () => {
       const channelName = PUSHER_CHANNELS.CHAT(chatId);
       console.log('🔔 Configurando listener para canal:', channelName);
 
+      if (boundChannels.has(channelName)) {
+        console.log(`🔔 Handler já registrado para ${channelName}, pulando...`);
+        return;
+      }
+
       const channel = $pusher.subscribe(channelName);
       console.log('🔔 Canal inscrito:', channel);
 
       channel.bind(PUSHER_EVENTS.MESSAGE_SENT, (event: PusherMessageSentEvent) => {
         console.log('🔔 Nova mensagem recebida via Pusher para chat:', chatId, event);
-        
-        // Tratar data de forma mais robusta
+
+        if (messages.value.some(m => m.id === event.id)) {
+          console.log('🔔 Mensagem duplicada ignorada (id:', event.id, ')');
+          return;
+        }
+
         let createdAt = event.created_at;
         try {
-          if (createdAt) {
-            const date = new Date(createdAt);
-            if (isNaN(date.getTime())) {
-              console.warn('⚠️ Data inválida recebida do Pusher para chat:', chatId, createdAt);
-              createdAt = new Date().toISOString(); // Usar data atual como fallback
-            }
+          if (createdAt && isNaN(new Date(createdAt).getTime())) {
+            createdAt = new Date().toISOString();
           }
-        } catch (err) {
-          console.warn('⚠️ Erro ao processar data do Pusher para chat:', chatId, err);
-          createdAt = new Date().toISOString(); // Usar data atual como fallback
+        } catch {
+          createdAt = new Date().toISOString();
         }
-        
+
         const newMessage: ChatMessage = {
           id: event.id,
           chat_id: event.chat_id,
           content: event.content,
           sender_id: event.sender_id,
           sender_type: event.sender_type,
-          message_type: 'text', // Padrão para mensagens de texto
+          message_type: 'text',
           metadata: null,
           is_read: event.is_read,
           read_at: null,
@@ -399,25 +403,21 @@ export const useChatManager = () => {
           updated_at: createdAt
         };
 
-        // Adicionar mensagem ao estado
         messages.value.push(newMessage);
         console.log('🔔 Mensagem adicionada ao estado para chat:', chatId, newMessage);
 
-        // Atualizar última mensagem no chat correspondente
         const chatIndex = chats.value.findIndex(c => c.id === event.chat_id);
         if (chatIndex !== -1) {
           chats.value[chatIndex].last_message = newMessage;
           chats.value[chatIndex].unread_count = (chats.value[chatIndex].unread_count || 0) + 1;
-          console.log('🔔 Chat atualizado com nova mensagem para chat:', chatId);
         }
 
-        // Se a mensagem é para o chat atual, fazer scroll para baixo
         if (currentChat.value?.id === event.chat_id) {
-          // Emitir evento para fazer scroll (será capturado pelo ChatInterface)
           window.dispatchEvent(new CustomEvent('scroll-to-bottom'));
         }
       });
 
+      boundChannels.add(channelName);
       console.log(`✅ Listener do Pusher configurado com sucesso para chat ${chatId}`);
     } catch (error) {
       console.error(`❌ Erro ao configurar listener do Pusher para chat ${chatId}:`, error);

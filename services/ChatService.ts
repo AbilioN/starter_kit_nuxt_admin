@@ -241,7 +241,9 @@ export class ChatService {
     return {
       ...message,
       time,
-      isOwn: message.sender_id === currentUser?.id,
+      // Explicit Number() coercion guards against id being stored as a string
+      // after a JSON.parse round-trip through localStorage.
+      isOwn: Number(message.sender_id) === Number(currentUser?.id),
       user_name: message.sender_type === 'admin' ? 'Admin' : 'Usuário'
     };
   }

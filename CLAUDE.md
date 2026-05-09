@@ -1,6 +1,6 @@
 # CLAUDE.md — starter_kit_nuxt_admin
 
-Este arquivo dá contexto de **arquitetura** e **convenções** para um assistente (Claude) trabalhar neste repositório com segurança, sem “quebrar o projeto” nem reinventar padrões já existentes.
+Este arquivo dá contexto de **arquitetura** e **convenções** para um assistente (Claude) trabalhar neste repositório com segurança, sem "quebrar o projeto" nem reinventar padrões já existentes.
 
 ## Visão geral rápida
 
@@ -12,10 +12,10 @@ Este arquivo dá contexto de **arquitetura** e **convenções** para um assisten
   - `infrastructure/repositories/*` (endpoints/contratos)
   - `services/*` (orquestração + normalização de retorno)
   - `composables/use*.ts` (estado de tela + carregamento + paginação)
-- **RBAC**: permissões + “super admin” em `composables/usePermissions.ts` e middleware.
+- **RBAC**: permissões + "super admin" em `composables/usePermissions.ts` e middleware.
 - **Realtime/Chat**: Pusher plugin (`plugins/echo.client.ts`) + consumo via `useChat()` (usa `$echo`).
 
-## Como o app “sobe” e roda
+## Como o app "sobe" e roda
 
 - `app.vue` renderiza `<NuxtLayout><NuxtPage/></NuxtLayout>`.
 - Layout padrão: `layouts/default.vue`
@@ -44,7 +44,7 @@ Arquivo: `nuxt.config.ts`
   - `permissions.ts`: faz RBAC por rota (mapa estático `routePermissions`)
 - **`components/`**: componentes visuais e de layout.
   - Menu lateral: `components/Layout/Full/vertical-sidebar/sidebarItem.ts` (inclui `permission?: string`)
-- **`composables/`**: “view-models” de tela.
+- **`composables/`**: "view-models" de tela.
   - Ex.: `useUsers`, `useAdmins`, `useRoles`, `useAudit`, `useChat`, `useNotification`, `useAuth`, `usePermissions`
 - **`services/`**: casos de uso/serviços de domínio (chamam repositórios).
   - `AuthService`, `AdminService`, `AuditService`, `ChatService`
@@ -105,12 +105,12 @@ Arquivo: `middleware/auth.ts`
 ### Observações importantes (débitos técnicos / inconsistências)
 
 - **Chaves de token divergentes**:
-  - O token “certo” no código HTTP é `localStorage['auth_token']` (usado pelo `ApiClient` e pelo `AuthService`).
+  - O token "certo" no código HTTP é `localStorage['auth_token']` (usado pelo `ApiClient` e pelo `AuthService`).
   - O `useAuth.logout()` remove `localStorage['token']` (provável bug: deveria remover `auth_token`).
   - `plugins/debug.client.ts` também lê `localStorage['token']` (provável bug).
 - **`/me` e `/logout`**:
   - `config/api.ts` define `ENDPOINTS.ME='/me'` e `ENDPOINTS.LOGOUT='/logout'`.
-  - O documento `docs/2026-04-29_ADMIN_PANEL_PROMPT.md` diz que **não existe** endpoint `/api/admin/me` e que logout server-side “não existe ainda”.
+  - O documento `docs/2026-04-29_ADMIN_PANEL_PROMPT.md` diz que **não existe** endpoint `/api/admin/me` e que logout server-side "não existe ainda".
   - Se o backend não expõe esses endpoints, `checkAuth()` só deve validar via algum endpoint autenticado real (ex.: `/dashboard`).
 
 ## Permissões (RBAC)
@@ -160,7 +160,7 @@ Arquivo: `config/api.ts`
 Recomendação prática ao mexer:
 
 - Preferir passar baseURL por env (`NUXT_API_BASE_URL`) em dev/CI.
-- Para Nuxt, o padrão mais “Nuxt way” é `runtimeConfig.public.apiBaseUrl`, mas hoje o projeto usa `process.env` diretamente — mantenha consistente ao implementar novas configs.
+- Para Nuxt, o padrão mais "Nuxt way" é `runtimeConfig.public.apiBaseUrl`, mas hoje o projeto usa `process.env` diretamente — mantenha consistente ao implementar novas configs.
 
 ## Convenções ao implementar features novas
 
@@ -181,7 +181,7 @@ Recomendação prática ao mexer:
 
 ## Guardrails (o que NÃO fazer sem intenção explícita)
 
-- Não reestruturar de `fetch`/repositories para `$fetch`/useFetch “do nada”.
+- Não reestruturar de `fetch`/repositories para `$fetch`/useFetch "do nada".
 - Não habilitar SSR (o app está desenhado como SPA).
 - Não hardcodar chaves/segredos novos no repo. Hoje já existem valores default em Pusher — se for ajustar, migrar para env/runtimeConfig e remover defaults.
 - Não acoplar permissões em strings espalhadas por todo lugar: centralizar no middleware/constantes quando possível.
@@ -193,4 +193,3 @@ npm install
 npm run dev
 npm run build
 ```
-
