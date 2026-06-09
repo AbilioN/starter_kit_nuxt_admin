@@ -39,8 +39,18 @@ export const useAuth = () => {
         if (process.client) {
           localStorage.setItem('user', JSON.stringify(loginData.admin));
           localStorage.setItem('auth_token', loginData.token);
+
+          // Update Echo auth header so private channel subscriptions work immediately
+          try {
+            const nuxtApp = useNuxtApp() as any;
+            if (nuxtApp.$echo) {
+              nuxtApp.$echo.connector.pusher.config.auth.headers['Authorization'] = `Bearer ${loginData.token}`;
+            }
+          } catch {
+            // Echo may not be available in all environments
+          }
         }
-        
+
         return { success: true };
       } else {
         // Retornar a mensagem de erro específica da API

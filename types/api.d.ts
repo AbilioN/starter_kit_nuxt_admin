@@ -17,6 +17,7 @@ export interface Admin {
   is_active: boolean;
   is_super_admin: boolean;
   last_login_at: string | null;
+  channel?: string;
 }
 
 export interface Role {

@@ -39,7 +39,7 @@ export interface PusherUserEvent {
 
 export interface PusherTypingEvent {
   user_id: number;
+  user_name: string;
   user_type: 'user' | 'admin';
   chat_id: number;
-  is_typing: boolean;
 }

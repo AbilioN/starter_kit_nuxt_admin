@@ -19,7 +19,8 @@ export class SettingsService {
 
   async getPublicSettings(): Promise<PublicSettings> {
     const response = await $fetch<PublicSettingsResponse>(
-      `${this.publicBaseURL}/settings/public`
+      `${this.publicBaseURL}/settings/public`,
+      { timeout: 5000 }
     );
     return response.data;
   }

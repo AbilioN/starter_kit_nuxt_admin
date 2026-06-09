@@ -21,16 +21,14 @@ export const PUSHER_EVENTS = {
 } as const;
 
 export const PUSHER_CHANNELS = {
-  // Canais para mensagens de chat
+  // Personal channels — one per user, receives ALL MessageSent events across all their chats
+  // Pass to Echo.private() — Echo prepends "private-" automatically
+  PERSONAL_ADMIN: (adminId: number) => `user.admin.${adminId}`,
+  PERSONAL_USER: (userId: number) => `user.user.${userId}`,
+
+  // Per-chat channel — used for typing indicators only
+  // Pass to Echo.private() — Echo prepends "private-" automatically
   CHAT: (chatId: number) => `chat.${chatId}`,
-  
-  // Canais privados (para futuras funcionalidades)
-  PRIVATE_USER: (userId: number) => `private-user.${userId}`,
-  PRIVATE_CHAT: (chatId: number) => `private-chat.${chatId}`,
-  
-  // Canais públicos (para futuras funcionalidades)
-  PUBLIC_CHAT: (chatId: number) => `public-chat.${chatId}`,
-  PUBLIC_USERS: 'public-users'
 } as const;
 
 export type PusherEventType = typeof PUSHER_EVENTS[keyof typeof PUSHER_EVENTS];
