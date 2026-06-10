@@ -1,7 +1,7 @@
 import { ref, computed, readonly, watch, onUnmounted } from 'vue';
 import { ChatService } from '~/services/ChatService';
 import type { ChatMessage, Chat, ChatsResponse } from '~/types/chat';
-import type { PusherMessageSentEvent, PusherTypingEvent } from '~/types/pusher';
+import type { PusherMessageSentEvent, PusherTypingEvent, PusherMessageReadEvent, PusherMessageEditedEvent, PusherMessageDeletedEvent } from '~/types/pusher';
 import { PUSHER_EVENTS } from '~/config/pusher-events';
 
 // Module-level guard: prevents duplicate personal channel subscriptions across
@@ -37,6 +37,26 @@ export const useChatManager = () => {
     console.log('🔔 Subscribing to personal channel:', channelName);
 
     $echo.private(channelName)
+      .listen('.MessageRead', (event: PusherMessageReadEvent) => {
+        // Mark all messages in the chat as read when another participant reads
+        if (currentChat.value?.id === event.chat_id) {
+          messages.value = messages.value.map(m =>
+            m.sender_id !== event.reader_id ? { ...m, is_read: true, read_at: event.read_at } : m
+          );
+        }
+      })
+      .listen('.MessageEdited', (event: PusherMessageEditedEvent) => {
+        const idx = messages.value.findIndex(m => m.id === event.id);
+        if (idx !== -1) {
+          messages.value.splice(idx, 1, { ...messages.value[idx], content: event.content, edited_at: event.edited_at });
+        }
+      })
+      .listen('.MessageDeleted', (event: PusherMessageDeletedEvent) => {
+        const idx = messages.value.findIndex(m => m.id === event.id);
+        if (idx !== -1) {
+          messages.value.splice(idx, 1, { ...messages.value[idx], content: null });
+        }
+      })
       .listen(`.${PUSHER_EVENTS.MESSAGE_SENT}`, async (event: PusherMessageSentEvent) => {
         console.log('🔔 MessageSent on personal channel:', event);
 
@@ -251,11 +271,15 @@ export const useChatManager = () => {
     }
   };
 
+  const replyTo = ref<ChatMessage | null>(null);
+
   const sendMessage = async (content: string) => {
     if (!currentChat.value?.id || !content.trim()) return;
     try {
       sendStopTypingIndicator(currentChat.value.id);
-      const message = await chatService.sendMessageToChat(currentChat.value.id, content);
+      const replyToId = replyTo.value?.id ?? null;
+      const message = await chatService.sendMessageToChat(currentChat.value.id, content, replyToId);
+      replyTo.value = null;
       if (currentChat.value) {
         currentChat.value.last_message = message;
         currentChat.value.unread_count = 0;
@@ -265,6 +289,48 @@ export const useChatManager = () => {
       error.value = err instanceof Error ? err.message : 'Failed to send message';
       console.error('Send message error:', err);
       throw err;
+    }
+  };
+
+  const editMessage = async (messageId: string, content: string) => {
+    if (!currentChat.value?.id) return;
+    try {
+      await chatService.editMessage(currentChat.value.id, messageId, content);
+      const idx = messages.value.findIndex(m => m.id === messageId);
+      if (idx !== -1) {
+        messages.value.splice(idx, 1, { ...messages.value[idx], content, edited_at: new Date().toISOString() });
+      }
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to edit message';
+      throw err;
+    }
+  };
+
+  const deleteMessage = async (messageId: string) => {
+    if (!currentChat.value?.id) return;
+    try {
+      await chatService.deleteMessage(currentChat.value.id, messageId);
+      const idx = messages.value.findIndex(m => m.id === messageId);
+      if (idx !== -1) {
+        messages.value.splice(idx, 1, { ...messages.value[idx], content: null });
+      }
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to delete message';
+      throw err;
+    }
+  };
+
+  const searchUsers = async (query: string) => {
+    if (!query.trim()) return [];
+    return chatService.searchUsers(query);
+  };
+
+  const markCurrentChatAsRead = async () => {
+    if (!currentChat.value?.id) return;
+    try {
+      await chatService.markChatAsRead(currentChat.value.id);
+    } catch {
+      // Non-critical
     }
   };
 
@@ -357,5 +423,10 @@ export const useChatManager = () => {
     subscribeToPersonalChannel,
     testPusherConnection,
     resetChat,
+    editMessage,
+    deleteMessage,
+    searchUsers,
+    markCurrentChatAsRead,
+    replyTo,
   };
 };

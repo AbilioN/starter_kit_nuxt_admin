@@ -91,29 +91,39 @@ export class ChatService {
   /**
    * Enviar mensagem para um chat específico
    */
-  async sendMessageToChat(chatId: string | number, content: string): Promise<ChatMessage> {
+  async sendMessageToChat(chatId: string | number, content: string, replyToId?: string | null): Promise<ChatMessage> {
     try {
-      // Validação básica
-      if (!content.trim()) {
-        throw new Error('Message cannot be empty');
-      }
+      if (!content.trim()) throw new Error('Message cannot be empty');
+      if (content.length > 1000) throw new Error('Message too long (maximum 1000 characters)');
 
-      if (content.length > 1000) {
-        throw new Error('Message too long (maximum 1000 characters)');
-      }
+      const response: MessageSendResponse = await this.chatRepository.sendMessageToChat(chatId, content.trim(), replyToId);
 
-      const response: MessageSendResponse = await this.chatRepository.sendMessageToChat(chatId, content.trim());
-      
-      // A API retorna { success: true, data: { ... } }
       if (response.success && response.data) {
         return response.data;
       }
-      
+
       throw new Error('Invalid API response when sending message to chat');
     } catch (error) {
       console.error('ChatService - sendMessageToChat error:', error);
       throw error;
     }
+  }
+
+  async editMessage(chatId: string, messageId: string, content: string): Promise<void> {
+    await this.chatRepository.editMessage(chatId, messageId, content);
+  }
+
+  async deleteMessage(chatId: string, messageId: string): Promise<void> {
+    await this.chatRepository.deleteMessage(chatId, messageId);
+  }
+
+  async searchUsers(query: string): Promise<Array<{ id: string; name: string; email: string; last_seen_at: string | null }>> {
+    const response = await this.chatRepository.searchUsers(query) as any;
+    return (response.data ?? response) as any[];
+  }
+
+  async markChatAsRead(chatId: string): Promise<void> {
+    await this.chatRepository.markChatAsRead(chatId);
   }
 
   /**

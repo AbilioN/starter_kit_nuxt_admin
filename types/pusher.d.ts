@@ -13,10 +13,22 @@ export interface PusherMessageSentEvent {
 }
 
 export interface PusherMessageReadEvent {
-  message_id: string;
   chat_id: string;
+  reader_id: string;
+  reader_type: string;
   read_at: string;
-  read_by: string;
+}
+
+export interface PusherMessageEditedEvent {
+  id: string;
+  chat_id: string;
+  content: string;
+  edited_at: string;
+}
+
+export interface PusherMessageDeletedEvent {
+  id: string;
+  chat_id: string;
 }
 
 export interface PusherChatEvent {

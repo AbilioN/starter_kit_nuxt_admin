@@ -72,6 +72,12 @@ const sidebarItem: menu[] = [
     permission: "audit-read",
   },
   {
+    title: "Chats",
+    icon: "chat-round-line-duotone",
+    to: "/chats",
+    permission: "chat-manage",
+  },
+  {
     title: "Notifications",
     icon: "bell-outline",
     to: "/notifications",

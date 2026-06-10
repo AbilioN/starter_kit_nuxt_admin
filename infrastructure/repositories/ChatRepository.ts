@@ -89,17 +89,34 @@ export class ChatRepository {
   /**
    * Enviar mensagem para um chat específico
    */
-  async sendMessageToChat(chatId: string | number, content: string): Promise<MessageSendResponse> {
+  async sendMessageToChat(chatId: string | number, content: string, replyToId?: string | null): Promise<MessageSendResponse> {
     try {
       const response = await this.chatApiClient.post<MessageSendResponse>(`/chat/${chatId}/send`, {
         content,
-        message_type: 'text'
+        message_type: 'text',
+        ...(replyToId ? { reply_to_id: replyToId } : {}),
       });
       return response;
     } catch (error) {
       console.error('ChatRepository - sendMessageToChat error:', error);
       throw new Error('Failed to send message');
     }
+  }
+
+  async editMessage(chatId: string, messageId: string, content: string): Promise<any> {
+    return this.chatApiClient.patch<any>(`/chat/${chatId}/messages/${messageId}`, { content });
+  }
+
+  async deleteMessage(chatId: string, messageId: string): Promise<any> {
+    return this.chatApiClient.delete<any>(`/chat/${chatId}/messages/${messageId}`);
+  }
+
+  async searchUsers(query: string): Promise<any> {
+    return this.chatApiClient.get<any>(`/users/search?q=${encodeURIComponent(query)}`);
+  }
+
+  async markChatAsRead(chatId: string): Promise<any> {
+    return this.chatApiClient.post<any>(`/chat/${chatId}/read`);
   }
 
   /**

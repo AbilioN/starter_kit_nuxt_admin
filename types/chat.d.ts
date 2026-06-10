@@ -2,15 +2,25 @@
 export interface ChatMessage {
   id: string;
   chat_id: string;
-  content: string;
+  content: string | null;
   sender_id: string;
   sender_type: 'user' | 'admin';
   message_type: 'text' | 'image' | 'file' | 'audio' | 'video';
   metadata: any | null;
   is_read: boolean;
   read_at: string | null;
+  edited_at: string | null;
+  reply_to_id: string | null;
+  reply: { id: string; content: string | null; sender_id: string } | null;
   created_at: string;
   updated_at: string | null;
+}
+
+export interface UserSearchResult {
+  id: string;
+  name: string;
+  email: string;
+  last_seen_at: string | null;
 }
 
 export interface ChatUser {
