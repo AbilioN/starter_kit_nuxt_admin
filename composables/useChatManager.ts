@@ -4,8 +4,15 @@ import type { ChatMessage, Chat, ChatsResponse } from '~/types/chat';
 import type { PusherMessageSentEvent, PusherTypingEvent } from '~/types/pusher';
 import { PUSHER_EVENTS } from '~/config/pusher-events';
 
+// Module-level guard: prevents duplicate personal channel subscriptions across
+// multiple useChatManager() calls (e.g. ChatWidget + ChatInterface both mounted).
+let _subscribedPersonalChannel: string | null = null;
+
 export const useChatManager = () => {
-  const chats = ref<Chat[]>([]);
+  // Globally shared via useState so every component instance (ChatWidget badge,
+  // ChatInterface list) always sees the same chat list and unread counts.
+  const chats = useState<Chat[]>('chat_manager_chats', () => []);
+
   const currentChat = ref<Chat | null>(null);
   const messages = ref<ChatMessage[]>([]);
   const loading = ref(false);
@@ -14,25 +21,26 @@ export const useChatManager = () => {
 
   // userId → display name for current chat typing indicators
   const typingUsers = ref<Map<number, string>>(new Map());
-
-  // Track which per-chat typing channel is currently subscribed
   let currentTypingChatId: number | null = null;
 
   const currentUser = useAuth().user;
   const chatService = new ChatService();
+  const notification = useNotification();
 
   // ── Personal channel (all MessageSent events across all chats) ──────────
 
   const subscribeToPersonalChannel = (channelName: string) => {
     const { $echo } = useNuxtApp() as any;
-    if (!$echo) return;
+    if (!$echo || _subscribedPersonalChannel === channelName) return;
 
+    _subscribedPersonalChannel = channelName;
     console.log('🔔 Subscribing to personal channel:', channelName);
 
     $echo.private(channelName)
-      .listen(`.${PUSHER_EVENTS.MESSAGE_SENT}`, (event: PusherMessageSentEvent) => {
+      .listen(`.${PUSHER_EVENTS.MESSAGE_SENT}`, async (event: PusherMessageSentEvent) => {
         console.log('🔔 MessageSent on personal channel:', event);
 
+        // Deduplicate: ignore if message already in the active view
         if (messages.value.some(m => m.id === event.id)) return;
 
         let createdAt = event.created_at;
@@ -58,17 +66,57 @@ export const useChatManager = () => {
           updated_at: createdAt,
         };
 
-        // Only append to messages if this is the active chat
+        // Append to active chat and scroll
         if (currentChat.value?.id === event.chat_id) {
           messages.value.push(newMessage);
           window.dispatchEvent(new CustomEvent('scroll-to-bottom'));
         }
 
         const chatIndex = chats.value.findIndex(c => c.id === event.chat_id);
+
         if (chatIndex !== -1) {
-          chats.value[chatIndex].last_message = newMessage;
-          if (currentChat.value?.id !== event.chat_id) {
-            chats.value[chatIndex].unread_count = (chats.value[chatIndex].unread_count || 0) + 1;
+          const isActive = currentChat.value?.id === event.chat_id;
+
+          // Reactive splice so Vue detects the mutation
+          chats.value.splice(chatIndex, 1, {
+            ...chats.value[chatIndex],
+            last_message: newMessage,
+            unread_count: isActive
+              ? chats.value[chatIndex].unread_count
+              : (chats.value[chatIndex].unread_count || 0) + 1,
+          });
+
+          // Notify about the incoming message in a non-active chat
+          if (!isActive) {
+            const chatName = chatService.getChatDisplayName(chats.value[chatIndex]);
+            const senderLabel = event.sender_type === 'user' ? 'Usuário' : 'Admin';
+            const preview = event.content.length > 60
+              ? event.content.slice(0, 60) + '…'
+              : event.content;
+            notification.info(`${chatName} — ${senderLabel}: ${preview}`, 5000);
+          }
+        } else {
+          // Unknown chat_id — a new conversation was created. Refresh the list
+          // so the new chat appears without requiring a manual page reload.
+          try {
+            const response = await chatService.getChats(1);
+            if (response.chats?.length) {
+              const existingIds = new Set(chats.value.map(c => c.id));
+              const incoming = response.chats.filter(c => !existingIds.has(c.id));
+              if (incoming.length) {
+                chats.value = [...incoming, ...chats.value];
+                const newChat = incoming.find(c => c.id === event.chat_id);
+                if (newChat) {
+                  const chatName = chatService.getChatDisplayName(newChat);
+                  const preview = event.content.length > 60
+                    ? event.content.slice(0, 60) + '…'
+                    : event.content;
+                  notification.info(`Nova conversa — ${chatName}: ${preview}`, 6000);
+                }
+              }
+            }
+          } catch (err) {
+            console.error('Failed to refresh chat list after unknown chat_id:', err);
           }
         }
       });
@@ -131,9 +179,7 @@ export const useChatManager = () => {
   watch(
     () => currentUser.value?.channel,
     (channel) => {
-      if (channel) {
-        subscribeToPersonalChannel(channel);
-      }
+      if (channel) subscribeToPersonalChannel(channel);
     },
     { immediate: true },
   );
@@ -244,12 +290,26 @@ export const useChatManager = () => {
     subscribeToTypingChannel(chat.id);
   };
 
+  const testPusherConnection = () => {
+    const { $echo } = useNuxtApp() as any;
+    if (!$echo) {
+      console.warn('Echo not available');
+      notification.warning('Pusher não conectado');
+      return;
+    }
+    const state = $echo.connector?.pusher?.connection?.state ?? 'unknown';
+    console.log('✅ Pusher connection state:', state);
+    notification.success(`Pusher: ${state}`);
+  };
+
   const getChatDisplayName = (chat: Chat): string => chatService.getChatDisplayName(chat);
   const formatMessage = (message: ChatMessage) => chatService.formatMessage(message);
   const isOwnMessage = (message: ChatMessage): boolean => message.sender_id === currentUser.value?.id;
 
   const unreadChats = computed(() => chats.value.filter(chat => chat.unread_count > 0));
-  const totalUnread = computed(() => chats.value.reduce((total, chat) => total + chat.unread_count, 0));
+  const totalUnread = computed(() =>
+    chats.value.reduce((total, chat) => total + (chat.unread_count || 0), 0),
+  );
   const formattedMessages = computed(() => messages.value.map(message => formatMessage(message)));
   const typingUserNames = computed(() => Array.from(typingUsers.value.values()));
 
@@ -286,5 +346,6 @@ export const useChatManager = () => {
     sendTypingIndicator,
     sendStopTypingIndicator,
     subscribeToPersonalChannel,
+    testPusherConnection,
   };
 };

@@ -12,8 +12,8 @@
     >
       <v-icon>mdi-chat</v-icon>
       <v-badge
-        v-if="unreadCount > 0"
-        :content="unreadCount"
+        v-if="totalUnread > 0"
+        :content="totalUnread"
         color="error"
         dot
       />
@@ -186,9 +186,11 @@ import type { Chat } from '~/types/chat';
 // Estados locais
 const isOpen = ref(false);
 const newMessage = ref('');
-const unreadCount = ref(0);
 const messagesContainer = ref<HTMLElement>();
 let typingTimeout: NodeJS.Timeout | null = null;
+
+// Unread badge driven by the globally-shared chat state
+const { totalUnread } = useChatManager();
 
 // Composable do chat
 const {
