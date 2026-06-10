@@ -112,6 +112,10 @@ export class ApiClient implements IHttpClient {
     return this.request<T>('PUT', url, data, config);
   }
 
+  async patch<T>(url: string, data?: any, config?: RequestConfig): Promise<T> {
+    return this.request<T>('PATCH', url, data, config);
+  }
+
   async delete<T>(url: string, config?: RequestConfig): Promise<T> {
     return this.request<T>('DELETE', url, undefined, config);
   }

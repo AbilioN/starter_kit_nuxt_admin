@@ -17,6 +17,11 @@ definePageMeta({
                                 </div>
                                 <!-- <div class="text-h6 text-medium-emphasis text-center mb-6">Your Social Campaigns</div> -->
                                 <AuthLoginForm />
+                                <div class="d-flex justify-center mt-2">
+                                    <v-btn variant="plain" size="small" to="/auth/forgot-password" class="text-primary">
+                                        Forgot your password?
+                                    </v-btn>
+                                </div>
                                 <h6 class="text-subtitle-1  text-grey100 d-flex justify-center align-center mt-3">
                                     New to Spike?
                                     <v-btn class="pl-0 text-primary text-body-1 font-weight-medium  opacity-1 pl-2" height="auto"

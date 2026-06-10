@@ -22,23 +22,17 @@ const handleLogout = () => {
         </template>
         <v-sheet rounded="xl" width="200" elevation="10" class="mt-2">
             <v-list class="py-0" lines="one" density="compact">
-                <v-list-item value="item1" color="primary" >
+                <v-list-item value="item1" color="primary" to="/profile">
                     <template v-slot:prepend>
                         <UserIcon stroke-width="1.5" size="20"/>
                     </template>
                     <v-list-item-title class="pl-4 text-body-1">My Profile</v-list-item-title>
                 </v-list-item>
-                <v-list-item value="item2" color="primary">
+                <v-list-item value="item2" color="primary" to="/notifications">
                     <template v-slot:prepend>
                         <MailIcon stroke-width="1.5" size="20"/>
                     </template>
-                    <v-list-item-title  class="pl-4 text-body-1">My Account</v-list-item-title>
-                </v-list-item>
-                <v-list-item value="item3" color="primary"> 
-                    <template v-slot:prepend>
-                        <ListCheckIcon stroke-width="1.5"  size="20"/>
-                    </template>
-                    <v-list-item-title class="pl-4 text-body-1">My Task</v-list-item-title>
+                    <v-list-item-title class="pl-4 text-body-1">Notifications</v-list-item-title>
                 </v-list-item>
             </v-list>
             <div class="pt-4 pb-4 px-5 text-center">

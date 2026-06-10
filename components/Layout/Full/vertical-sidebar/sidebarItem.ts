@@ -41,6 +41,11 @@ const sidebarItem: menu[] = [
     icon: "presentation-graph-line-duotone",
     to: "/dashboard-template",
   },
+  {
+    title: "My Profile",
+    icon: "user-circle-bold",
+    to: "/profile",
+  },
   { header: "Management" },
   {
     title: "Users",
