@@ -3,26 +3,26 @@
  */
 
 export interface PusherMessageSentEvent {
-  id: number;
-  chat_id: number;
+  id: string;
+  chat_id: string;
   content: string;
   sender_type: 'user' | 'admin';
-  sender_id: number;
+  sender_id: string;
   is_read: boolean;
   created_at: string;
 }
 
 export interface PusherMessageReadEvent {
-  message_id: number;
-  chat_id: number;
+  message_id: string;
+  chat_id: string;
   read_at: string;
-  read_by: number;
+  read_by: string;
 }
 
 export interface PusherChatEvent {
-  chat_id: number;
+  chat_id: string;
   chat: {
-    id: number;
+    id: string;
     name: string;
     type: 'private' | 'group';
     description: string;
@@ -32,14 +32,14 @@ export interface PusherChatEvent {
 }
 
 export interface PusherUserEvent {
-  user_id: number;
+  user_id: string;
   user_type: 'user' | 'admin';
   timestamp: string;
 }
 
 export interface PusherTypingEvent {
-  user_id: number;
+  user_id: string;
   user_name: string;
   user_type: 'user' | 'admin';
-  chat_id: number;
+  chat_id: string;
 }

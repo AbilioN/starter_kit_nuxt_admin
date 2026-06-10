@@ -1,9 +1,9 @@
 // Tipos para o sistema de chat
 export interface ChatMessage {
-  id: number;
-  chat_id: number;
+  id: string;
+  chat_id: string;
   content: string;
-  sender_id: number;
+  sender_id: string;
   sender_type: 'user' | 'admin';
   message_type: 'text' | 'image' | 'file' | 'audio' | 'video';
   metadata: any | null;
@@ -14,7 +14,7 @@ export interface ChatMessage {
 }
 
 export interface ChatUser {
-  id: number;
+  id: string;
   name: string;
   email: string;
   avatar?: string;
@@ -23,7 +23,7 @@ export interface ChatUser {
 }
 
 export interface Chat {
-  id: number;
+  id: string;
   type: 'private' | 'group';
   name: string | null;
   description: string | null;
@@ -35,7 +35,7 @@ export interface Chat {
 }
 
 export interface ChatChannel {
-  id: number;
+  id: string;
   name: string | null;
   type: 'public' | 'private' | 'direct';
   participants: ChatUser[];
@@ -45,14 +45,14 @@ export interface ChatChannel {
 
 export interface ChatEvent {
   message: ChatMessage;
-  channel_id: number;
+  channel_id: string;
   user: ChatUser;
 }
 
 export interface TypingEvent {
-  user_id: number;
+  user_id: string;
   user_name: string;
-  channel_id: number;
+  channel_id: string;
   is_typing: boolean;
 }
 
@@ -67,7 +67,7 @@ export interface ChatResponse extends Chat {
   participants_count: number;
   created_at: string;
   updated_at: string;
-  created_by: number;
+  created_by: string;
   created_by_type: 'user' | 'admin';
 }
 

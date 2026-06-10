@@ -23,12 +23,12 @@ export const PUSHER_EVENTS = {
 export const PUSHER_CHANNELS = {
   // Personal channels — one per user, receives ALL MessageSent events across all their chats
   // Pass to Echo.private() — Echo prepends "private-" automatically
-  PERSONAL_ADMIN: (adminId: number) => `user.admin.${adminId}`,
-  PERSONAL_USER: (userId: number) => `user.user.${userId}`,
+  PERSONAL_ADMIN: (adminId: string) => `user.admin.${adminId}`,
+  PERSONAL_USER: (userId: string) => `user.user.${userId}`,
 
   // Per-chat channel — used for typing indicators only
   // Pass to Echo.private() — Echo prepends "private-" automatically
-  CHAT: (chatId: number) => `chat.${chatId}`,
+  CHAT: (chatId: string) => `chat.${chatId}`,
 } as const;
 
 export type PusherEventType = typeof PUSHER_EVENTS[keyof typeof PUSHER_EVENTS];

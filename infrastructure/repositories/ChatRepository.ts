@@ -75,7 +75,7 @@ export class ChatRepository {
   /**
    * Buscar mensagens de um chat específico
    */
-  async getChatMessages(chatId: number, page: number = 1, perPage: number = 50): Promise<any> {
+  async getChatMessages(chatId: string | number, page: number = 1, perPage: number = 50): Promise<any> {
     try {
       const response = await this.chatApiClient.get<any>(`/chat/${chatId}/messages?page=${page}&per_page=${perPage}`);
       console.log('🔍 ChatRepository - getChatMessages raw response:', response);
@@ -89,7 +89,7 @@ export class ChatRepository {
   /**
    * Enviar mensagem para um chat específico
    */
-  async sendMessageToChat(chatId: number, content: string): Promise<MessageSendResponse> {
+  async sendMessageToChat(chatId: string | number, content: string): Promise<MessageSendResponse> {
     try {
       const response = await this.chatApiClient.post<MessageSendResponse>(`/chat/${chatId}/send`, {
         content,
@@ -105,7 +105,7 @@ export class ChatRepository {
   /**
    * Criar chat privado
    */
-  async createPrivateChat(otherUserId: number, otherUserType: 'user' | 'admin'): Promise<ChatCreateResponse> {
+  async createPrivateChat(otherUserId: string | number, otherUserType: 'user' | 'admin'): Promise<ChatCreateResponse> {
     try {
       const response = await this.chatApiClient.post<ChatCreateResponse>('/chat/create-private', {
         other_user_id: otherUserId,

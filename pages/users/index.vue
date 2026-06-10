@@ -517,8 +517,9 @@ onMounted(() => {
         </v-card-title>
         
         <v-card-text class="chat-dialog-content pa-0">
-          <ChatInterface 
+          <ChatInterface
             v-if="selectedChatUser"
+            :key="selectedChatUser.id"
             :initial-chat="null"
             :initial-user="selectedChatUser"
             @close="showChatDialog = false"

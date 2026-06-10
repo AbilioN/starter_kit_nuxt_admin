@@ -10,18 +10,18 @@ let _subscribedPersonalChannel: string | null = null;
 
 export const useChatManager = () => {
   // Globally shared via useState so every component instance (ChatWidget badge,
-  // ChatInterface list) always sees the same chat list and unread counts.
+  // ChatInterface list, personal-channel callback) always sees the same state.
   const chats = useState<Chat[]>('chat_manager_chats', () => []);
+  const currentChat = useState<Chat | null>('chat_manager_current_chat', () => null);
+  const messages = useState<ChatMessage[]>('chat_manager_messages', () => []);
 
-  const currentChat = ref<Chat | null>(null);
-  const messages = ref<ChatMessage[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
   const pagination = ref<any>(null);
 
   // userId → display name for current chat typing indicators
-  const typingUsers = ref<Map<number, string>>(new Map());
-  let currentTypingChatId: number | null = null;
+  const typingUsers = ref<Map<string, string>>(new Map());
+  let currentTypingChatId: string | null = null;
 
   const currentUser = useAuth().user;
   const chatService = new ChatService();
@@ -124,7 +124,7 @@ export const useChatManager = () => {
 
   // ── Per-chat typing channel ─────────────────────────────────────────────
 
-  const subscribeToTypingChannel = (chatId: number) => {
+  const subscribeToTypingChannel = (chatId: string) => {
     const { $echo } = useNuxtApp() as any;
     if (!$echo || currentTypingChatId === chatId) return;
 
@@ -135,15 +135,15 @@ export const useChatManager = () => {
     $echo.private(`chat.${chatId}`)
       .listenForWhisper('client-typing', (event: PusherTypingEvent) => {
         if (event.user_id !== currentUser.value?.id) {
-          typingUsers.value.set(event.user_id, event.user_name);
+          typingUsers.value.set(String(event.user_id), event.user_name);
         }
       })
-      .listenForWhisper('client-stop-typing', (event: { user_id: number }) => {
-        typingUsers.value.delete(event.user_id);
+      .listenForWhisper('client-stop-typing', (event: { user_id: string | number }) => {
+        typingUsers.value.delete(String(event.user_id));
       });
   };
 
-  const unsubscribeFromTypingChannel = (chatId: number) => {
+  const unsubscribeFromTypingChannel = (chatId: string) => {
     const { $echo } = useNuxtApp() as any;
     if (!$echo) return;
     console.log('🔔 Leaving typing channel for chat:', chatId);
@@ -154,7 +154,7 @@ export const useChatManager = () => {
     }
   };
 
-  const sendTypingIndicator = (chatId: number) => {
+  const sendTypingIndicator = (chatId: string) => {
     const { $echo } = useNuxtApp() as any;
     if (!$echo || !currentUser.value) return;
     $echo.private(`chat.${chatId}`).whisper('client-typing', {
@@ -165,7 +165,7 @@ export const useChatManager = () => {
     });
   };
 
-  const sendStopTypingIndicator = (chatId: number) => {
+  const sendStopTypingIndicator = (chatId: string) => {
     const { $echo } = useNuxtApp() as any;
     if (!$echo || !currentUser.value) return;
     $echo.private(`chat.${chatId}`).whisper('client-stop-typing', {
@@ -177,9 +177,13 @@ export const useChatManager = () => {
   // ── Subscribe to personal channel when user is authenticated ───────────
 
   watch(
-    () => currentUser.value?.channel,
-    (channel) => {
-      if (channel) subscribeToPersonalChannel(channel);
+    () => currentUser.value,
+    (adminUser) => {
+      if (!adminUser) return;
+      // Fall back to derived channel name if the stored user object pre-dates
+      // the channel field being added to the login response.
+      const channel = adminUser.channel ?? `user.admin.${adminUser.id}`;
+      subscribeToPersonalChannel(channel);
     },
     { immediate: true },
   );
@@ -201,7 +205,7 @@ export const useChatManager = () => {
     }
   };
 
-  const startChatWithUser = async (userId: number, userType: 'user' | 'admin' = 'user') => {
+  const startChatWithUser = async (userId: string | number, userType: 'user' | 'admin' = 'user') => {
     loading.value = true;
     error.value = null;
     try {
@@ -229,7 +233,7 @@ export const useChatManager = () => {
     }
   };
 
-  const loadChatMessages = async (chatId: number, page: number = 1) => {
+  const loadChatMessages = async (chatId: string, page: number = 1) => {
     loading.value = true;
     error.value = null;
     try {
@@ -276,6 +280,11 @@ export const useChatManager = () => {
       console.error('Send message to user error:', err);
       throw err;
     }
+  };
+
+  const resetChat = () => {
+    currentChat.value = null;
+    messages.value = [];
   };
 
   const selectChat = async (chat: Readonly<Chat>) => {
@@ -347,5 +356,6 @@ export const useChatManager = () => {
     sendStopTypingIndicator,
     subscribeToPersonalChannel,
     testPusherConnection,
+    resetChat,
   };
 };

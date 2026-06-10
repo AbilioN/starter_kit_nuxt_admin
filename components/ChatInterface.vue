@@ -191,7 +191,7 @@ import type { ChatMessage, Chat } from '~/types/chat';
 
 // Props
 interface Props {
-  initialUser?: Readonly<{ id: number; name: string; email: string }> | null;
+  initialUser?: Readonly<{ id: string | number; name: string; email: string }> | null;
   initialChat?: Readonly<Chat> | null;
 }
 
@@ -209,6 +209,7 @@ const emit = defineEmits<{
 const newMessage = ref('');
 const messagesContainer = ref<HTMLElement>();
 const sendError = ref('');
+const isInitializing = ref(false);
 
 // Composable de chat
 const {
@@ -224,10 +225,9 @@ const {
   sendMessage,
   startChatWithUser,
   getChatDisplayName,
-  testPusherConnection
+  testPusherConnection,
+  resetChat,
 } = useChatManager();
-
-
 
 // Computed
 const chatTitle = computed(() => {
@@ -240,8 +240,6 @@ const chatTitle = computed(() => {
   return 'Chat';
 });
 
-
-
 // Funções
 const closeChat = () => {
   emit('close');
@@ -249,74 +247,48 @@ const closeChat = () => {
 
 const handleSendMessage = async () => {
   if (!newMessage.value.trim()) return;
-  
-  console.log('💬 handleSendMessage chamado:', { 
-    currentChat: currentChat.value, 
-    initialUser: props.initialUser,
-    message: newMessage.value 
-  });
-  
   try {
-    sendError.value = ''; // Limpar erro anterior
-    
+    sendError.value = '';
     if (currentChat.value) {
-      // Se já tem um chat, enviar mensagem para ele
-      console.log('💬 Enviando mensagem para chat existente:', currentChat.value.id);
       await sendMessage(newMessage.value);
-      newMessage.value = ''; // Limpar apenas o campo de input
-      // Não fazer scroll aqui, deixar o Pusher fazer
+      newMessage.value = '';
     } else if (props.initialUser) {
-      // Se não tem chat mas tem usuário inicial, criar chat e enviar mensagem
-      console.log('💬 Criando novo chat com usuário:', props.initialUser.id);
       const chat = await startChatWithUser(props.initialUser.id, 'user');
       if (chat && chat.id) {
-        // Aguardar um pouco para o chat ser criado
         await nextTick();
-        // Enviar a mensagem para o chat recém-criado
         await sendMessage(newMessage.value);
-        newMessage.value = ''; // Limpar apenas o campo de input
-        // Não fazer scroll aqui, deixar o Pusher fazer
+        newMessage.value = '';
       }
     }
   } catch (err) {
     console.error('Erro ao enviar mensagem:', err);
-    // Mostrar erro para o usuário
     sendError.value = 'Erro ao enviar mensagem. Tente novamente.';
-    // Limpar erro após 3 segundos
-    setTimeout(() => {
-      sendError.value = '';
-    }, 3000);
+    setTimeout(() => { sendError.value = ''; }, 3000);
   }
 };
 
 const initializeChat = async () => {
-  if (props.initialUser && !currentChat.value) {
-    try {
-      console.log('🚀 Iniciando chat com usuário:', props.initialUser);
-      const chat = await startChatWithUser(props.initialUser.id, 'user');
-      
-      // Após criar o chat, carregar as mensagens diretamente
-      if (chat && chat.id) {
-        console.log('📥 Carregando mensagens do chat criado:', chat.id);
-        // Aguardar um pouco para o chat ser criado
-        await nextTick();
-        // Usar o loadChatMessages do useChatManager
-        await loadChatMessages(chat.id);
-      }
-    } catch (err) {
-      console.error('Erro ao inicializar chat:', err);
-      sendError.value = 'Erro ao inicializar chat. Tente novamente.';
-      // Limpar erro após 5 segundos
-      setTimeout(() => {
-        sendError.value = '';
-      }, 5000);
+  if (!props.initialUser || isInitializing.value) return;
+  isInitializing.value = true;
+  try {
+    // Always reset global state first — currentChat/messages live in useState
+    // and persist across dialog close/re-open cycles.
+    resetChat();
+    const chat = await startChatWithUser(props.initialUser.id, 'user');
+    if (chat && chat.id) {
+      await nextTick();
+      await loadChatMessages(chat.id);
     }
+  } catch (err) {
+    console.error('Erro ao inicializar chat:', err);
+    sendError.value = 'Erro ao inicializar chat. Tente novamente.';
+    setTimeout(() => { sendError.value = ''; }, 5000);
+  } finally {
+    isInitializing.value = false;
   }
 };
 
-const handleScroll = () => {
-  // Implementar lógica de scroll se necessário
-};
+const handleScroll = () => {};
 
 const scrollToBottom = () => {
   nextTick(() => {
@@ -328,77 +300,46 @@ const scrollToBottom = () => {
 
 const formatTime = (dateString?: string) => {
   if (!dateString) return '--:--';
-  
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      return '--:--';
-    }
-    return date.toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch (err) {
-    console.warn('Erro ao formatar data:', err, dateString);
+    if (isNaN(date.getTime())) return '--:--';
+    return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  } catch {
     return '--:--';
   }
 };
 
 const getMessageAuthor = (message: ChatMessage & { isOwn: boolean; time: string; user_name: string }) => {
-  if (message.isOwn) {
-    return 'Você';
-  }
-  return message.user_name || 'Usuário';
+  return message.isOwn ? 'Você' : (message.user_name || 'Usuário');
 };
 
 // Lifecycle
 onMounted(async () => {
-  // Só carregar todos os chats se não houver usuário específico
   if (!props.initialUser) {
     await loadChats();
   }
-  await initializeChat();
-
-  // Listener para scroll automático quando nova mensagem chegar via Pusher
   window.addEventListener('scroll-to-bottom', scrollToBottom);
 });
 
 onUnmounted(() => {
-  // Limpar listener
   window.removeEventListener('scroll-to-bottom', scrollToBottom);
+  // Clear global state so the next open starts clean.
+  resetChat();
 });
 
 // Watchers
 watch(() => props.initialChat, (newChat) => {
-  if (newChat) {
-    // Carregar o chat quando initialChat mudar
-    selectChat(newChat);
-  }
+  if (newChat) selectChat(newChat);
 }, { immediate: true });
 
+// Runs immediately on mount and again if the prop changes while mounted.
 watch(() => props.initialUser, async (newUser) => {
-  if (newUser && !currentChat.value) {
-    try {
-      await initializeChat();
-    } catch (err) {
-      console.error('Erro ao inicializar chat com usuário:', err);
-      sendError.value = 'Erro ao inicializar chat. Tente novamente.';
-      setTimeout(() => {
-        sendError.value = '';
-      }, 5000);
-    }
-  }
+  if (newUser) await initializeChat();
 }, { immediate: true });
 
 watch(currentChat, () => {
-  if (currentChat.value) {
-    nextTick(() => {
-      scrollToBottom();
-    });
-  }
+  if (currentChat.value) nextTick(() => scrollToBottom());
 });
-
-console.log('🎯 ChatInterface carregado com initialChat:', props.initialChat, 'initialUser:', props.initialUser);
 </script>
 
 <style scoped>

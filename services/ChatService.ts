@@ -24,7 +24,7 @@ export class ChatService {
   /**
    * Criar chat privado
    */
-  async createPrivateChat(otherUserId: number, otherUserType: 'user' | 'admin'): Promise<Chat> {
+  async createPrivateChat(otherUserId: string | number, otherUserType: 'user' | 'admin'): Promise<Chat> {
     try {
       const response: ChatCreateResponse = await this.chatRepository.createPrivateChat(otherUserId, otherUserType);
       console.log('🔍 ChatService - createPrivateChat response:', response);
@@ -91,7 +91,7 @@ export class ChatService {
   /**
    * Enviar mensagem para um chat específico
    */
-  async sendMessageToChat(chatId: number, content: string): Promise<ChatMessage> {
+  async sendMessageToChat(chatId: string | number, content: string): Promise<ChatMessage> {
     try {
       // Validação básica
       if (!content.trim()) {
@@ -183,7 +183,7 @@ export class ChatService {
   /**
    * Buscar mensagens de um chat específico
    */
-  async getChatMessages(chatId: number, page: number = 1, perPage: number = 50): Promise<MessagesResponse> {
+  async getChatMessages(chatId: string | number, page: number = 1, perPage: number = 50): Promise<MessagesResponse> {
     try {
       const response = await this.chatRepository.getChatMessages(chatId, page, perPage);
       
@@ -243,7 +243,7 @@ export class ChatService {
       time,
       // Explicit Number() coercion guards against id being stored as a string
       // after a JSON.parse round-trip through localStorage.
-      isOwn: Number(message.sender_id) === Number(currentUser?.id),
+      isOwn: String(message.sender_id) === String(currentUser?.id),
       user_name: message.sender_type === 'admin' ? 'Admin' : 'Usuário'
     };
   }
