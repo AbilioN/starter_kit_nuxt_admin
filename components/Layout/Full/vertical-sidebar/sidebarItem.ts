@@ -78,6 +78,12 @@ const sidebarItem: menu[] = [
     permission: "chat-manage",
   },
   {
+    title: "Files",
+    icon: "folder-with-files-line-duotone",
+    to: "/files",
+    permission: "file-read",
+  },
+  {
     title: "Notifications",
     icon: "bell-outline",
     to: "/notifications",
