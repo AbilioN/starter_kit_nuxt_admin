@@ -18,64 +18,69 @@ const deleteDialog = ref(false);
 type PreviewType = 'image' | 'pdf' | 'text' | 'none';
 
 interface PreviewState {
-  url: string;
+  blobUrl: string | null;
   name: string;
   mime: string;
   type: PreviewType;
   textContent: string | null;
-  loadingText: boolean;
+  loading: boolean;
   error: string | null;
 }
 
 const preview = ref<PreviewState | null>(null);
 
-const authUrl = (url: string): string => {
-  const token = process.client ? localStorage.getItem('auth_token') : null;
-  if (!token) return url;
-  return `${url}${url.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`;
-};
-
 const resolvePreviewType = (mime: string): PreviewType => {
   if (mime.startsWith('image/')) return 'image';
   if (mime === 'application/pdf') return 'pdf';
-  if (
-    mime.startsWith('text/') ||
-    mime === 'application/json' ||
-    mime === 'application/xml'
-  ) return 'text';
+  if (mime.startsWith('text/') || mime === 'application/json' || mime === 'application/xml') return 'text';
   return 'none';
+};
+
+const fetchWithAuth = (url: string): Promise<Response> => {
+  const token = process.client ? localStorage.getItem('auth_token') : null;
+  return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
 };
 
 const openPreview = async (file: FileItem) => {
   const type = resolvePreviewType(file.mime_type);
 
-  preview.value = {
-    url: authUrl(file.url),
-    name: file.original_name,
-    mime: file.mime_type,
-    type,
-    textContent: null,
-    loadingText: type === 'text',
-    error: null,
-  };
+  preview.value = { blobUrl: null, name: file.original_name, mime: file.mime_type, type, textContent: null, loading: true, error: null };
 
-  if (type === 'text') {
-    try {
-      const textToken = process.client ? localStorage.getItem('auth_token') : null;
-      const res = await fetch(authUrl(file.url), {
-        headers: textToken ? { Authorization: `Bearer ${textToken}` } : {},
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  try {
+    const res = await fetchWithAuth(file.url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    if (type === 'text') {
       preview.value.textContent = await res.text();
-    } catch (err: any) {
-      preview.value.error = err.message ?? 'Failed to load file content.';
-    } finally {
-      preview.value.loadingText = false;
+    } else if (type === 'image' || type === 'pdf') {
+      const blob = await res.blob();
+      preview.value.blobUrl = URL.createObjectURL(blob);
     }
+  } catch (err: any) {
+    preview.value.error = err.message ?? 'Failed to load file.';
+  } finally {
+    if (preview.value) preview.value.loading = false;
   }
 };
 
-const closePreview = () => { preview.value = null; };
+const closePreview = () => {
+  if (preview.value?.blobUrl) URL.revokeObjectURL(preview.value.blobUrl);
+  preview.value = null;
+};
+
+const downloadFile = async (file: FileItem) => {
+  try {
+    const res = await fetchWithAuth(file.url);
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.original_name;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {}
+};
 
 // ── Upload / Delete ───────────────────────────────────────────────────────────
 
@@ -207,7 +212,7 @@ const handleDelete = async () => {
             </v-card-text>
 
             <v-card-actions class="pt-0">
-              <v-btn size="small" variant="text" :href="authUrl(file.url)" target="_blank" icon="mdi-download" @click.stop />
+              <v-btn size="small" variant="text" icon="mdi-download" @click.stop="downloadFile(file)" />
               <v-spacer />
               <v-btn
                 v-if="can('file-delete')"
@@ -253,7 +258,7 @@ const handleDelete = async () => {
                   <td class="text-body-2 text-medium-emphasis">{{ new Date(file.created_at).toLocaleDateString() }}</td>
                   <td @click.stop>
                     <div class="d-flex gap-1 justify-end">
-                      <v-btn size="small" variant="text" icon="mdi-download" :href="authUrl(file.url)" target="_blank" />
+                      <v-btn size="small" variant="text" icon="mdi-download" @click.stop="downloadFile(file)" />
                       <v-btn
                         v-if="can('file-delete')"
                         size="small"
@@ -313,38 +318,44 @@ const handleDelete = async () => {
         <!-- Body -->
         <v-card-text class="pa-0" style="max-height: 72vh; overflow: hidden;">
 
-          <!-- Image -->
-          <v-img
-            v-if="preview.type === 'image'"
-            :src="preview.url"
-            contain
-            max-height="72vh"
-          />
+          <!-- Loading -->
+          <div v-if="preview.loading" class="d-flex justify-center align-center" style="height:72vh">
+            <v-progress-circular indeterminate color="primary" size="48" />
+          </div>
 
-          <!-- PDF -->
-          <iframe
-            v-else-if="preview.type === 'pdf'"
-            :src="preview.url + '#toolbar=1&navpanes=0&scrollbar=1'"
-            style="width:100%; height:72vh; border:none; display:block;"
-          />
+          <!-- Error -->
+          <v-alert v-else-if="preview.error" type="error" variant="tonal" class="ma-4">
+            {{ preview.error }}
+          </v-alert>
 
-          <!-- Text / JSON / XML -->
-          <div v-else-if="preview.type === 'text'" style="height:72vh; overflow:auto;">
-            <div v-if="preview.loadingText" class="d-flex justify-center align-center" style="height:100%">
-              <v-progress-circular indeterminate color="primary" />
+          <template v-else>
+            <!-- Image -->
+            <v-img
+              v-if="preview.type === 'image'"
+              :src="preview.blobUrl!"
+              contain
+              max-height="72vh"
+            />
+
+            <!-- PDF -->
+            <iframe
+              v-else-if="preview.type === 'pdf'"
+              :src="preview.blobUrl! + '#toolbar=1&navpanes=0&scrollbar=1'"
+              style="width:100%; height:72vh; border:none; display:block;"
+            />
+
+            <!-- Text / JSON / XML -->
+            <div v-else-if="preview.type === 'text'" style="height:72vh; overflow:auto;">
+              <pre class="text-viewer pa-5 text-body-2">{{ preview.textContent }}</pre>
             </div>
-            <v-alert v-else-if="preview.error" type="error" variant="tonal" class="ma-4">
-              {{ preview.error }}
-            </v-alert>
-            <pre v-else class="text-viewer pa-5 text-body-2">{{ preview.textContent }}</pre>
-          </div>
 
-          <!-- No preview available -->
-          <div v-else class="d-flex flex-column align-center justify-center py-16 text-medium-emphasis">
-            <v-icon size="64" class="mb-4">{{ mimeIcon(preview.mime) }}</v-icon>
-            <p class="text-h6">No preview available</p>
-            <p class="text-body-2 mt-1">Download the file to open it.</p>
-          </div>
+            <!-- No preview available -->
+            <div v-else class="d-flex flex-column align-center justify-center py-16 text-medium-emphasis">
+              <v-icon size="64" class="mb-4">{{ mimeIcon(preview.mime) }}</v-icon>
+              <p class="text-h6">No preview available</p>
+              <p class="text-body-2 mt-1">Download the file to open it.</p>
+            </div>
+          </template>
 
         </v-card-text>
 
@@ -352,9 +363,9 @@ const handleDelete = async () => {
         <v-card-actions class="pa-3">
           <v-spacer />
           <v-btn
-            :href="preview.url"
-            target="_blank"
-            download
+            v-if="preview.blobUrl"
+            :href="preview.blobUrl"
+            :download="preview.name"
             prepend-icon="mdi-download"
             variant="tonal"
             color="primary"
