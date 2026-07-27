@@ -66,7 +66,7 @@ export const useUsers = () => {
       role: 'User', // Valor padrão
       status: user.email_verified_at ? 'Ativo' : 'Pendente',
       statusColor: user.email_verified_at ? 'success' : 'warning',
-      avatar: `/images/profile/user-${(user.id % 8) + 1}.jpg`, // Avatar baseado no ID
+      avatar: `/images/profile/user-${(parseInt(String(user.id).replace(/-/g, '').slice(0, 8), 16) % 8) + 1}.jpg`,
       phone: `+55 (11) ${String(user.id).padStart(5, '0')}-${String(user.id).padStart(4, '0')}`,
       department: 'TI', // Valor padrão
       lastLogin: user.email_verified_at ? user.updated_at : 'Nunca'

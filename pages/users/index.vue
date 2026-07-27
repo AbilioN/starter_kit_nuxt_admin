@@ -268,7 +268,6 @@ onMounted(() => {
                     </v-avatar>
                     <div>
                       <div class="font-weight-medium">{{ user.name }}</div>
-                      <div class="text-caption text-medium-emphasis">{{ user.phone }}</div>
                     </div>
                   </div>
                 </td>

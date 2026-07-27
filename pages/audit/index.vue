@@ -310,7 +310,7 @@ onMounted(() => {
                   <div>
                     <div class="font-weight-medium">{{ log.user.name }}</div>
                     <div class="text-caption text-medium-emphasis">
-                      {{ log.user.type }} #{{ log.user.id }}
+                      {{ log.user.type }}
                     </div>
                   </div>
                 </td>
@@ -327,9 +327,6 @@ onMounted(() => {
                 <td>
                   <div>
                     <div class="font-weight-medium">{{ getModelName(log.model.type) }}</div>
-                    <div class="text-caption text-medium-emphasis" v-if="log.model.id">
-                      ID: {{ log.model.id }}
-                    </div>
                   </div>
                 </td>
                 <td>

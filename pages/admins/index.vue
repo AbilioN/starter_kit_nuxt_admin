@@ -377,7 +377,6 @@ onMounted(() => {
                     </v-avatar>
                     <div>
                       <div class="font-weight-medium">{{ admin.name }}</div>
-                      <div class="text-caption text-medium-emphasis">{{ admin.phone }}</div>
                     </div>
                   </div>
                 </td>
