@@ -1,5 +1,6 @@
 import type { IHttpClient, RequestConfig } from '~/types/domain';
 import { getApiConfig } from '~/config/api';
+import { appendTenantQueryParam } from '~/utils/tenant';
 
 interface ApiErrorResponse {
   message: string;
@@ -10,11 +11,13 @@ export class ApiClient implements IHttpClient {
   private baseURL: string;
   private defaultHeaders: Record<string, string>;
   private timeout: number;
+  private tenantQueryParam: string | null;
 
   constructor(customBaseURL?: string) {
     const config = getApiConfig();
     this.baseURL = customBaseURL || config.baseURL;
     this.timeout = config.timeout;
+    this.tenantQueryParam = config.tenantQueryParam;
     this.defaultHeaders = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -34,7 +37,7 @@ export class ApiClient implements IHttpClient {
     data?: any,
     config?: RequestConfig
   ): Promise<T> {
-    const fullURL = `${this.baseURL}${url}`;
+    const fullURL = appendTenantQueryParam(`${this.baseURL}${url}`, this.tenantQueryParam);
     
     const headers = {
       ...this.defaultHeaders,
@@ -71,6 +74,14 @@ export class ApiClient implements IHttpClient {
       if (!response.ok) {
         if (response.status === 401) {
           if (process.client) {
+            // The redirect below is a hard reload, which wipes the console
+            // before a plain console.error would be readable — stash it in
+            // sessionStorage instead so the login page can surface it after.
+            sessionStorage.setItem('last_401', JSON.stringify({
+              method,
+              url: fullURL,
+              at: new Date().toISOString(),
+            }));
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
             window.location.href = '/auth/login';

@@ -1,5 +1,6 @@
 import { ApiClient } from '~/infrastructure/http/ApiClient';
 import { getApiConfig } from '~/config/api';
+import { appendTenantQueryParam } from '~/utils/tenant';
 import type {
   Setting,
   SettingsResponse,
@@ -10,18 +11,15 @@ import type {
 
 export class SettingsService {
   private client: ApiClient;
-  private publicBaseURL: string;
 
   constructor() {
     this.client = new ApiClient();
-    this.publicBaseURL = getApiConfig().publicBaseURL;
   }
 
   async getPublicSettings(): Promise<PublicSettings> {
-    const response = await $fetch<PublicSettingsResponse>(
-      `${this.publicBaseURL}/settings/public`,
-      { timeout: 5000 }
-    );
+    const { publicBaseURL, tenantQueryParam } = getApiConfig();
+    const url = appendTenantQueryParam(`${publicBaseURL}/settings/public`, tenantQueryParam);
+    const response = await $fetch<PublicSettingsResponse>(url, { timeout: 5000 });
     return response.data;
   }
 

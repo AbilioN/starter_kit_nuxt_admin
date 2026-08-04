@@ -8,6 +8,7 @@ definePageMeta({
 });
 
 const { can } = usePermissions();
+const { user: admin } = useAuth();
 const {
   settings,
   groupedSettings,
@@ -18,14 +19,70 @@ const {
   updateManySettings,
 } = useSettings();
 
+const {
+  tenantTheme,
+  saving: tenantSaving,
+  updateBranding,
+  updateSubscriptionPlan,
+} = useTenantSettings();
+const { uploadFile, uploading: logoUploading } = useFiles();
+
 // Active tab
 const activeTab = ref('general');
-const tabs = [
-  { key: 'general', label: 'General', icon: 'mdi-cog-outline' },
-  { key: 'email', label: 'Email', icon: 'mdi-email-outline' },
-  { key: 'storage', label: 'Storage', icon: 'mdi-harddisk' },
-  { key: 'features', label: 'Feature Flags', icon: 'mdi-flag-outline' },
-];
+const tabs = computed(() => {
+  const base = [
+    { key: 'general', label: 'General', icon: 'mdi-cog-outline' },
+    { key: 'email', label: 'Email', icon: 'mdi-email-outline' },
+    { key: 'storage', label: 'Storage', icon: 'mdi-harddisk' },
+    { key: 'features', label: 'Feature Flags', icon: 'mdi-flag-outline' },
+  ];
+  if (admin.value?.is_tenant_owner) {
+    base.push({ key: 'tenant', label: 'Branding & Plan', icon: 'mdi-palette-outline' });
+  }
+  return base;
+});
+
+// Tenant branding form
+const brandingForm = reactive({
+  theme_primary_color: '',
+  theme_secondary_color: '',
+});
+watch(tenantTheme, (theme) => {
+  brandingForm.theme_primary_color = theme?.primary_color ?? '';
+  brandingForm.theme_secondary_color = theme?.secondary_color ?? '';
+}, { immediate: true });
+
+const logoFile = ref<File | null>(null);
+const logoInputRef = ref<HTMLInputElement | null>(null);
+const onLogoInputChange = (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  logoFile.value = input.files?.[0] ?? null;
+};
+
+const saveBranding = async () => {
+  let logo_path: string | undefined;
+  if (logoFile.value) {
+    const uploaded = await uploadFile(logoFile.value, 'branding');
+    // The branding endpoint stores a storage path, not a public URL — the
+    // file's id is the closest match this app's File API currently exposes.
+    logo_path = uploaded?.id;
+  }
+  const ok = await updateBranding({
+    theme_primary_color: brandingForm.theme_primary_color || undefined,
+    theme_secondary_color: brandingForm.theme_secondary_color || undefined,
+    logo_path,
+  });
+  if (ok) logoFile.value = null;
+};
+
+// Subscription plan — no plan-catalog endpoint is exposed to tenant admins
+// yet (only GodAdmin can list plans), so this is a raw id field for now.
+const subscriptionPlanId = ref('');
+const saveSubscriptionPlan = async () => {
+  if (!subscriptionPlanId.value) return;
+  const ok = await updateSubscriptionPlan({ subscription_plan_id: subscriptionPlanId.value });
+  if (ok) subscriptionPlanId.value = '';
+};
 
 // Local draft copies of values — keyed by setting.key
 const drafts = reactive<Record<string, Setting['value']>>({});
@@ -69,7 +126,7 @@ const resetGroup = () => {
 };
 
 const labelForGroup = (group: string) =>
-  tabs.find(t => t.key === group)?.label ?? group;
+  tabs.value.find(t => t.key === group)?.label ?? group;
 
 onMounted(() => loadSettings());
 </script>
@@ -108,8 +165,86 @@ onMounted(() => loadSettings());
         </v-tab>
       </v-tabs>
 
+      <!-- Tenant branding & subscription (tenant-owner only) -->
+      <v-row v-if="activeTab === 'tenant'">
+        <v-col cols="12" md="7">
+          <UiChildCard title="Branding">
+            <v-row>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="brandingForm.theme_primary_color"
+                  label="Primary color"
+                  placeholder="#112233"
+                  variant="outlined"
+                  density="comfortable"
+                >
+                  <template v-slot:prepend-inner>
+                    <div class="color-swatch" :style="{ backgroundColor: brandingForm.theme_primary_color || 'transparent' }" />
+                  </template>
+                </v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="brandingForm.theme_secondary_color"
+                  label="Secondary color"
+                  placeholder="#445566"
+                  variant="outlined"
+                  density="comfortable"
+                >
+                  <template v-slot:prepend-inner>
+                    <div class="color-swatch" :style="{ backgroundColor: brandingForm.theme_secondary_color || 'transparent' }" />
+                  </template>
+                </v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <input ref="logoInputRef" type="file" accept="image/*" style="display:none" @change="onLogoInputChange" />
+                <div class="d-flex align-center ga-3">
+                  <v-btn variant="outlined" prepend-icon="mdi-image-outline" @click="logoInputRef?.click()">
+                    {{ logoFile ? logoFile.name : 'Choose Logo' }}
+                  </v-btn>
+                  <img v-if="tenantTheme?.logo_url" :src="tenantTheme.logo_url" alt="Current logo" class="current-logo" />
+                </div>
+              </v-col>
+            </v-row>
+            <v-divider class="my-4" />
+            <v-btn
+              color="primary"
+              :loading="tenantSaving || logoUploading"
+              prepend-icon="mdi-content-save-outline"
+              @click="saveBranding"
+            >
+              Save Branding
+            </v-btn>
+          </UiChildCard>
+        </v-col>
+        <v-col cols="12" md="5">
+          <UiChildCard title="Subscription Plan">
+            <p class="text-body-2 text-medium-emphasis mb-4">
+              There's no plan catalog available to tenant admins yet — enter the plan id directly.
+            </p>
+            <v-text-field
+              v-model="subscriptionPlanId"
+              label="Subscription plan id"
+              variant="outlined"
+              density="comfortable"
+              class="mb-4"
+            />
+            <v-btn
+              color="primary"
+              variant="outlined"
+              :loading="tenantSaving"
+              :disabled="!subscriptionPlanId"
+              prepend-icon="mdi-swap-horizontal"
+              @click="saveSubscriptionPlan"
+            >
+              Change Plan
+            </v-btn>
+          </UiChildCard>
+        </v-col>
+      </v-row>
+
       <!-- Loading -->
-      <v-row v-if="loading">
+      <v-row v-else-if="loading">
         <v-col cols="12">
           <UiChildCard>
             <div class="d-flex justify-center align-center py-12">
@@ -251,5 +386,19 @@ onMounted(() => loadSettings());
   flex: 1;
   min-width: 0;
   padding-right: 16px;
+}
+
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.current-logo {
+  max-height: 48px;
+  max-width: 160px;
+  object-fit: contain;
+  display: block;
 }
 </style>

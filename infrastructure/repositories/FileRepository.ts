@@ -1,4 +1,5 @@
 import { getApiConfig } from '~/config/api';
+import { appendTenantQueryParam } from '~/utils/tenant';
 import { ApiClient } from '../http/ApiClient';
 
 export interface FileItem {
@@ -35,6 +36,7 @@ export interface UploadFileResponse {
 export class FileRepository {
   private apiClient = new ApiClient();
   private baseURL = getApiConfig().baseURL;
+  private tenantQueryParam = getApiConfig().tenantQueryParam;
 
   async getFiles(page = 1, perPage = 20, folder?: string): Promise<FilesListResponse> {
     let url = `/files?page=${page}&per_page=${perPage}`;
@@ -48,7 +50,8 @@ export class FileRepository {
     formData.append('file', file);
     if (folder) formData.append('folder', folder);
 
-    const res = await fetch(`${this.baseURL}/files`, {
+    const url = appendTenantQueryParam(`${this.baseURL}/files`, this.tenantQueryParam);
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token ?? ''}`,

@@ -1,42 +1,44 @@
 import type { ThemeTypes } from '@/types/themeTypes/ThemeType';
 
-const BLUE_THEME: ThemeTypes = {
-    name: 'BLUE_THEME',
+// Original palette for this admin console — slate neutrals with a deep teal
+// accent, distinct from the generic light-blue look of the base template.
+// This is the pre-tenant-branding default; useTenantTheme overrides
+// primary/secondary at runtime once a tenant's branding loads.
+const APP_THEME: ThemeTypes = {
+    name: 'APP_THEME',
     dark: false,
     variables: {
-        'border-color': '#e5eaef'
+        'border-color': '#e2e8f0'
     },
     colors: {
-        primary: '#0085db',
-        secondary: '#707a82',
-        info: '#46caeb',
-        success: '#4bd08b',
-        warning: '#f8c076',
-        error: '#fb977d',
-        indigo:'#8763da',
-        lightprimary: '#e5f3fb',
-        lightinfo:'#e1f5fa',
-        lightsecondary: '#e7ecf0',
-        lightsuccess: '#dffff3',
-        lighterror: '#ffede9',
-        lightwarning: '#fff6ea',
-        lightindigo:'#f1ebff',
-        textPrimary: '#2A3547',
-        textSecondary: '#2A3547',
-        borderColor: '#e5eaef',
-        inputBorder: '#DFE5EF',
+        primary: '#0f766e',
+        secondary: '#475569',
+        info: '#0ea5e9',
+        success: '#15803d',
+        warning: '#b45309',
+        error: '#dc2626',
+        indigo: '#6d28d9',
+        lightprimary: '#e6f4f3',
+        lightinfo: '#e3f4fc',
+        lightsecondary: '#eceff2',
+        lightsuccess: '#e5f6ea',
+        lighterror: '#fdeaea',
+        lightwarning: '#fdf1e3',
+        lightindigo: '#f0eafb',
+        textPrimary: '#101828',
+        textSecondary: '#475467',
+        borderColor: '#e2e8f0',
+        inputBorder: '#d7dee8',
         containerBg: '#ffffff',
-        background: '#f0f5f9',
-        hoverColor: '#f6f9fc',
-        surface: '#fff',
-        grey100: '#707a82',
-        grey200: '#111c2d',
-        darkbg:'#2a3447',
-        bglight:'#f5f8fb',
-        bgdark:'#111c2d'
-       
+        background: '#f5f7f8',
+        hoverColor: '#f1f5f4',
+        surface: '#ffffff',
+        grey100: '#64748b',
+        grey200: '#0f172a',
+        darkbg: '#1e2530',
+        bglight: '#f4f7f6',
+        bgdark: '#0f172a'
     }
 };
 
-
-export { BLUE_THEME};
+export { APP_THEME };

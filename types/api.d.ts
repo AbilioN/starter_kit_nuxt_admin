@@ -16,6 +16,7 @@ export interface Admin {
   email: string;
   is_active: boolean;
   is_super_admin: boolean;
+  is_tenant_owner: boolean;
   last_login_at: string | null;
   channel?: string;
 }
@@ -247,4 +248,42 @@ export interface AuditLogFilters {
   date_to?: string; // YYYY-MM-DD
   per_page?: number;
   page?: number;
-} 
+}
+
+// Tipos para Multitenancy (branding + subscription)
+export interface TenantTheme {
+  name: string;
+  primary_color: string | null;
+  secondary_color: string | null;
+  logo_url: string | null;
+}
+
+export interface TenantThemeResponse {
+  success: boolean;
+  data: TenantTheme;
+}
+
+export interface UpdateTenantBrandingRequest {
+  theme_primary_color?: string;
+  theme_secondary_color?: string;
+  logo_path?: string;
+}
+
+export interface TenantBranding {
+  theme_primary_color: string | null;
+  theme_secondary_color: string | null;
+  logo_path: string | null;
+}
+
+export interface UpdateTenantBrandingResponse {
+  success: boolean;
+  data: TenantBranding;
+}
+
+export interface UpdateSubscriptionPlanRequest {
+  subscription_plan_id: string;
+}
+
+export interface UpdateSubscriptionPlanResponse {
+  success: boolean;
+}

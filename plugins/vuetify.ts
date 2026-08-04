@@ -8,21 +8,21 @@ import VueTablerIcons from "vue-tabler-icons";
 import "@/assets/scss/style.scss";
 
 import {
-  BLUE_THEME,
+  APP_THEME,
 } from "@/theme/LightTheme";
 export default defineNuxtPlugin((nuxtApp) => {
   const vuetify = createVuetify({
     components,
     directives,
     theme: {
-      defaultTheme: "BLUE_THEME",
+      defaultTheme: "APP_THEME",
       themes: {
-        BLUE_THEME,
+        APP_THEME,
       },
     },
     defaults: {
       VCard: {
-        rounded: "xl",
+        rounded: "lg",
       },
       VTextField: {
         variant: "outlined",

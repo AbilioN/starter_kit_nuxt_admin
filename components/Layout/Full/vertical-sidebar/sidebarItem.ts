@@ -37,11 +37,6 @@ const sidebarItem: menu[] = [
     to: "/dashboard",
   },
   {
-    title: "Dashboard Template",
-    icon: "presentation-graph-line-duotone",
-    to: "/dashboard-template",
-  },
-  {
     title: "My Profile",
     icon: "user-circle-bold",
     to: "/profile",
@@ -103,63 +98,6 @@ const sidebarItem: menu[] = [
         to: "/settings/features",
       },
     ],
-  },
-  { header: "ui" },
-  {
-    title: "Alert",
-    icon: "volume-small-broken",
-    to: "/ui-components/alerts",
-  },
-  {
-    title: "Button",
-    icon: "tag-horizontal-outline",
-    to: "/ui-components/buttons",
-  },
-  {
-    title: "Cards",
-    icon: "cardholder-linear",
-    to: "/ui-components/cards",
-  },
-  {
-    title: "Tables",
-    icon: "suspension-outline",
-    to: "/ui-components/tables",
-  },
-  {
-    title: "Authentication",
-    icon: "shield-user-line-duotone",
-    to: "/auth/",
-    children: [
-      {
-        title: "Login",
-        to: "/auth/login",
-      },
-      {
-        title: "Register",
-        to: "/auth/register",
-      },
-      {
-        title: "Forgot Password",
-        to: "/auth/forgot-password",
-      },
-      {
-        title: "Two Steps",
-        to: "/auth/two-steps",
-      },
-      {
-        title: "Error",
-        to: "/auth/error",
-      },
-      {
-        title: "Maintenance",
-        to: "/auth/maintenance",
-      },
-    ],
-  },
-  {
-    title: "Error",
-    icon: "alert-circle-line-duotone",
-    to: "/error",
   },
 ];
 

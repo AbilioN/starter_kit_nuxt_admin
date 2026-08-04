@@ -42,37 +42,32 @@ const handleLogin = async () => {
 </script>
 
 <template>
-    <div class="d-flex align-center text-center mb-6">
-        <div class="text-h6 w-100 px-5 font-weight-regular auth-divider position-relative">
-            <span class="bg-surface px-5 py-3 position-relative text-subtitle-1 text-grey100">Your Social Campaigns</span>
-        </div>
-    </div>
     <form @submit.prevent="handleLogin">
         <v-row class="mb-3">
             <v-col cols="12">
                 <v-label class="font-weight-medium mb-1">Email</v-label>
-                <v-text-field 
+                <v-text-field
                     v-model="email"
-                    variant="outlined" 
-                    class="pwdInput" 
-                    hide-details 
+                    variant="outlined"
+                    class="pwdInput"
+                    hide-details
                     color="primary"
                     type="email"
                     :disabled="loading"
-                    placeholder="admin@dashboard.com"
+                    placeholder="you@example.com"
                 ></v-text-field>
             </v-col>
             <v-col cols="12">
                 <v-label class="font-weight-medium mb-1">Password</v-label>
-                <v-text-field 
+                <v-text-field
                     v-model="password"
-                    variant="outlined" 
-                    class="border-borderColor" 
-                    type="password" 
+                    variant="outlined"
+                    class="border-borderColor"
+                    type="password"
                     hide-details
                     color="primary"
                     :disabled="loading"
-                    placeholder="Digite sua senha"
+                    placeholder="Enter your password"
                 ></v-text-field>
             </v-col>
             
@@ -89,12 +84,12 @@ const handleLogin = async () => {
             <v-col cols="12 " class="py-0">
                 <div class="d-flex flex-wrap align-center w-100 ">
                     <v-checkbox v-model="checkbox" hide-details color="primary">
-                        <template v-slot:label class="">Remeber this Device</template>
+                        <template v-slot:label>Remember this device</template>
                     </v-checkbox>
                     <div class="ml-sm-auto">
-                        <RouterLink to=""
+                        <RouterLink to="/auth/forgot-password"
                             class="text-primary text-decoration-none text-body-1 opacity-1 font-weight-medium">
-                            Forgot Password ?
+                            Forgot Password?
                         </RouterLink>
                     </div>
                 </div>
@@ -111,7 +106,7 @@ const handleLogin = async () => {
                     :loading="loading"
                     :disabled="loading"
                 >
-                    {{ loading ? 'Entrando...' : 'Sign In' }}
+                    {{ loading ? 'Signing in…' : 'Sign In' }}
                 </v-btn>
             </v-col>
         </v-row>
