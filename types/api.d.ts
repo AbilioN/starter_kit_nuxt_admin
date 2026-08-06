@@ -289,3 +289,47 @@ export interface UpdateSubscriptionPlanRequest {
 export interface UpdateSubscriptionPlanResponse {
   success: boolean;
 }
+
+// Tipos para o catálogo público de planos + self-service signup (landlord-level,
+// sem tenant/auth) — ver /api/public/subscription-plans e /api/public/signup
+export interface PublicSubscriptionPlan {
+  id: string;
+  name: string;
+  slug: string;
+  price_cents: number | null;
+  features: Record<string, boolean>;
+  tertiary_color: string | null;
+  icon_small_url: string | null;
+  icon_medium_url: string | null;
+  icon_large_url: string | null;
+}
+
+export interface PublicSubscriptionPlansResponse {
+  success: boolean;
+  data: PublicSubscriptionPlan[];
+}
+
+export interface PublicSubscriptionPlanResponse {
+  success: boolean;
+  data: PublicSubscriptionPlan;
+}
+
+export interface PublicSignupRequest {
+  name: string;
+  subdomain: string;
+  plan_id?: string;
+  admin_email: string;
+  admin_password: string;
+  admin_password_confirmation: string;
+}
+
+export interface PublicSignupResult {
+  subdomain: string;
+  redirect_url: string;
+}
+
+export interface PublicSignupResponse {
+  success: boolean;
+  data: PublicSignupResult;
+  message?: string;
+}

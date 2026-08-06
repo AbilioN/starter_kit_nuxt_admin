@@ -87,6 +87,15 @@ export const buildTenantApiOrigin = (rootDomain: string, protocol: string): stri
   return `${protocol}://${tenant}.${rootDomain}`;
 };
 
+/**
+ * Origin for the landlord-level public API (subscription plans catalog,
+ * self-service signup) — these run on the bare root domain, before any
+ * tenant has been picked, so unlike buildTenantApiOrigin() this never
+ * prefixes a subdomain and never falls back to a resolved/default tenant.
+ */
+export const buildLandlordApiOrigin = (rootDomain: string, protocol: string): string =>
+  `${protocol}://${rootDomain}`;
+
 /** The tenant to send as ?tenant= — only meaningful in "query" mode. */
 export const getTenantQueryParam = (): string | null =>
   getTenantMode() === 'query' ? resolveTenant() : null;

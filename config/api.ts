@@ -1,4 +1,4 @@
-import { buildTenantApiOrigin, getTenantMode, getTenantQueryParam } from '~/utils/tenant';
+import { buildLandlordApiOrigin, buildTenantApiOrigin, getTenantMode, getTenantQueryParam } from '~/utils/tenant';
 
 // Root domain the resolved tenant subdomain gets prefixed onto in the
 // default "subdomain" mode, e.g. "starterkit.test:8006" ->
@@ -18,6 +18,8 @@ export const API_CONFIG = {
     TENANT_THEME: '/tenant/theme', // relative to publicBaseURL (/api)
     TENANT_SUBSCRIPTION_PLAN: '/tenant/subscription-plan', // relative to baseURL (/api/admin)
     TENANT_BRANDING: '/tenant/branding', // relative to baseURL (/api/admin)
+    PUBLIC_SUBSCRIPTION_PLANS: '/subscription-plans', // relative to getLandlordApiConfig().publicBaseURL (/api/public)
+    PUBLIC_SIGNUP: '/signup', // relative to getLandlordApiConfig().publicBaseURL (/api/public)
   }
 } as const;
 
@@ -37,5 +39,26 @@ export const getApiConfig = () => {
     // Only set in "query" mode — every request must carry this as ?tenant=
     // since the host itself no longer identifies the tenant.
     tenantQueryParam: getTenantQueryParam(),
+  };
+};
+
+/**
+ * Config for the landlord-level public API (pricing page, self-service
+ * signup) — no tenant subdomain, no auth token. Reuses the same root
+ * domain/protocol resolution as getApiConfig() (so local dev env overrides
+ * still apply), but the origin itself is always bare via buildLandlordApiOrigin().
+ */
+export const getLandlordApiConfig = () => {
+  const defaultRootDomain = getTenantMode() === 'query'
+    ? DEFAULT_API_ROOT_DOMAIN_QUERY
+    : DEFAULT_API_ROOT_DOMAIN_SUBDOMAIN;
+  const runtimeConfig = useRuntimeConfig();
+  const rootDomain = runtimeConfig.public.apiRootDomain || defaultRootDomain;
+  const protocol = runtimeConfig.public.apiProtocol || DEFAULT_API_PROTOCOL;
+  const origin = buildLandlordApiOrigin(rootDomain, protocol);
+
+  return {
+    publicBaseURL: `${origin}/api/public`,
+    timeout: API_CONFIG.TIMEOUT,
   };
 };
