@@ -51,10 +51,10 @@ export const getTenantSubdomain = (): string | null => {
 export type TenantMode = 'subdomain' | 'query';
 
 export const getTenantMode = (): TenantMode =>
-  process.env.NUXT_PUBLIC_TENANT_MODE === 'query' ? 'query' : 'subdomain';
+  useRuntimeConfig().public.tenantMode === 'query' ? 'query' : 'subdomain';
 
 const resolveTenant = (): string | null =>
-  getTenantSubdomain() || process.env.NUXT_PUBLIC_DEFAULT_TENANT || null;
+  getTenantSubdomain() || useRuntimeConfig().public.defaultTenant || null;
 
 /**
  * Builds the origin (protocol + host) of the tenant-scoped API.

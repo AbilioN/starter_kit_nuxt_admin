@@ -1,9 +1,10 @@
 import type { Setting, PublicSettings, SettingGroup } from '~/types/api';
 import { SettingsService } from '~/services/SettingsService';
 
-const settingsService = new SettingsService();
-
 export const useSettings = () => {
+  // Constructed here, not at module scope — SettingsService's ApiClient
+  // calls getApiConfig() -> useRuntimeConfig(), which needs a live Nuxt context.
+  const settingsService = new SettingsService();
   const settings = useState<Setting[]>('settings', () => []);
   const publicSettings = useState<PublicSettings>('publicSettings', () => ({}));
   const loading = ref(false);

@@ -35,7 +35,9 @@ export class AuthRepository implements IAuthRepository {
     };
 
     // Deixar o erro ser propagado para o serviço tratar
-    const response = await this.apiClient.post<LoginResponse>(API_CONFIG.ENDPOINTS.LOGIN, loginData);
+    // skipAuth: nunca enviar um Bearer token de uma sessão anterior (de outro
+    // tenant, por ex.) junto com uma tentativa de login nova.
+    const response = await this.apiClient.post<LoginResponse>(API_CONFIG.ENDPOINTS.LOGIN, loginData, { skipAuth: true });
     return response;
   }
 

@@ -16,6 +16,10 @@ export interface RequestConfig {
   headers?: Record<string, string>;
   params?: Record<string, any>;
   timeout?: number;
+  // Don't attach the stored Bearer token — for endpoints that must never
+  // carry a leftover token from a previous (possibly different-tenant)
+  // session, e.g. login itself.
+  skipAuth?: boolean;
 }
 
 export interface IAuthService {

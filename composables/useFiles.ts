@@ -3,9 +3,10 @@ import type { FileItem } from '~/infrastructure/repositories/FileRepository';
 
 export type { FileItem };
 
-const repo = new FileRepository();
-
 export const useFiles = () => {
+  // Constructed here, not at module scope — FileRepository's fields call
+  // getApiConfig() -> useRuntimeConfig(), which needs a live Nuxt context.
+  const repo = new FileRepository();
   const files = ref<FileItem[]>([]);
   const loading = ref(false);
   const uploading = ref(false);

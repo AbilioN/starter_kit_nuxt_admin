@@ -2,11 +2,13 @@ import { useTheme } from 'vuetify';
 import type { TenantTheme } from '~/types/api';
 import { TenantService } from '~/services/TenantService';
 
-const tenantService = new TenantService();
-
 // Shared across the whole app so every page reuses one fetch instead of
 // re-requesting the (public, unauthenticated) tenant theme endpoint.
 export const useTenantTheme = () => {
+  // Constructed here (not at module scope) — its constructor chain reaches
+  // getApiConfig(), which calls useRuntimeConfig() and therefore needs a
+  // live Nuxt/Vue context, unavailable at module-import time.
+  const tenantService = new TenantService();
   const tenantTheme = useState<TenantTheme | null>('tenantTheme', () => null);
   const loading = useState<boolean>('tenantThemeLoading', () => false);
 

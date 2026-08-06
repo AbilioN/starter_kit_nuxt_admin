@@ -1,6 +1,6 @@
 import type { IHttpClient, RequestConfig } from '~/types/domain';
 import { getApiConfig } from '~/config/api';
-import { appendTenantQueryParam } from '~/utils/tenant';
+import { appendTenantQueryParam, getTenantSubdomain } from '~/utils/tenant';
 
 interface ApiErrorResponse {
   message: string;
@@ -44,8 +44,10 @@ export class ApiClient implements IHttpClient {
       ...config?.headers,
     };
 
-    // Adicionar token de autenticação se disponível
-    const token = this.getAuthToken();
+    // Adicionar token de autenticação se disponível — exceto quando skipAuth
+    // pede explicitamente pra não carregar um token de sessão anterior
+    // (ex: login, que nunca deve enviar um Bearer de um tenant diferente).
+    const token = config?.skipAuth ? null : this.getAuthToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
@@ -84,7 +86,13 @@ export class ApiClient implements IHttpClient {
             }));
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
-            window.location.href = '/auth/login';
+            // Preserve which tenant we were on — a plain "/auth/login" would
+            // otherwise drop it from the URL, making it look like the app
+            // forgot the tenant (it doesn't; dev_tenant_override in
+            // localStorage still has it), but it's confusing to lose it from
+            // the address bar right when you're trying to debug a failure.
+            const tenant = getTenantSubdomain();
+            window.location.href = tenant ? `/auth/login?tenant=${encodeURIComponent(tenant)}` : '/auth/login';
           }
           throw new Error('Unauthenticated');
         }

@@ -26,24 +26,17 @@ export default defineNuxtConfig({
     server: {
       allowedHosts: true,
     },
-    // utils/tenant.ts and config/api.ts read process.env.NUXT_PUBLIC_* directly
-    // (not via useRuntimeConfig()) because ApiClient gets instantiated in ~10
-    // places across composables/repositories/services, several of which are
-    // plain TS classes with no Nuxt context to call useRuntimeConfig() from.
-    // ssr: false means all of that code runs in the browser bundle, where
-    // process.env is normally empty - `define` statically replaces each of
-    // these references at build time with the literal value read here (in
-    // Node, where process.env genuinely is populated from .env), so the
-    // request path this app builds actually reflects NUXT_PUBLIC_TENANT_MODE
-    // instead of silently defaulting to "subdomain" every time.
-    define: {
-      'process.env.NUXT_PUBLIC_TENANT_MODE': JSON.stringify(process.env.NUXT_PUBLIC_TENANT_MODE || ''),
-      'process.env.NUXT_PUBLIC_API_ROOT_DOMAIN': JSON.stringify(process.env.NUXT_PUBLIC_API_ROOT_DOMAIN || ''),
-      'process.env.NUXT_PUBLIC_API_PROTOCOL': JSON.stringify(process.env.NUXT_PUBLIC_API_PROTOCOL || ''),
-      'process.env.NUXT_PUBLIC_DEFAULT_TENANT': JSON.stringify(process.env.NUXT_PUBLIC_DEFAULT_TENANT || ''),
-    },
   },
 
+  // utils/tenant.ts and config/api.ts read these via useRuntimeConfig().public
+  // rather than process.env directly. An earlier attempt used vite.define to
+  // statically replace process.env.NUXT_PUBLIC_* in the client bundle, but
+  // Nuxt doesn't reliably forward top-level vite.define through to the actual
+  // dev-server Vite instance (confirmed empirically: the value was correct at
+  // nuxt.config.ts eval time, but the served/transformed module still had the
+  // raw unreplaced `process.env.X` expression) - runtimeConfig.public is
+  // Nuxt's own supported mechanism for exposing env to the client and doesn't
+  // have this gap.
   runtimeConfig: {
     public: {
       pusherKey: process.env.PUSHER_APP_KEY || 'b395ac035994ca7af583',
@@ -51,6 +44,10 @@ export default defineNuxtConfig({
       pusherAppId: process.env.PUSHER_APP_ID || '1553073',
       pusherSecret: process.env.PUSHER_APP_SECRET || '8a20e39fc3f1ab6111af',
       apiBaseUrl: process.env.NUXT_API_BASE_URL || 'http://localhost:8006/api',
+      tenantMode: process.env.NUXT_PUBLIC_TENANT_MODE || '',
+      apiRootDomain: process.env.NUXT_PUBLIC_API_ROOT_DOMAIN || '',
+      apiProtocol: process.env.NUXT_PUBLIC_API_PROTOCOL || '',
+      defaultTenant: process.env.NUXT_PUBLIC_DEFAULT_TENANT || '',
     }
   },
 

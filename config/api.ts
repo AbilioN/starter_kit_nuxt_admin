@@ -25,8 +25,9 @@ export const getApiConfig = () => {
   const defaultRootDomain = getTenantMode() === 'query'
     ? DEFAULT_API_ROOT_DOMAIN_QUERY
     : DEFAULT_API_ROOT_DOMAIN_SUBDOMAIN;
-  const rootDomain = process.env.NUXT_PUBLIC_API_ROOT_DOMAIN || defaultRootDomain;
-  const protocol = process.env.NUXT_PUBLIC_API_PROTOCOL || DEFAULT_API_PROTOCOL;
+  const runtimeConfig = useRuntimeConfig();
+  const rootDomain = runtimeConfig.public.apiRootDomain || defaultRootDomain;
+  const protocol = runtimeConfig.public.apiProtocol || DEFAULT_API_PROTOCOL;
   const origin = buildTenantApiOrigin(rootDomain, protocol);
 
   return {

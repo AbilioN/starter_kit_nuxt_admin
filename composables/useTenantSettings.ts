@@ -1,11 +1,12 @@
 import type { UpdateTenantBrandingRequest, UpdateSubscriptionPlanRequest } from '~/types/api';
 import { TenantService } from '~/services/TenantService';
 
-const tenantService = new TenantService();
-
 // Tenant-owner-only actions (branding + subscription plan) — distinct from
 // useTenantTheme, which only *reads* the public branding for display.
 export const useTenantSettings = () => {
+  // See useTenantTheme.ts — must be constructed inside the composable, not
+  // at module scope, since it needs a live Nuxt context for useRuntimeConfig().
+  const tenantService = new TenantService();
   const saving = ref(false);
   const error = ref<string | null>(null);
 
