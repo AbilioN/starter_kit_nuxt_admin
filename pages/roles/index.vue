@@ -9,6 +9,8 @@ definePageMeta({
   middleware: ['auth', 'permissions']
 });
 
+const { t } = useI18n();
+
 // Usar o composable de roles
 const {
   formattedRoles,
@@ -50,11 +52,11 @@ const roleForm = ref({
 });
 
 // Filtros disponíveis
-const statusOptions = [
-  { value: 'all', label: 'Todos os Status' },
-  { value: 'Ativo', label: 'Ativo' },
-  { value: 'Inativo', label: 'Inativo' }
-];
+const statusOptions = computed(() => [
+  { value: 'all', label: t('common.labels.allStatuses') },
+  { value: 'Ativo', label: t('common.labels.active') },
+  { value: 'Inativo', label: t('common.labels.inactive') }
+]);
 
 // Computed para filtrar roles
 const filteredRoles = computed(() => {
@@ -255,9 +257,9 @@ onMounted(() => {
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
           <div>
-            <h1 class="text-h4 font-weight-bold">Roles</h1>
+            <h1 class="text-h4 font-weight-bold">{{ t('pages.roles.title') }}</h1>
             <p class="text-body-1 text-medium-emphasis">
-              Gerencie roles e permissões do sistema
+              {{ t('pages.roles.subtitle') }}
             </p>
           </div>
           <v-btn
@@ -267,7 +269,7 @@ onMounted(() => {
             @click="addRole"
             size="large"
           >
-            Criar Role
+            {{ t('pages.roles.createRole') }}
           </v-btn>
         </div>
       </v-col>
@@ -276,12 +278,12 @@ onMounted(() => {
     <!-- Filtros -->
     <v-row class="mb-6">
       <v-col cols="12">
-        <UiChildCard title="Filters">
+        <UiChildCard :title="t('pages.roles.filters')">
           <v-row>
             <v-col cols="12" md="6">
               <v-text-field
                 v-model="search"
-                label="Search by name or description"
+                :label="t('pages.roles.searchPlaceholder')"
                 prepend-inner-icon="mdi-magnify"
                 variant="outlined"
                 density="compact"
@@ -294,7 +296,7 @@ onMounted(() => {
                 :items="statusOptions"
                 item-title="label"
                 item-value="value"
-                label="Status"
+                :label="t('common.labels.status')"
                 variant="outlined"
                 density="compact"
               />
@@ -308,14 +310,14 @@ onMounted(() => {
                   @click="clearFilters"
                   prepend-icon="mdi-refresh"
                 >
-                  Clear Filters
+                  {{ t('common.actions.clearFilters') }}
                 </v-btn>
                 <v-chip
                   color="primary"
                   variant="tonal"
                   class="ml-auto"
                 >
-                  {{ filteredRoles.length }} roles found
+                  {{ t('pages.roles.rolesFound', { count: filteredRoles.length }) }}
                 </v-chip>
               </div>
             </v-col>
@@ -348,16 +350,16 @@ onMounted(() => {
     <!-- Tabela de Roles -->
     <v-row v-else>
       <v-col cols="12">
-        <UiChildCard title="Roles List">
+        <UiChildCard :title="t('pages.roles.listTitle')">
           <v-table fixed-header height="600px">
             <thead>
               <tr>
-                <th class="text-left">Name</th>
-                <th class="text-left">Description</th>
-                <th class="text-left">Permissions</th>
-                <th class="text-left">Status</th>
-                <th class="text-left">Created At</th>
-                <th class="text-center">Actions</th>
+                <th class="text-left">{{ t('common.labels.name') }}</th>
+                <th class="text-left">{{ t('common.labels.description') }}</th>
+                <th class="text-left">{{ t('pages.roles.tablePermissions') }}</th>
+                <th class="text-left">{{ t('common.labels.status') }}</th>
+                <th class="text-left">{{ t('common.labels.createdAt') }}</th>
+                <th class="text-center">{{ t('common.labels.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -372,7 +374,7 @@ onMounted(() => {
                     variant="tonal"
                     size="small"
                   >
-                    {{ role.permissionsCount }} permissions
+                    {{ t('pages.roles.permissionsCount', { count: role.permissionsCount }) }}
                   </v-chip>
                 </td>
                 <td>
@@ -393,7 +395,7 @@ onMounted(() => {
                       variant="text"
                       color="info"
                       @click="viewPermissions(role)"
-                      title="View Permissions"
+                      :title="t('pages.roles.viewPermissions')"
                     >
                       <v-icon>mdi-eye</v-icon>
                     </v-btn>
@@ -404,7 +406,7 @@ onMounted(() => {
                       variant="text"
                       color="primary"
                       @click="editRole(role)"
-                      title="Edit"
+                      :title="t('common.actions.edit')"
                     >
                       <v-icon>mdi-pencil</v-icon>
                     </v-btn>
@@ -415,7 +417,7 @@ onMounted(() => {
                       variant="text"
                       :color="role.status === 'Ativo' ? 'warning' : 'success'"
                       @click="toggleRoleStatus(role)"
-                      :title="role.status === 'Ativo' ? 'Deactivate' : 'Activate'"
+                      :title="role.status === 'Ativo' ? t('common.actions.deactivate') : t('common.actions.activate')"
                     >
                       <v-icon>{{ role.status === 'Ativo' ? 'mdi-toggle-switch-off' : 'mdi-toggle-switch' }}</v-icon>
                     </v-btn>
@@ -426,7 +428,7 @@ onMounted(() => {
                       variant="text"
                       color="error"
                       @click="deleteRole(role)"
-                      title="Delete"
+                      :title="t('common.actions.delete')"
                     >
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
@@ -439,7 +441,7 @@ onMounted(() => {
           <!-- Info sobre total de roles -->
           <div class="d-flex justify-end mt-4">
             <div class="text-body-2 text-medium-emphasis">
-              Total: {{ formattedRoles.length }} roles
+              {{ t('pages.roles.totalRoles', { count: formattedRoles.length }) }}
             </div>
           </div>
         </UiChildCard>
@@ -449,40 +451,40 @@ onMounted(() => {
     <!-- Diálogos -->
     <v-dialog v-model="showAddDialog" max-width="900px" scrollable>
       <v-card>
-        <v-card-title>Create Role</v-card-title>
+        <v-card-title>{{ t('pages.roles.createDialogTitle') }}</v-card-title>
         <v-card-text>
           <v-form>
             <v-row>
               <v-col cols="12">
                 <v-text-field
                   v-model="roleForm.name"
-                  label="Role Name"
+                  :label="t('pages.roles.roleNameLabel')"
                   variant="outlined"
                   required
-                  placeholder="Ex: Manager"
-                  hint="Slug will be auto-generated from name"
+                  :placeholder="t('pages.roles.roleNamePlaceholder')"
+                  :hint="t('pages.roles.roleNameHint')"
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-textarea
                   v-model="roleForm.description"
-                  label="Description"
+                  :label="t('common.labels.description')"
                   variant="outlined"
                   rows="3"
-                  placeholder="Describe the purpose of this role..."
+                  :placeholder="t('pages.roles.descriptionPlaceholder')"
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-switch
                   v-model="roleForm.is_active"
-                  label="Active Role"
+                  :label="t('pages.roles.activeRoleSwitch')"
                   color="primary"
                   hide-details
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <PermissionSelector
                   v-model="roleForm.selectedPermissions"
@@ -496,51 +498,51 @@ onMounted(() => {
         </v-card-text>
         <v-card-actions>
           <v-chip color="info" variant="tonal">
-            {{ roleForm.selectedPermissions.length }} permissions selected
+            {{ t('pages.roles.permissionsSelected', { count: roleForm.selectedPermissions.length }) }}
           </v-chip>
           <v-spacer></v-spacer>
           <v-alert v-if="saveError" type="error" variant="tonal" density="compact" class="mr-4">
             {{ saveError }}
           </v-alert>
-          <v-btn @click="showAddDialog = false" :disabled="saving">Cancel</v-btn>
-          <v-btn color="primary" @click="saveRole" :loading="saving" :disabled="saving">Create Role</v-btn>
+          <v-btn @click="showAddDialog = false" :disabled="saving">{{ t('common.actions.cancel') }}</v-btn>
+          <v-btn color="primary" @click="saveRole" :loading="saving" :disabled="saving">{{ t('pages.roles.createRole') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="showEditDialog" max-width="900px" scrollable>
       <v-card>
-        <v-card-title>Edit Role: {{ selectedRole?.name }}</v-card-title>
+        <v-card-title>{{ t('pages.roles.editDialogTitle', { name: selectedRole?.name }) }}</v-card-title>
         <v-card-text>
           <v-form>
             <v-row>
               <v-col cols="12">
                 <v-text-field
                   v-model="roleForm.name"
-                  label="Role Name"
+                  :label="t('pages.roles.roleNameLabel')"
                   variant="outlined"
                   required
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-textarea
                   v-model="roleForm.description"
-                  label="Description"
+                  :label="t('common.labels.description')"
                   variant="outlined"
                   rows="3"
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-switch
                   v-model="roleForm.is_active"
-                  label="Active Role"
+                  :label="t('pages.roles.activeRoleSwitch')"
                   color="primary"
                   hide-details
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <PermissionSelector
                   v-model="roleForm.selectedPermissions"
@@ -554,23 +556,23 @@ onMounted(() => {
         </v-card-text>
         <v-card-actions>
           <v-chip color="info" variant="tonal">
-            {{ roleForm.selectedPermissions.length }} permissions selected
+            {{ t('pages.roles.permissionsSelected', { count: roleForm.selectedPermissions.length }) }}
           </v-chip>
           <v-spacer></v-spacer>
           <v-alert v-if="saveError" type="error" variant="tonal" density="compact" class="mr-4">
             {{ saveError }}
           </v-alert>
-          <v-btn @click="showEditDialog = false" :disabled="saving">Cancel</v-btn>
-          <v-btn color="primary" @click="saveRole" :loading="saving" :disabled="saving">Save Changes</v-btn>
+          <v-btn @click="showEditDialog = false" :disabled="saving">{{ t('common.actions.cancel') }}</v-btn>
+          <v-btn color="primary" @click="saveRole" :loading="saving" :disabled="saving">{{ t('common.actions.saveChanges') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="showDeleteDialog" max-width="400px">
       <v-card>
-        <v-card-title>Confirm Deletion</v-card-title>
+        <v-card-title>{{ t('pages.users.deleteDialogTitle') }}</v-card-title>
         <v-card-text>
-          <p>Are you sure you want to delete this role?</p>
+          <p>{{ t('pages.roles.deleteConfirmBody') }}</p>
           <p><strong>{{ selectedRole?.name }}</strong></p>
           <v-alert v-if="saveError" type="error" variant="tonal" density="compact" class="mt-4">
             {{ saveError }}
@@ -578,8 +580,8 @@ onMounted(() => {
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="showDeleteDialog = false" :disabled="saving">Cancel</v-btn>
-          <v-btn color="error" @click="confirmDelete" :loading="saving" :disabled="saving">Delete</v-btn>
+          <v-btn @click="showDeleteDialog = false" :disabled="saving">{{ t('common.actions.cancel') }}</v-btn>
+          <v-btn color="error" @click="confirmDelete" :loading="saving" :disabled="saving">{{ t('common.actions.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -587,17 +589,17 @@ onMounted(() => {
     <!-- Diálogo de Permissões -->
     <v-dialog v-model="showPermissionsDialog" max-width="800px">
       <v-card>
-        <v-card-title>Role Permissions: {{ selectedRole?.name }}</v-card-title>
+        <v-card-title>{{ t('pages.roles.permissionsDialogTitle', { name: selectedRole?.name }) }}</v-card-title>
         <v-card-text>
           <div v-if="selectedRole">
-            <p><strong>Description:</strong> {{ selectedRole.description }}</p>
-            <p><strong>Total Permissions:</strong> {{ selectedRole.permissionsCount }}</p>
-            
+            <p><strong>{{ t('pages.roles.permissionsDialogDescription') }}</strong> {{ selectedRole.description }}</p>
+            <p><strong>{{ t('pages.roles.permissionsDialogTotal') }}</strong> {{ selectedRole.permissionsCount }}</p>
+
             <div v-if="selectedRole.permissions && selectedRole.permissions.length > 0" class="mt-4">
-              <h4>Permissions List:</h4>
+              <h4>{{ t('pages.roles.permissionsListTitle') }}</h4>
               <div class="permissions-grid">
-                <v-chip 
-                  v-for="permission in selectedRole.permissions" 
+                <v-chip
+                  v-for="permission in selectedRole.permissions"
                   :key="permission.id"
                   :color="permission.is_active ? 'primary' : 'grey'"
                   class="mr-2 mb-2"
@@ -607,13 +609,13 @@ onMounted(() => {
               </div>
             </div>
             <div v-else>
-              <p>No permissions found for this role.</p>
+              <p>{{ t('pages.roles.noPermissionsFound') }}</p>
             </div>
           </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="showPermissionsDialog = false">Close</v-btn>
+          <v-btn @click="showPermissionsDialog = false">{{ t('common.actions.close') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

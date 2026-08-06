@@ -5,6 +5,7 @@ import type { FileItem } from '~/composables/useFiles';
 
 definePageMeta({ middleware: 'auth' });
 
+const { t } = useI18n();
 const { can } = usePermissions();
 const { files, loading, uploading, error, pagination, loadFiles, uploadFile, deleteFile, formatSize, mimeIcon, mimeColor } = useFiles();
 
@@ -115,9 +116,9 @@ const handleDelete = async () => {
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
           <div>
-            <h1 class="text-h4 font-weight-bold">Files</h1>
+            <h1 class="text-h4 font-weight-bold">{{ t('pages.files.title') }}</h1>
             <p class="text-body-1 text-medium-emphasis">
-              Manage uploaded files — {{ pagination.total }} total
+              {{ t('pages.files.subtitle', { count: pagination.total }) }}
             </p>
           </div>
           <div class="d-flex gap-3 align-center">
@@ -132,7 +133,7 @@ const handleDelete = async () => {
               :loading="uploading"
               @click="fileInputRef?.click()"
             >
-              Upload
+              {{ t('pages.files.upload') }}
             </v-btn>
             <input ref="fileInputRef" type="file" multiple style="display:none" @change="onFileInputChange" />
           </div>
@@ -143,7 +144,7 @@ const handleDelete = async () => {
     <!-- Permission denied -->
     <v-row v-if="!can('file-read')">
       <v-col cols="12">
-        <v-alert type="warning" variant="tonal">You don't have permission to view files.</v-alert>
+        <v-alert type="warning" variant="tonal">{{ t('pages.files.noPermission') }}</v-alert>
       </v-col>
     </v-row>
 
@@ -172,10 +173,10 @@ const handleDelete = async () => {
           <UiChildCard>
             <div class="d-flex flex-column align-center py-16 text-medium-emphasis">
               <v-icon size="64" class="mb-4">mdi-folder-open-outline</v-icon>
-              <p class="text-h6">No files yet</p>
-              <p class="text-body-2 mt-1">Upload your first file to get started.</p>
+              <p class="text-h6">{{ t('pages.files.noFilesYet') }}</p>
+              <p class="text-body-2 mt-1">{{ t('pages.files.noFilesHint') }}</p>
               <v-btn v-if="can('file-upload')" color="primary" class="mt-4" prepend-icon="mdi-upload" @click="fileInputRef?.click()">
-                Upload File
+                {{ t('pages.files.uploadFile') }}
               </v-btn>
             </div>
           </UiChildCard>
@@ -234,10 +235,10 @@ const handleDelete = async () => {
             <v-table density="comfortable">
               <thead>
                 <tr>
-                  <th>File</th>
-                  <th>Size</th>
-                  <th>Type</th>
-                  <th>Uploaded</th>
+                  <th>{{ t('pages.files.tableFile') }}</th>
+                  <th>{{ t('pages.files.tableSize') }}</th>
+                  <th>{{ t('pages.files.tableType') }}</th>
+                  <th>{{ t('pages.files.tableUploaded') }}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -291,14 +292,14 @@ const handleDelete = async () => {
     <!-- Delete confirmation dialog -->
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card rounded="xl">
-        <v-card-title class="text-h6 pa-6 pb-3">Delete file?</v-card-title>
+        <v-card-title class="text-h6 pa-6 pb-3">{{ t('pages.files.deleteDialogTitle') }}</v-card-title>
         <v-card-text class="pa-6 pt-0 text-medium-emphasis">
-          This action cannot be undone.
+          {{ t('pages.files.deleteDialogBody') }}
         </v-card-text>
         <v-card-actions class="pa-4 pt-0">
           <v-spacer />
-          <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
-          <v-btn color="error" variant="flat" @click="handleDelete">Delete</v-btn>
+          <v-btn variant="text" @click="deleteDialog = false">{{ t('common.actions.cancel') }}</v-btn>
+          <v-btn color="error" variant="flat" @click="handleDelete">{{ t('common.actions.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -352,8 +353,8 @@ const handleDelete = async () => {
             <!-- No preview available -->
             <div v-else class="d-flex flex-column align-center justify-center py-16 text-medium-emphasis">
               <v-icon size="64" class="mb-4">{{ mimeIcon(preview.mime) }}</v-icon>
-              <p class="text-h6">No preview available</p>
-              <p class="text-body-2 mt-1">Download the file to open it.</p>
+              <p class="text-h6">{{ t('pages.files.noPreview') }}</p>
+              <p class="text-body-2 mt-1">{{ t('pages.files.noPreviewHint') }}</p>
             </div>
           </template>
 
@@ -370,7 +371,7 @@ const handleDelete = async () => {
             variant="tonal"
             color="primary"
           >
-            Download
+            {{ t('common.actions.download') }}
           </v-btn>
         </v-card-actions>
       </v-card>

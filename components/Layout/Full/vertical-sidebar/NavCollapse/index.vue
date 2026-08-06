@@ -1,6 +1,7 @@
 <script setup>
 import { Icon } from "@iconify/vue";
 const props = defineProps({ item: Object, level: Number });
+const { t } = useI18n();
 
 // Verificar permissões
 const { hasPermission, isSuperAdmin } = usePermissions();
@@ -63,7 +64,7 @@ const shouldShowItem = computed(() => {
           </template>
           <!---Title  -->
           <v-list-item-title class="text-subtitle-1 font-weight-medium">{{
-            item.title
+            item.title ? t(item.title) : ''
           }}</v-list-item-title>
           <!---If Caption-->
           <v-list-item-subtitle

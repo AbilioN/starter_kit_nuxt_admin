@@ -6,6 +6,8 @@ definePageMeta({
   middleware: 'auth'
 });
 
+const { t } = useI18n();
+
 // Obter parâmetros da rota
 const route = useRoute();
 const modelType = decodeURIComponent(route.params.type as string);
@@ -19,9 +21,9 @@ const modelId = Number(route.params.id);
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
           <div>
-            <h1 class="text-h4 font-weight-bold">Histórico do Modelo</h1>
+            <h1 class="text-h4 font-weight-bold">{{ t('pages.auditModel.title') }}</h1>
             <p class="text-body-1 text-medium-emphasis">
-              Visualize todo o histórico de mudanças deste registro
+              {{ t('pages.auditModel.subtitle') }}
             </p>
           </div>
           <v-btn
@@ -29,7 +31,7 @@ const modelId = Number(route.params.id);
             prepend-icon="mdi-arrow-left"
             @click="$router.back()"
           >
-            Voltar
+            {{ t('common.actions.back') }}
           </v-btn>
         </div>
       </v-col>

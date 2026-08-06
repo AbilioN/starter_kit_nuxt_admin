@@ -8,6 +8,8 @@ definePageMeta({
   middleware: 'auth'
 });
 
+const { t } = useI18n();
+
 // Usar o composable de auditoria
 const {
   logs,
@@ -47,28 +49,28 @@ const selectedLogId = ref<number | null>(null);
 const selectedLogDetails = ref<any>(null);
 
 // Opções de filtros
-const actionOptions = [
-  { value: '', label: 'Todas as ações' },
-  { value: 'created', label: 'Criado' },
-  { value: 'updated', label: 'Atualizado' },
-  { value: 'deleted', label: 'Deletado' },
-  { value: 'login', label: 'Login' },
-  { value: 'viewed', label: 'Visualizado' }
-];
+const actionOptions = computed(() => [
+  { value: '', label: t('pages.audit.actionAll') },
+  { value: 'created', label: t('pages.audit.actionCreated') },
+  { value: 'updated', label: t('pages.audit.actionUpdated') },
+  { value: 'deleted', label: t('pages.audit.actionDeleted') },
+  { value: 'login', label: t('pages.audit.actionLogin') },
+  { value: 'viewed', label: t('pages.audit.actionViewed') }
+]);
 
-const modelTypeOptions = [
-  { value: '', label: 'Todos os modelos' },
+const modelTypeOptions = computed(() => [
+  { value: '', label: t('pages.audit.modelAll') },
   { value: 'App\\Models\\User', label: 'User' },
   { value: 'App\\Models\\Admin', label: 'Admin' },
   { value: 'App\\Models\\Role', label: 'Role' },
   { value: 'App\\Models\\Permission', label: 'Permission' }
-];
+]);
 
-const userTypeOptions = [
-  { value: '', label: 'Todos os tipos' },
+const userTypeOptions = computed(() => [
+  { value: '', label: t('pages.audit.userTypeAll') },
   { value: 'Admin', label: 'Admin' },
   { value: 'User', label: 'User' }
-];
+]);
 
 // Função para aplicar filtros
 const applyFilters = () => {
@@ -137,9 +139,9 @@ onMounted(() => {
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
           <div>
-            <h1 class="text-h4 font-weight-bold">Auditoria</h1>
+            <h1 class="text-h4 font-weight-bold">{{ t('pages.audit.title') }}</h1>
             <p class="text-body-1 text-medium-emphasis">
-              Visualize todos os logs de auditoria do sistema
+              {{ t('pages.audit.subtitle') }}
             </p>
           </div>
         </div>
@@ -149,7 +151,7 @@ onMounted(() => {
     <!-- Filtros -->
     <v-row class="mb-6">
       <v-col cols="12">
-        <UiChildCard title="Filtros">
+        <UiChildCard :title="t('pages.audit.filters')">
           <v-row>
             <v-col cols="12" md="3">
               <v-select
@@ -157,7 +159,7 @@ onMounted(() => {
                 :items="actionOptions"
                 item-title="label"
                 item-value="value"
-                label="Ação"
+                :label="t('pages.audit.action')"
                 variant="outlined"
                 density="compact"
                 clearable
@@ -169,7 +171,7 @@ onMounted(() => {
                 :items="modelTypeOptions"
                 item-title="label"
                 item-value="value"
-                label="Modelo"
+                :label="t('pages.audit.model')"
                 variant="outlined"
                 density="compact"
                 clearable
@@ -181,7 +183,7 @@ onMounted(() => {
                 :items="userTypeOptions"
                 item-title="label"
                 item-value="value"
-                label="Tipo de Usuário"
+                :label="t('pages.audit.userType')"
                 variant="outlined"
                 density="compact"
                 clearable
@@ -190,7 +192,7 @@ onMounted(() => {
             <v-col cols="12" md="3">
               <v-text-field
                 v-model="filters.tags"
-                label="Tags (separadas por vírgula)"
+                :label="t('pages.audit.tagsLabel')"
                 variant="outlined"
                 density="compact"
                 clearable
@@ -202,7 +204,7 @@ onMounted(() => {
             <v-col cols="12" md="3">
               <v-text-field
                 v-model="filters.date_from"
-                label="Data Inicial"
+                :label="t('pages.audit.dateFrom')"
                 type="date"
                 variant="outlined"
                 density="compact"
@@ -212,7 +214,7 @@ onMounted(() => {
             <v-col cols="12" md="3">
               <v-text-field
                 v-model="filters.date_to"
-                label="Data Final"
+                :label="t('pages.audit.dateTo')"
                 type="date"
                 variant="outlined"
                 density="compact"
@@ -223,7 +225,7 @@ onMounted(() => {
               <v-select
                 v-model="filters.per_page"
                 :items="[10, 20, 50, 100]"
-                label="Itens por página"
+                :label="t('pages.audit.perPage')"
                 variant="outlined"
                 density="compact"
               />
@@ -235,7 +237,7 @@ onMounted(() => {
                 prepend-icon="mdi-filter"
                 block
               >
-                Aplicar Filtros
+                {{ t('pages.audit.applyFilters') }}
               </v-btn>
             </v-col>
           </v-row>
@@ -247,14 +249,14 @@ onMounted(() => {
                   @click="clearFilters"
                   prepend-icon="mdi-refresh"
                 >
-                  Limpar Filtros
+                  {{ t('common.actions.clearFilters') }}
                 </v-btn>
                 <v-chip
                   color="primary"
                   variant="tonal"
                   class="ml-auto"
                 >
-                  {{ logsCount }} logs encontrados
+                  {{ t('pages.audit.logsFound', { count: logsCount }) }}
                 </v-chip>
               </div>
             </v-col>
@@ -288,17 +290,17 @@ onMounted(() => {
     <!-- Tabela de Logs -->
     <v-row v-else>
       <v-col cols="12">
-        <UiChildCard title="Logs de Auditoria">
+        <UiChildCard :title="t('pages.audit.listTitle')">
           <v-table fixed-header height="600px">
             <thead>
               <tr>
-                <th class="text-left">Data/Hora</th>
-                <th class="text-left">Usuário</th>
-                <th class="text-left">Ação</th>
-                <th class="text-left">Modelo</th>
-                <th class="text-left">Descrição</th>
-                <th class="text-left">Tags</th>
-                <th class="text-center">Ações</th>
+                <th class="text-left">{{ t('pages.audit.tableDateTime') }}</th>
+                <th class="text-left">{{ t('pages.audit.userSection') }}</th>
+                <th class="text-left">{{ t('pages.audit.action') }}</th>
+                <th class="text-left">{{ t('pages.audit.tableModel') }}</th>
+                <th class="text-left">{{ t('common.labels.description') }}</th>
+                <th class="text-left">{{ t('pages.audit.tableTags') }}</th>
+                <th class="text-center">{{ t('common.labels.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -356,7 +358,7 @@ onMounted(() => {
                       variant="text"
                       color="primary"
                       @click="viewLogDetails(log.id)"
-                      title="Ver Detalhes"
+                      :title="t('pages.audit.viewDetails')"
                     >
                       <v-icon>mdi-eye</v-icon>
                     </v-btn>
@@ -365,7 +367,7 @@ onMounted(() => {
               </tr>
               <tr v-if="logs.length === 0">
                 <td colspan="7" class="text-center py-8 text-medium-emphasis">
-                  Nenhum log encontrado
+                  {{ t('pages.audit.noLogsFound') }}
                 </td>
               </tr>
             </tbody>
@@ -374,7 +376,7 @@ onMounted(() => {
           <!-- Paginação -->
           <div v-if="pagination" class="d-flex align-center justify-space-between mt-4">
             <div class="text-body-2 text-medium-emphasis">
-              Mostrando {{ pagination.from }} a {{ pagination.to }} de {{ pagination.total }} logs
+              {{ t('pages.audit.showingRange', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
             </div>
             
             <div class="d-flex align-center gap-2">
@@ -395,7 +397,7 @@ onMounted(() => {
                 variant="text"
                 :disabled="!canGoPrev"
                 @click="handlePrevPage"
-                title="Página anterior"
+                :title="t('pages.audit.previousPage')"
               >
                 <v-icon>mdi-chevron-left</v-icon>
               </v-btn>
@@ -419,7 +421,7 @@ onMounted(() => {
                 variant="text"
                 :disabled="!canGoNext"
                 @click="handleNextPage"
-                title="Próxima página"
+                :title="t('pages.audit.nextPage')"
               >
                 <v-icon>mdi-chevron-right</v-icon>
               </v-btn>
@@ -434,7 +436,7 @@ onMounted(() => {
       <v-card v-if="selectedLogDetails">
         <v-card-title class="d-flex align-center justify-space-between">
           <div>
-            <div class="text-h5">Detalhes do Log de Auditoria</div>
+            <div class="text-h5">{{ t('pages.audit.detailsDialogTitle') }}</div>
             <div class="text-caption text-medium-emphasis">ID: {{ selectedLogDetails.id }}</div>
           </div>
           <v-btn
@@ -452,14 +454,14 @@ onMounted(() => {
           <!-- Informações Básicas -->
           <v-row class="mb-4">
             <v-col cols="12">
-              <h3 class="text-h6 mb-2">Informações Básicas</h3>
+              <h3 class="text-h6 mb-2">{{ t('pages.audit.basicInfo') }}</h3>
             </v-col>
             <v-col cols="12" md="6">
-              <div class="text-body-2 text-medium-emphasis">Data/Hora</div>
+              <div class="text-body-2 text-medium-emphasis">{{ t('pages.audit.tableDateTime') }}</div>
               <div class="text-body-1">{{ formatDate(selectedLogDetails.created_at) }}</div>
             </v-col>
             <v-col cols="12" md="6">
-              <div class="text-body-2 text-medium-emphasis">Ação</div>
+              <div class="text-body-2 text-medium-emphasis">{{ t('pages.audit.action') }}</div>
               <v-chip
                 :color="getActionColor(selectedLogDetails.action)"
                 variant="tonal"
@@ -473,14 +475,14 @@ onMounted(() => {
           <!-- Usuário -->
           <v-row class="mb-4">
             <v-col cols="12">
-              <h3 class="text-h6 mb-2">Usuário</h3>
+              <h3 class="text-h6 mb-2">{{ t('pages.audit.userSection') }}</h3>
             </v-col>
             <v-col cols="12" md="4">
-              <div class="text-body-2 text-medium-emphasis">Nome</div>
+              <div class="text-body-2 text-medium-emphasis">{{ t('common.labels.name') }}</div>
               <div class="text-body-1">{{ selectedLogDetails.user.name }}</div>
             </v-col>
             <v-col cols="12" md="4">
-              <div class="text-body-2 text-medium-emphasis">Tipo</div>
+              <div class="text-body-2 text-medium-emphasis">{{ t('common.labels.type') }}</div>
               <div class="text-body-1">{{ selectedLogDetails.user.type }}</div>
             </v-col>
             <v-col cols="12" md="4">
@@ -492,10 +494,10 @@ onMounted(() => {
           <!-- Modelo -->
           <v-row class="mb-4">
             <v-col cols="12">
-              <h3 class="text-h6 mb-2">Modelo</h3>
+              <h3 class="text-h6 mb-2">{{ t('pages.audit.modelSection') }}</h3>
             </v-col>
             <v-col cols="12" md="6">
-              <div class="text-body-2 text-medium-emphasis">Tipo</div>
+              <div class="text-body-2 text-medium-emphasis">{{ t('common.labels.type') }}</div>
               <div class="text-body-1">{{ selectedLogDetails.model.type }}</div>
             </v-col>
             <v-col cols="12" md="6">
@@ -507,7 +509,7 @@ onMounted(() => {
           <!-- Descrição -->
           <v-row class="mb-4" v-if="selectedLogDetails.description">
             <v-col cols="12">
-              <h3 class="text-h6 mb-2">Descrição</h3>
+              <h3 class="text-h6 mb-2">{{ t('pages.audit.descriptionSection') }}</h3>
               <div class="text-body-1">{{ selectedLogDetails.description }}</div>
             </v-col>
           </v-row>
@@ -515,7 +517,7 @@ onMounted(() => {
           <!-- Tags -->
           <v-row class="mb-4" v-if="selectedLogDetails.tags && selectedLogDetails.tags.length > 0">
             <v-col cols="12">
-              <h3 class="text-h6 mb-2">Tags</h3>
+              <h3 class="text-h6 mb-2">{{ t('pages.audit.tagsSection') }}</h3>
               <div class="d-flex gap-2 flex-wrap">
                 <v-chip
                   v-for="tag in selectedLogDetails.tags"
@@ -532,16 +534,16 @@ onMounted(() => {
           <!-- Mudanças -->
           <v-row class="mb-4" v-if="selectedLogDetails.changes">
             <v-col cols="12">
-              <h3 class="text-h6 mb-2">Mudanças</h3>
+              <h3 class="text-h6 mb-2">{{ t('pages.audit.changesSection') }}</h3>
               <v-row>
                 <v-col cols="12" md="6" v-if="selectedLogDetails.changes.old">
-                  <div class="text-body-2 text-medium-emphasis mb-2">Valores Anteriores</div>
+                  <div class="text-body-2 text-medium-emphasis mb-2">{{ t('pages.audit.previousValues') }}</div>
                   <v-card variant="outlined" class="pa-3">
                     <pre class="text-body-2" style="white-space: pre-wrap; word-break: break-word;">{{ JSON.stringify(selectedLogDetails.changes.old, null, 2) }}</pre>
                   </v-card>
                 </v-col>
                 <v-col cols="12" md="6" v-if="selectedLogDetails.changes.new">
-                  <div class="text-body-2 text-medium-emphasis mb-2">Valores Novos</div>
+                  <div class="text-body-2 text-medium-emphasis mb-2">{{ t('pages.audit.newValues') }}</div>
                   <v-card variant="outlined" class="pa-3">
                     <pre class="text-body-2" style="white-space: pre-wrap; word-break: break-word;">{{ JSON.stringify(selectedLogDetails.changes.new, null, 2) }}</pre>
                   </v-card>
@@ -553,14 +555,14 @@ onMounted(() => {
           <!-- Contexto -->
           <v-row class="mb-4" v-if="selectedLogDetails.context">
             <v-col cols="12">
-              <h3 class="text-h6 mb-2">Contexto</h3>
+              <h3 class="text-h6 mb-2">{{ t('pages.audit.contextSection') }}</h3>
               <v-row>
                 <v-col cols="12" md="6" v-if="selectedLogDetails.context.ip">
                   <div class="text-body-2 text-medium-emphasis">IP</div>
                   <div class="text-body-1">{{ selectedLogDetails.context.ip }}</div>
                 </v-col>
                 <v-col cols="12" md="6" v-if="selectedLogDetails.context.method">
-                  <div class="text-body-2 text-medium-emphasis">Método HTTP</div>
+                  <div class="text-body-2 text-medium-emphasis">{{ t('pages.audit.httpMethod') }}</div>
                   <div class="text-body-1">{{ selectedLogDetails.context.method }}</div>
                 </v-col>
                 <v-col cols="12" v-if="selectedLogDetails.context.url">
@@ -578,7 +580,7 @@ onMounted(() => {
           <!-- Metadata -->
           <v-row v-if="selectedLogDetails.metadata">
             <v-col cols="12">
-              <h3 class="text-h6 mb-2">Metadata</h3>
+              <h3 class="text-h6 mb-2">{{ t('pages.audit.metadataSection') }}</h3>
               <v-card variant="outlined" class="pa-3">
                 <pre class="text-body-2" style="white-space: pre-wrap; word-break: break-word;">{{ JSON.stringify(selectedLogDetails.metadata, null, 2) }}</pre>
               </v-card>
@@ -594,7 +596,7 @@ onMounted(() => {
             color="primary"
             @click="showLogDetailsDialog = false"
           >
-            Fechar
+            {{ t('common.actions.close') }}
           </v-btn>
         </v-card-actions>
       </v-card>

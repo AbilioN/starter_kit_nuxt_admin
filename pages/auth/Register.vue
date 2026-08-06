@@ -3,6 +3,8 @@
 definePageMeta({
   layout: "blank",
 });
+
+const { t } = useI18n();
 </script>
 <template>
     <div class="authentication">
@@ -17,9 +19,9 @@ definePageMeta({
                                 </div>
                                 <AuthRegisterForm />
                                 <h6 class="text-subtitle-1  text-grey100 d-flex justify-center align-center mt-3">
-                                    Already have an Account?
+                                    {{ t('auth.register.alreadyHaveAccount') }}
                                     <v-btn variant="plain" to="/auth/login"
-                                        class="text-primary text-body-1 opacity-1 font-weight-medium pl-2">Sign In</v-btn>
+                                        class="text-primary text-body-1 opacity-1 font-weight-medium pl-2">{{ t('auth.register.signIn') }}</v-btn>
                                 </h6>
                             </v-card-item>
                         </v-card>

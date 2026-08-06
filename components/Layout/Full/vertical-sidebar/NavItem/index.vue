@@ -1,6 +1,7 @@
 <script setup>
 import { Icon } from '@iconify/vue';
 const props = defineProps({ item: Object, level: Number });
+const { t } = useI18n();
 
 // Verificar permissões
 const { hasPermission, isSuperAdmin } = usePermissions();
@@ -37,7 +38,7 @@ const shouldShowItem = computed(() => {
                     </span>
                 </div>
             </template>
-            <v-list-item-title class="text-subtitle-1 font-weight-medium" color="primary">{{item.title }}
+            <v-list-item-title class="text-subtitle-1 font-weight-medium" color="primary">{{ item.title ? t(item.title) : '' }}
 
                 <span v-if="item.children">
                 <span v-if="item.chip" class="ps-3">

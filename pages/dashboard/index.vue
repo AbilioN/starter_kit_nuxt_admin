@@ -6,6 +6,7 @@ import BarChart from '@/components/charts/BarChart.vue';
 
 definePageMeta({ middleware: 'auth' });
 
+const { t } = useI18n();
 const { user } = useAuth();
 const { metrics, loading, error, loadMetrics, formatBytes } = useDashboard();
 
@@ -43,9 +44,9 @@ const messagesSeries = computed(() => [{
   <div>
     <v-row class="mb-4">
       <v-col cols="12">
-        <h1 class="text-h4 font-weight-bold">Dashboard</h1>
+        <h1 class="text-h4 font-weight-bold">{{ t('pages.dashboard.title') }}</h1>
         <p class="text-body-1 text-medium-emphasis">
-          Welcome, {{ user?.name || 'User' }}!
+          {{ t('pages.dashboard.welcome', { name: user?.name || 'User' }) }}
         </p>
       </v-col>
     </v-row>
@@ -75,8 +76,8 @@ const messagesSeries = computed(() => [{
               </v-avatar>
               <div>
                 <div class="text-h4 font-weight-bold">{{ metrics.users.total.toLocaleString() }}</div>
-                <div class="text-body-2 text-medium-emphasis">Total Users</div>
-                <div class="text-caption text-success">+{{ metrics.users.new_this_week }} this week</div>
+                <div class="text-body-2 text-medium-emphasis">{{ t('pages.dashboard.totalUsers') }}</div>
+                <div class="text-caption text-success">{{ t('pages.dashboard.thisWeek', { count: metrics.users.new_this_week }) }}</div>
               </div>
             </div>
           </UiChildCard>
@@ -90,7 +91,7 @@ const messagesSeries = computed(() => [{
               </v-avatar>
               <div>
                 <div class="text-h4 font-weight-bold">{{ metrics.admins.total }}</div>
-                <div class="text-body-2 text-medium-emphasis">Admins</div>
+                <div class="text-body-2 text-medium-emphasis">{{ t('pages.dashboard.admins') }}</div>
               </div>
             </div>
           </UiChildCard>
@@ -104,8 +105,8 @@ const messagesSeries = computed(() => [{
               </v-avatar>
               <div>
                 <div class="text-h4 font-weight-bold">{{ metrics.chats.total.toLocaleString() }}</div>
-                <div class="text-body-2 text-medium-emphasis">Chats</div>
-                <div class="text-caption text-medium-emphasis">{{ metrics.chats.messages_this_week }} msg this week</div>
+                <div class="text-body-2 text-medium-emphasis">{{ t('pages.dashboard.chats') }}</div>
+                <div class="text-caption text-medium-emphasis">{{ t('pages.dashboard.msgThisWeek', { count: metrics.chats.messages_this_week }) }}</div>
               </div>
             </div>
           </UiChildCard>
@@ -119,8 +120,8 @@ const messagesSeries = computed(() => [{
               </v-avatar>
               <div>
                 <div class="text-h4 font-weight-bold">{{ metrics.storage.total_files }}</div>
-                <div class="text-body-2 text-medium-emphasis">Files</div>
-                <div class="text-caption text-medium-emphasis">{{ formatBytes(metrics.storage.bytes_used) }} used</div>
+                <div class="text-body-2 text-medium-emphasis">{{ t('pages.dashboard.files') }}</div>
+                <div class="text-caption text-medium-emphasis">{{ t('pages.dashboard.used', { size: formatBytes(metrics.storage.bytes_used) }) }}</div>
               </div>
             </div>
           </UiChildCard>
@@ -130,7 +131,7 @@ const messagesSeries = computed(() => [{
       <!-- Charts row -->
       <v-row>
         <v-col cols="12" lg="6">
-          <UiChildCard title="New Users (last 7 days)">
+          <UiChildCard :title="t('pages.dashboard.newUsersChart')">
             <apexchart
               v-if="newUsersSeries[0].data.length"
               type="area"
@@ -138,12 +139,12 @@ const messagesSeries = computed(() => [{
               :options="newUsersChartOptions"
               :series="newUsersSeries"
             />
-            <div v-else class="text-center text-medium-emphasis py-8">No data yet</div>
+            <div v-else class="text-center text-medium-emphasis py-8">{{ t('pages.dashboard.noDataYet') }}</div>
           </UiChildCard>
         </v-col>
 
         <v-col cols="12" lg="6">
-          <UiChildCard title="Messages Sent (last 7 days)">
+          <UiChildCard :title="t('pages.dashboard.messagesChart')">
             <apexchart
               v-if="messagesSeries[0].data.length"
               type="bar"
@@ -151,7 +152,7 @@ const messagesSeries = computed(() => [{
               :options="messagesChartOptions"
               :series="messagesSeries"
             />
-            <div v-else class="text-center text-medium-emphasis py-8">No data yet</div>
+            <div v-else class="text-center text-medium-emphasis py-8">{{ t('pages.dashboard.noDataYet') }}</div>
           </UiChildCard>
         </v-col>
       </v-row>
@@ -159,7 +160,7 @@ const messagesSeries = computed(() => [{
       <!-- Audit action distribution -->
       <v-row v-if="Object.keys(metrics.audit.action_distribution).length > 0">
         <v-col cols="12" md="6">
-          <UiChildCard title="Audit Actions (last 7 days)">
+          <UiChildCard :title="t('pages.dashboard.auditActionsChart')">
             <v-list density="compact">
               <v-list-item
                 v-for="(count, action) in metrics.audit.action_distribution"
@@ -178,13 +179,13 @@ const messagesSeries = computed(() => [{
         </v-col>
 
         <v-col cols="12" md="6">
-          <UiChildCard title="This Month">
+          <UiChildCard :title="t('pages.dashboard.thisMonth')">
             <v-list density="compact">
               <v-list-item class="px-0">
                 <template #prepend>
                   <v-icon color="primary" class="mr-3">mdi-account-plus-outline</v-icon>
                 </template>
-                <v-list-item-title class="text-body-2">New users this month</v-list-item-title>
+                <v-list-item-title class="text-body-2">{{ t('pages.dashboard.newUsersThisMonth') }}</v-list-item-title>
                 <template #append>
                   <span class="font-weight-bold">{{ metrics.users.new_this_month }}</span>
                 </template>
@@ -193,7 +194,7 @@ const messagesSeries = computed(() => [{
                 <template #prepend>
                   <v-icon color="success" class="mr-3">mdi-message-text-outline</v-icon>
                 </template>
-                <v-list-item-title class="text-body-2">Messages this week</v-list-item-title>
+                <v-list-item-title class="text-body-2">{{ t('pages.dashboard.messagesThisWeek') }}</v-list-item-title>
                 <template #append>
                   <span class="font-weight-bold">{{ metrics.chats.messages_this_week }}</span>
                 </template>
@@ -202,7 +203,7 @@ const messagesSeries = computed(() => [{
                 <template #prepend>
                   <v-icon color="info" class="mr-3">mdi-harddisk</v-icon>
                 </template>
-                <v-list-item-title class="text-body-2">Storage used</v-list-item-title>
+                <v-list-item-title class="text-body-2">{{ t('pages.dashboard.storageUsed') }}</v-list-item-title>
                 <template #append>
                   <span class="font-weight-bold">{{ formatBytes(metrics.storage.bytes_used) }}</span>
                 </template>

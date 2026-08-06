@@ -6,6 +6,7 @@ definePageMeta({
   middleware: 'auth',
 });
 
+const { t } = useI18n();
 const { can } = usePermissions();
 const {
   featureFlags,
@@ -46,9 +47,9 @@ onMounted(() => loadSettings('features'));
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
           <div>
-            <h1 class="text-h4 font-weight-bold">Feature Flags</h1>
+            <h1 class="text-h4 font-weight-bold">{{ t('pages.featureFlags.title') }}</h1>
             <p class="text-body-1 text-medium-emphasis">
-              Enable or disable application features in real time
+              {{ t('pages.featureFlags.subtitle') }}
             </p>
           </div>
           <v-btn
@@ -56,7 +57,7 @@ onMounted(() => loadSettings('features'));
             prepend-icon="mdi-cog-outline"
             :to="'/settings'"
           >
-            All Settings
+            {{ t('pages.featureFlags.allSettings') }}
           </v-btn>
         </div>
       </v-col>
@@ -66,7 +67,7 @@ onMounted(() => loadSettings('features'));
     <v-row v-if="!can('setting-read')">
       <v-col cols="12">
         <v-alert type="warning" variant="tonal">
-          You don't have permission to view settings.
+          {{ t('pages.featureFlags.noPermission') }}
         </v-alert>
       </v-col>
     </v-row>
@@ -93,14 +94,14 @@ onMounted(() => loadSettings('features'));
       <!-- Flags list -->
       <v-row v-else>
         <v-col cols="12">
-          <UiChildCard title="Feature Flags">
+          <UiChildCard :title="t('pages.featureFlags.title')">
             <!-- Empty state -->
             <div
               v-if="featureFlags.length === 0"
               class="d-flex flex-column align-center justify-center py-12 text-medium-emphasis"
             >
               <v-icon size="64" class="mb-4">mdi-flag-off-outline</v-icon>
-              <p>No feature flags configured.</p>
+              <p>{{ t('pages.featureFlags.noFlags') }}</p>
             </div>
 
             <!-- Flags -->
@@ -136,7 +137,7 @@ onMounted(() => loadSettings('features'));
                     size="small"
                     class="mr-4"
                   >
-                    {{ isEnabled(flag.value) ? 'Enabled' : 'Disabled' }}
+                    {{ isEnabled(flag.value) ? t('pages.featureFlags.enabled') : t('pages.featureFlags.disabled') }}
                   </v-chip>
 
                   <v-switch
@@ -154,7 +155,7 @@ onMounted(() => loadSettings('features'));
             <template v-if="!can('setting-update') && featureFlags.length > 0">
               <v-divider class="my-4" />
               <v-alert type="info" variant="tonal" density="compact">
-                You have read-only access to feature flags.
+                {{ t('pages.featureFlags.readOnlyNotice') }}
               </v-alert>
             </template>
           </UiChildCard>

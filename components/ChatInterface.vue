@@ -18,7 +18,7 @@
           <div>
             <h3 class="text-h6">{{ chatTitle }}</h3>
             <p v-if="currentChat" class="text-caption text-grey">
-              {{ currentChat.type === 'private' ? 'Chat privado' : 'Chat em grupo' }}
+              {{ currentChat.type === 'private' ? t('components.chatInterface.privateChat') : t('components.chatInterface.groupChat') }}
             </p>
             <p v-else-if="initialUser" class="text-caption text-grey">
               {{ initialUser.email }}
@@ -40,7 +40,7 @@
         <v-text-field
           v-model="userSearchQuery"
           @input="onUserSearch"
-          placeholder="Buscar usuário para novo chat..."
+          :placeholder="t('components.chatInterface.searchUserPlaceholder')"
           prepend-inner-icon="mdi-magnify"
           variant="outlined"
           density="compact"
@@ -77,8 +77,8 @@
 
       <div v-else-if="chats.length === 0" class="text-center pa-8">
         <v-icon size="64" color="grey" class="mb-4">mdi-chat-outline</v-icon>
-        <h3 class="text-h6 mb-2">Nenhum chat</h3>
-        <p class="text-body-2 text-grey">Busque um usuário acima para iniciar.</p>
+        <h3 class="text-h6 mb-2">{{ t('components.chatInterface.noChats') }}</h3>
+        <p class="text-body-2 text-grey">{{ t('components.chatInterface.noChatsHint') }}</p>
       </div>
 
       <div v-else class="chats">
@@ -107,7 +107,7 @@
               <span class="text-caption text-grey">{{ formatTime(chat.last_message?.created_at) }}</span>
             </div>
             <p class="text-body-2 text-grey conversation-preview">
-              {{ chat.last_message?.content || 'Nenhuma mensagem ainda' }}
+              {{ chat.last_message?.content || t('pages.chats.noMessages') }}
             </p>
           </div>
         </div>
@@ -122,7 +122,7 @@
         </div>
         <div v-else-if="messages.length === 0" class="text-center pa-8">
           <v-icon size="64" color="grey" class="mb-4">mdi-message-outline</v-icon>
-          <p class="text-body-2 text-grey">Seja o primeiro a enviar uma mensagem!</p>
+          <p class="text-body-2 text-grey">{{ t('components.chatInterface.noMessagesYet') }}</p>
         </div>
         <div v-else class="messages-list">
           <div
@@ -135,27 +135,27 @@
             <div v-if="message.reply" class="reply-preview" :class="{ 'reply-own': message.isOwn }">
               <v-icon size="12" class="mr-1">mdi-reply</v-icon>
               <span class="text-caption reply-text">
-                {{ message.reply.content ?? 'Mensagem apagada' }}
+                {{ message.reply.content ?? t('components.chatInterface.messageDeleted') }}
               </span>
             </div>
 
             <div class="message-bubble" :class="{ 'bubble-own': message.isOwn }">
               <div class="message-header">
-                <span class="message-author">{{ message.isOwn ? 'Você' : (message.user_name || 'Usuário') }}</span>
+                <span class="message-author">{{ message.isOwn ? t('components.chatInterface.you') : (message.user_name || t('components.chatInterface.user')) }}</span>
                 <span class="message-time">{{ message.time }}</span>
               </div>
 
               <!-- Deleted message -->
               <div v-if="message.content === null" class="message-deleted">
                 <v-icon size="14" class="mr-1">mdi-minus-circle-outline</v-icon>
-                <span class="text-caption fst-italic">Mensagem apagada</span>
+                <span class="text-caption fst-italic">{{ t('components.chatInterface.messageDeleted') }}</span>
               </div>
               <div v-else class="message-text">{{ message.content }}</div>
 
               <!-- Edited label + read ticks -->
               <div class="message-meta">
-                <span v-if="message.edited_at" class="text-caption edited-label">editado</span>
-                <span v-if="message.isOwn" class="read-ticks" :title="message.is_read ? 'Lido' : 'Enviado'">
+                <span v-if="message.edited_at" class="text-caption edited-label">{{ t('components.chatInterface.edited') }}</span>
+                <span v-if="message.isOwn" class="read-ticks" :title="message.is_read ? t('components.chatInterface.read') : t('components.chatInterface.sent')">
                   <v-icon size="12" :color="message.is_read ? '#4fc3f7' : 'rgba(255,255,255,0.6)'">
                     {{ message.is_read ? 'mdi-check-all' : 'mdi-check' }}
                   </v-icon>
@@ -188,7 +188,7 @@
       <!-- Typing indicator -->
       <div v-if="typingUserNames.length > 0" class="typing-indicator">
         <v-icon size="14" class="mr-1">mdi-dots-horizontal</v-icon>
-        {{ typingUserNames.join(', ') }} {{ typingUserNames.length === 1 ? 'está digitando...' : 'estão digitando...' }}
+        {{ typingUserNames.join(', ') }} {{ typingUserNames.length === 1 ? t('components.chatInterface.isTyping') : t('components.chatInterface.areTyping') }}
       </div>
 
       <!-- Input de Mensagem -->
@@ -205,7 +205,7 @@
         <!-- Edit banner -->
         <div v-if="editingMessage" class="edit-banner">
           <v-icon size="14" class="mr-1">mdi-pencil</v-icon>
-          <span class="text-caption">Editando mensagem</span>
+          <span class="text-caption">{{ t('components.chatInterface.editingMessage') }}</span>
           <v-btn icon size="x-small" variant="text" class="ml-auto" @click="cancelEdit">
             <v-icon size="14">mdi-close</v-icon>
           </v-btn>
@@ -222,7 +222,7 @@
               ref="inputField"
               @keydown.enter.prevent="handleSendMessage"
               @input="onTyping"
-              :placeholder="replyTo ? 'Digite uma resposta...' : editingMessage ? 'Editar mensagem...' : 'Digite sua mensagem...'"
+              :placeholder="replyTo ? t('components.chatInterface.replyPlaceholder') : editingMessage ? t('components.chatInterface.editPlaceholder') : t('components.chatInterface.messagePlaceholder')"
               variant="outlined"
               density="compact"
               hide-details
@@ -245,12 +245,12 @@
     <!-- Delete confirmation dialog -->
     <v-dialog v-model="deleteDialog" max-width="380">
       <v-card>
-        <v-card-title>Apagar mensagem?</v-card-title>
-        <v-card-text>Esta ação não pode ser desfeita.</v-card-text>
+        <v-card-title>{{ t('components.chatInterface.deleteDialogTitle') }}</v-card-title>
+        <v-card-text>{{ t('components.chatInterface.deleteDialogBody') }}</v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="deleteDialog = false">Cancelar</v-btn>
-          <v-btn color="error" @click="executeDelete">Apagar</v-btn>
+          <v-btn @click="deleteDialog = false">{{ t('common.actions.cancel') }}</v-btn>
+          <v-btn color="error" @click="executeDelete">{{ t('common.actions.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -260,6 +260,8 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue';
 import type { ChatMessage, Chat } from '~/types/chat';
+
+const { t } = useI18n();
 
 interface Props {
   initialUser?: Readonly<{ id: string | number; name: string; email: string }> | null;
@@ -311,8 +313,8 @@ const {
 
 const chatTitle = computed(() => {
   if (currentChat.value) return getChatDisplayName(currentChat.value);
-  if (props.initialUser) return `Chat com ${props.initialUser.name}`;
-  return 'Chat';
+  if (props.initialUser) return t('components.chatInterface.chatWith', { name: props.initialUser.name });
+  return t('components.chatInterface.chatDefaultTitle');
 });
 
 const closeChat = () => emit('close');
@@ -338,7 +340,7 @@ const handleSendMessage = async () => {
     }
     scrollToBottom();
   } catch (err) {
-    sendError.value = 'Erro ao enviar mensagem. Tente novamente.';
+    sendError.value = t('components.chatInterface.sendErrorGeneric');
     setTimeout(() => { sendError.value = ''; }, 3000);
   }
 };
@@ -370,7 +372,7 @@ const executeDelete = async () => {
   try {
     await deleteMessage(deletingMessageId.value);
   } catch {
-    sendError.value = 'Erro ao apagar mensagem.';
+    sendError.value = t('components.chatInterface.deleteErrorGeneric');
     setTimeout(() => { sendError.value = ''; }, 3000);
   }
   deletingMessageId.value = null;
@@ -417,7 +419,7 @@ const initializeChat = async () => {
       await loadChatMessages(chat.id);
     }
   } catch {
-    sendError.value = 'Erro ao inicializar chat.';
+    sendError.value = t('components.chatInterface.initErrorGeneric');
     setTimeout(() => { sendError.value = ''; }, 5000);
   } finally {
     isInitializing.value = false;

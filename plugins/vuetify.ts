@@ -2,7 +2,7 @@ import { createVuetify } from "vuetify";
 import "@mdi/font/css/materialdesignicons.css";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
-import PerfectScrollbarPlugin from "vue3-perfect-scrollbar";
+import { PerfectScrollbarPlugin } from "vue3-perfect-scrollbar";
 import VueApexCharts from "vue3-apexcharts";
 import VueTablerIcons from "vue-tabler-icons";
 import "@/assets/scss/style.scss";

@@ -7,6 +7,7 @@ definePageMeta({
   middleware: 'auth',
 });
 
+const { t } = useI18n();
 const { can } = usePermissions();
 const { user: admin } = useAuth();
 const {
@@ -30,13 +31,13 @@ const {
 const activeTab = ref('general');
 const tabs = computed(() => {
   const base = [
-    { key: 'general', label: 'General', icon: 'mdi-cog-outline' },
-    { key: 'email', label: 'Email', icon: 'mdi-email-outline' },
-    { key: 'storage', label: 'Storage', icon: 'mdi-harddisk' },
-    { key: 'features', label: 'Feature Flags', icon: 'mdi-flag-outline' },
+    { key: 'general', label: t('pages.settings.tabGeneral'), icon: 'mdi-cog-outline' },
+    { key: 'email', label: t('pages.settings.tabEmail'), icon: 'mdi-email-outline' },
+    { key: 'storage', label: t('pages.settings.tabStorage'), icon: 'mdi-harddisk' },
+    { key: 'features', label: t('pages.settings.tabFeatures'), icon: 'mdi-flag-outline' },
   ];
   if (admin.value?.is_tenant_owner) {
-    base.push({ key: 'tenant', label: 'Branding & Plan', icon: 'mdi-palette-outline' });
+    base.push({ key: 'tenant', label: t('pages.settings.tabBranding'), icon: 'mdi-palette-outline' });
   }
   return base;
 });
@@ -130,9 +131,9 @@ onMounted(() => loadSettings());
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
           <div>
-            <h1 class="text-h4 font-weight-bold">Settings</h1>
+            <h1 class="text-h4 font-weight-bold">{{ t('pages.settings.title') }}</h1>
             <p class="text-body-1 text-medium-emphasis">
-              Configure your application settings
+              {{ t('pages.settings.subtitle') }}
             </p>
           </div>
         </div>
@@ -143,7 +144,7 @@ onMounted(() => loadSettings());
     <v-row v-if="!can('setting-read')">
       <v-col cols="12">
         <v-alert type="warning" variant="tonal">
-          You don't have permission to view settings.
+          {{ t('pages.settings.noPermission') }}
         </v-alert>
       </v-col>
     </v-row>
@@ -160,12 +161,12 @@ onMounted(() => loadSettings());
       <!-- Tenant branding & subscription (tenant-owner only) -->
       <v-row v-if="activeTab === 'tenant'">
         <v-col cols="12" md="7">
-          <UiChildCard title="Branding">
+          <UiChildCard :title="t('pages.settings.brandingTitle')">
             <v-row>
               <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="brandingForm.theme_primary_color"
-                  label="Primary color"
+                  :label="t('pages.settings.primaryColor')"
                   placeholder="#112233"
                   variant="outlined"
                   density="comfortable"
@@ -178,7 +179,7 @@ onMounted(() => loadSettings());
               <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="brandingForm.theme_secondary_color"
-                  label="Secondary color"
+                  :label="t('pages.settings.secondaryColor')"
                   placeholder="#445566"
                   variant="outlined"
                   density="comfortable"
@@ -192,7 +193,7 @@ onMounted(() => loadSettings());
                 <input ref="logoInputRef" type="file" accept="image/*" style="display:none" @change="onLogoInputChange" />
                 <div class="d-flex align-center ga-3">
                   <v-btn variant="outlined" prepend-icon="mdi-image-outline" @click="logoInputRef?.click()">
-                    {{ logoFile ? logoFile.name : 'Choose Logo' }}
+                    {{ logoFile ? logoFile.name : t('pages.settings.chooseLogo') }}
                   </v-btn>
                   <img v-if="tenantTheme?.logo_url" :src="tenantTheme.logo_url" alt="Current logo" class="current-logo" />
                 </div>
@@ -205,18 +206,18 @@ onMounted(() => loadSettings());
               prepend-icon="mdi-content-save-outline"
               @click="saveBranding"
             >
-              Save Branding
+              {{ t('pages.settings.saveBranding') }}
             </v-btn>
           </UiChildCard>
         </v-col>
         <v-col cols="12" md="5">
-          <UiChildCard title="Subscription Plan">
+          <UiChildCard :title="t('pages.settings.subscriptionPlanTitle')">
             <p class="text-body-2 text-medium-emphasis mb-4">
-              There's no plan catalog available to tenant admins yet — enter the plan id directly.
+              {{ t('pages.settings.noPlanCatalog') }}
             </p>
             <v-text-field
               v-model="subscriptionPlanId"
-              label="Subscription plan id"
+              :label="t('pages.settings.subscriptionPlanId')"
               variant="outlined"
               density="comfortable"
               class="mb-4"
@@ -229,7 +230,7 @@ onMounted(() => loadSettings());
               prepend-icon="mdi-swap-horizontal"
               @click="saveSubscriptionPlan"
             >
-              Change Plan
+              {{ t('pages.settings.changePlan') }}
             </v-btn>
           </UiChildCard>
         </v-col>
@@ -256,14 +257,14 @@ onMounted(() => loadSettings());
       <!-- Settings form -->
       <v-row v-else>
         <v-col cols="12">
-          <UiChildCard :title="labelForGroup(activeTab) + ' Settings'">
+          <UiChildCard :title="labelForGroup(activeTab) + ' ' + t('pages.settings.settingsSuffix')">
             <!-- Empty state -->
             <div
               v-if="currentGroupSettings.length === 0"
               class="d-flex flex-column align-center justify-center py-12 text-medium-emphasis"
             >
               <v-icon size="64" class="mb-4">mdi-cog-off-outline</v-icon>
-              <p>No settings found for this group.</p>
+              <p>{{ t('pages.settings.noSettingsFound') }}</p>
             </div>
 
             <!-- Settings list -->
@@ -344,17 +345,17 @@ onMounted(() => loadSettings());
                   prepend-icon="mdi-content-save-outline"
                   @click="saveGroup"
                 >
-                  Save {{ labelForGroup(activeTab) }} Settings
+                  {{ t('pages.settings.saveGroupSettings', { group: labelForGroup(activeTab) }) }}
                 </v-btn>
                 <v-btn
                   variant="text"
                   :disabled="saving || !hasChanges"
                   @click="resetGroup"
                 >
-                  Discard Changes
+                  {{ t('common.actions.discardChanges') }}
                 </v-btn>
                 <v-chip v-if="hasChanges" color="warning" variant="tonal" size="small">
-                  Unsaved changes
+                  {{ t('pages.settings.unsavedChanges') }}
                 </v-chip>
               </div>
             </template>

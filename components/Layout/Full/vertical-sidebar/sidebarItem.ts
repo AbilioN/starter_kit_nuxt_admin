@@ -1,15 +1,3 @@
-import {
-  LayoutDashboardIcon,
-  BorderAllIcon,
-  AlertCircleIcon,
-  CircleDotIcon,
-  BoxMultiple1Icon,
-  LoginIcon,
-  MoodHappyIcon,
-  ApertureIcon,
-  UserPlusIcon,
-} from "vue-tabler-icons";
-
 export interface menu {
   header?: string;
   title?: string;
@@ -29,72 +17,75 @@ export interface menu {
   permission?: string;
 }
 
+// title/header hold i18n keys (resolved via $t() in NavItem/NavGroup/NavCollapse),
+// not literal display text — this array is a static module-level singleton,
+// evaluated once, so it can't hold already-translated strings.
 const sidebarItem: menu[] = [
-  { header: "Home" },
+  { header: "nav.home" },
   {
-    title: "Dashboard",
+    title: "nav.dashboard",
     icon: "graph-new-linear",
     to: "/dashboard",
   },
   {
-    title: "My Profile",
+    title: "nav.myProfile",
     icon: "user-circle-bold",
     to: "/profile",
   },
-  { header: "Management" },
+  { header: "nav.management" },
   {
-    title: "Users",
+    title: "nav.users",
     icon: "users-group-rounded-line-duotone",
     to: "/users",
     permission: "user-read",
   },
   {
-    title: "Administrators",
+    title: "nav.administrators",
     icon: "shield-user-outline",
     to: "/admins",
     permission: "admin-read",
   },
   {
-    title: "Roles",
+    title: "nav.roles",
     icon: "shield-keyhole-linear",
     to: "/roles",
     permission: "role-assign",
   },
   {
-    title: "Audit Logs",
+    title: "nav.auditLogs",
     icon: "clipboard-text-linear",
     to: "/audit",
     permission: "audit-read",
   },
   {
-    title: "Chats",
+    title: "nav.chats",
     icon: "chat-round-line-duotone",
     to: "/chats",
     permission: "chat-manage",
   },
   {
-    title: "Files",
+    title: "nav.files",
     icon: "folder-with-files-line-duotone",
     to: "/files",
     permission: "file-read",
   },
   {
-    title: "Notifications",
+    title: "nav.notifications",
     icon: "bell-outline",
     to: "/notifications",
   },
   {
-    title: "Settings",
+    title: "nav.settings",
     icon: "settings-linear",
     to: "/settings",
     permission: "setting-read",
     children: [
       {
-        title: "General",
+        title: "nav.settingsGeneral",
         to: "/settings",
       },
       {
-        title: "Feature Flags",
+        title: "nav.settingsFeatureFlags",
         to: "/settings/features",
       },
     ],

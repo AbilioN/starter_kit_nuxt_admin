@@ -7,6 +7,8 @@ definePageMeta({
   middleware: ['auth', 'permissions']
 });
 
+const { t } = useI18n();
+
 // Usar o composable de administradores
 const {
   formattedAdmins,
@@ -63,17 +65,17 @@ const saving = ref(false);
 const saveError = ref<string | null>(null);
 
 // Filtros disponíveis
-const statusOptions = [
-  { value: 'all', label: 'Todos os Status' },
-  { value: 'Ativo', label: 'Ativo' },
-  { value: 'Inativo', label: 'Inativo' }
-];
+const statusOptions = computed(() => [
+  { value: 'all', label: t('common.labels.allStatuses') },
+  { value: 'Ativo', label: t('common.labels.active') },
+  { value: 'Inativo', label: t('common.labels.inactive') }
+]);
 
-const roleOptions = [
-  { value: 'all', label: 'Todos os Roles' },
+const roleOptions = computed(() => [
+  { value: 'all', label: t('pages.users.allRoles') },
   { value: 'Super Admin', label: 'Super Admin' },
   { value: 'Admin', label: 'Admin' }
-];
+]);
 
 // Computed para filtrar administradores
 const filteredAdmins = computed(() => {
@@ -251,9 +253,9 @@ onMounted(() => {
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
           <div>
-            <h1 class="text-h4 font-weight-bold">Administradores</h1>
+            <h1 class="text-h4 font-weight-bold">{{ t('pages.admins.title') }}</h1>
             <p class="text-body-1 text-medium-emphasis">
-              Gerencie todos os administradores do sistema
+              {{ t('pages.admins.subtitle') }}
             </p>
           </div>
           <v-btn
@@ -263,7 +265,7 @@ onMounted(() => {
             @click="addAdmin"
             size="large"
           >
-            Adicionar Administrador
+            {{ t('pages.admins.addAdmin') }}
           </v-btn>
         </div>
       </v-col>
@@ -272,12 +274,12 @@ onMounted(() => {
     <!-- Filtros -->
     <v-row class="mb-6">
       <v-col cols="12">
-        <UiChildCard title="Filtros">
+        <UiChildCard :title="t('pages.admins.filters')">
           <v-row>
             <v-col cols="12" md="4">
               <v-text-field
                 v-model="search"
-                label="Buscar por nome ou email"
+                :label="t('pages.admins.searchPlaceholder')"
                 prepend-inner-icon="mdi-magnify"
                 variant="outlined"
                 density="compact"
@@ -290,7 +292,7 @@ onMounted(() => {
                 :items="statusOptions"
                 item-title="label"
                 item-value="value"
-                label="Status"
+                :label="t('common.labels.status')"
                 variant="outlined"
                 density="compact"
               />
@@ -301,7 +303,7 @@ onMounted(() => {
                 :items="roleOptions"
                 item-title="label"
                 item-value="value"
-                label="Role"
+                :label="t('common.labels.role')"
                 variant="outlined"
                 density="compact"
               />
@@ -315,14 +317,14 @@ onMounted(() => {
                   @click="clearFilters"
                   prepend-icon="mdi-refresh"
                 >
-                  Limpar Filtros
+                  {{ t('common.actions.clearFilters') }}
                 </v-btn>
                 <v-chip
                   color="primary"
                   variant="tonal"
                   class="ml-auto"
                 >
-                  {{ filteredAdmins.length }} administradores encontrados
+                  {{ t('pages.admins.adminsFound', { count: filteredAdmins.length }) }}
                 </v-chip>
               </div>
             </v-col>
@@ -356,16 +358,16 @@ onMounted(() => {
     <!-- Tabela de Administradores -->
     <v-row v-else>
       <v-col cols="12">
-        <UiChildCard title="Lista de Administradores">
+        <UiChildCard :title="t('pages.admins.listTitle')">
           <v-table fixed-header height="600px">
             <thead>
               <tr>
-                <th class="text-left">Administrator</th>
-                <th class="text-left">Email</th>
-                <th class="text-left">Role</th>
-                <th class="text-left">Status</th>
-                <th class="text-left">Last Login</th>
-                <th class="text-center">Actions</th>
+                <th class="text-left">{{ t('pages.admins.tableAdministrator') }}</th>
+                <th class="text-left">{{ t('common.labels.email') }}</th>
+                <th class="text-left">{{ t('common.labels.role') }}</th>
+                <th class="text-left">{{ t('common.labels.status') }}</th>
+                <th class="text-left">{{ t('common.labels.lastLogin') }}</th>
+                <th class="text-center">{{ t('common.labels.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -409,7 +411,7 @@ onMounted(() => {
                       variant="text"
                       color="info"
                       @click="startChat(admin)"
-                      title="Iniciar Chat"
+                      :title="t('pages.users.startChat')"
                     >
                       <v-icon>mdi-chat</v-icon>
                     </v-btn>
@@ -420,7 +422,7 @@ onMounted(() => {
                       variant="text"
                       color="primary"
                       @click="editAdmin(admin)"
-                      title="Editar"
+                      :title="t('common.actions.edit')"
                     >
                       <v-icon>mdi-pencil</v-icon>
                     </v-btn>
@@ -431,7 +433,7 @@ onMounted(() => {
                       variant="text"
                       :color="admin.status === 'Ativo' ? 'warning' : 'success'"
                       @click="toggleAdminStatus(admin)"
-                      :title="admin.status === 'Ativo' ? 'Desativar' : 'Ativar'"
+                      :title="admin.status === 'Ativo' ? t('common.actions.deactivate') : t('common.actions.activate')"
                     >
                       <v-icon>{{ admin.status === 'Ativo' ? 'mdi-account-off' : 'mdi-account-check' }}</v-icon>
                     </v-btn>
@@ -442,7 +444,7 @@ onMounted(() => {
                       variant="text"
                       color="error"
                       @click="selectAdminToDelete(admin)"
-                      title="Excluir"
+                      :title="t('common.actions.delete')"
                     >
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
@@ -455,14 +457,14 @@ onMounted(() => {
           <!-- Info sobre total (quando não há paginação) -->
           <div v-if="pagination && pagination.last_page === 1" class="d-flex justify-end mt-4">
             <div class="text-body-2 text-medium-emphasis">
-              Total: {{ pagination.total }} administrators
+              {{ t('pages.admins.totalAdmins', { count: pagination.total }) }}
             </div>
           </div>
 
           <!-- Paginação (quando há múltiplas páginas) -->
           <div v-if="pagination && pagination.last_page > 1" class="d-flex align-center justify-space-between mt-4">
             <div class="text-body-2 text-medium-emphasis">
-              Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} administrators
+              {{ t('pages.admins.showingRange', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
             </div>
             
             <div class="d-flex align-center gap-2">
@@ -483,7 +485,7 @@ onMounted(() => {
                 variant="text"
                 :disabled="!canGoPrev"
                 @click="prevPage"
-                title="Previous page"
+                :title="t('pages.users.previousPage')"
               >
                 <v-icon>mdi-chevron-left</v-icon>
               </v-btn>
@@ -507,7 +509,7 @@ onMounted(() => {
                 variant="text"
                 :disabled="!canGoNext"
                 @click="nextPage"
-                title="Next page"
+                :title="t('pages.users.nextPage')"
               >
                 <v-icon>mdi-chevron-right</v-icon>
               </v-btn>
@@ -520,78 +522,78 @@ onMounted(() => {
     <!-- Diálogos -->
     <v-dialog v-model="showAddDialog" max-width="600px" scrollable>
       <v-card>
-        <v-card-title>Create Administrator</v-card-title>
+        <v-card-title>{{ t('pages.admins.createDialogTitle') }}</v-card-title>
         <v-card-text>
           <v-form>
             <v-row>
               <v-col cols="12">
                 <v-text-field
                   v-model="adminForm.name"
-                  label="Name"
+                  :label="t('common.labels.name')"
                   variant="outlined"
                   required
-                  placeholder="Administrator Name"
+                  :placeholder="t('pages.admins.namePlaceholder')"
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-text-field
                   v-model="adminForm.email"
-                  label="Email"
+                  :label="t('common.labels.email')"
                   variant="outlined"
                   required
                   type="email"
-                  placeholder="admin@example.com"
+                  :placeholder="t('pages.admins.emailPlaceholder')"
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-text-field
                   v-model="adminForm.password"
-                  label="Password"
+                  :label="t('common.labels.password')"
                   variant="outlined"
                   required
                   type="password"
-                  placeholder="Minimum 8 characters"
+                  :placeholder="t('pages.admins.passwordPlaceholder')"
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-text-field
                   v-model="adminForm.password_confirmation"
-                  label="Confirm Password"
+                  :label="t('pages.admins.confirmPasswordLabel')"
                   variant="outlined"
                   required
                   type="password"
-                  placeholder="Re-enter password"
+                  :placeholder="t('pages.admins.confirmPasswordPlaceholder')"
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-select
                   v-model="adminForm.role_id"
                   :items="formattedRoles"
                   item-title="name"
                   item-value="id"
-                  label="Role (Optional)"
+                  :label="t('pages.admins.roleLabel')"
                   variant="outlined"
                   clearable
-                  placeholder="Select a role"
+                  :placeholder="t('pages.admins.rolePlaceholder')"
                 >
                   <template v-slot:item="{ props, item }">
                     <v-list-item v-bind="props">
                       <template v-slot:subtitle>
-                        <span class="text-caption">{{ item.raw.permissionsCount }} permissions</span>
+                        <span class="text-caption">{{ t('pages.admins.permissionsCount', { count: item.raw.permissionsCount }) }}</span>
                       </template>
                     </v-list-item>
                   </template>
                 </v-select>
               </v-col>
-              
+
               <v-col cols="12">
                 <v-switch
                   v-model="adminForm.is_active"
-                  label="Active"
+                  :label="t('pages.admins.activeSwitch')"
                   color="primary"
                   hide-details
                 />
@@ -604,49 +606,49 @@ onMounted(() => {
           <v-alert v-if="saveError" type="error" variant="tonal" density="compact" class="mr-4">
             {{ saveError }}
           </v-alert>
-          <v-btn @click="showAddDialog = false" :disabled="saving">Cancel</v-btn>
-          <v-btn color="primary" @click="saveAdmin" :loading="saving" :disabled="saving">Create</v-btn>
+          <v-btn @click="showAddDialog = false" :disabled="saving">{{ t('common.actions.cancel') }}</v-btn>
+          <v-btn color="primary" @click="saveAdmin" :loading="saving" :disabled="saving">{{ t('common.actions.create') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="showEditDialog" max-width="600px" scrollable>
       <v-card>
-        <v-card-title>Edit Administrator: {{ selectedAdmin?.name }}</v-card-title>
+        <v-card-title>{{ t('pages.admins.editDialogTitleName', { name: selectedAdmin?.name }) }}</v-card-title>
         <v-card-text>
           <v-form>
             <v-row>
               <v-col cols="12">
                 <v-text-field
                   v-model="adminForm.name"
-                  label="Name"
+                  :label="t('common.labels.name')"
                   variant="outlined"
                   required
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-text-field
                   v-model="adminForm.email"
-                  label="Email"
+                  :label="t('common.labels.email')"
                   variant="outlined"
                   required
                   type="email"
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-switch
                   v-model="adminForm.is_active"
-                  label="Active"
+                  :label="t('pages.admins.activeSwitch')"
                   color="primary"
                   hide-details
                 />
               </v-col>
-              
+
               <v-col cols="12">
                 <v-alert type="info" variant="tonal" density="compact">
-                  <div class="text-caption">Leave password fields empty to keep current password</div>
+                  <div class="text-caption">{{ t('pages.admins.keepPasswordHint') }}</div>
                 </v-alert>
               </v-col>
             </v-row>
@@ -657,17 +659,17 @@ onMounted(() => {
           <v-alert v-if="saveError" type="error" variant="tonal" density="compact" class="mr-4">
             {{ saveError }}
           </v-alert>
-          <v-btn @click="showEditDialog = false" :disabled="saving">Cancel</v-btn>
-          <v-btn color="primary" @click="saveAdmin" :loading="saving" :disabled="saving">Save Changes</v-btn>
+          <v-btn @click="showEditDialog = false" :disabled="saving">{{ t('common.actions.cancel') }}</v-btn>
+          <v-btn color="primary" @click="saveAdmin" :loading="saving" :disabled="saving">{{ t('common.actions.saveChanges') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="showDeleteDialog" max-width="400px">
       <v-card>
-        <v-card-title>Confirm Deletion</v-card-title>
+        <v-card-title>{{ t('pages.users.deleteDialogTitle') }}</v-card-title>
         <v-card-text>
-          <p>Are you sure you want to delete this administrator?</p>
+          <p>{{ t('pages.admins.deleteConfirmBody') }}</p>
           <p><strong>{{ selectedAdmin?.name }}</strong></p>
           <v-alert v-if="saveError" type="error" variant="tonal" density="compact" class="mt-4">
             {{ saveError }}
@@ -675,8 +677,8 @@ onMounted(() => {
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="showDeleteDialog = false" :disabled="saving">Cancel</v-btn>
-          <v-btn color="error" @click="confirmDelete" :loading="saving" :disabled="saving">Delete</v-btn>
+          <v-btn @click="showDeleteDialog = false" :disabled="saving">{{ t('common.actions.cancel') }}</v-btn>
+          <v-btn color="error" @click="confirmDelete" :loading="saving" :disabled="saving">{{ t('common.actions.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -684,13 +686,13 @@ onMounted(() => {
     <!-- Chat Dialog -->
     <v-dialog v-model="showChatDialog" max-width="800px">
       <v-card>
-        <v-card-title>Chat com {{ selectedChatAdmin?.name }}</v-card-title>
+        <v-card-title>{{ t('pages.admins.chatDialogTitle', { name: selectedChatAdmin?.name }) }}</v-card-title>
         <v-card-text>
-          <p>Interface de chat com o administrador...</p>
+          <p>{{ t('pages.admins.chatDialogBody') }}</p>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="showChatDialog = false">Fechar</v-btn>
+          <v-btn @click="showChatDialog = false">{{ t('common.actions.close') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

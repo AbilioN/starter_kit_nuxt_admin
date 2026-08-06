@@ -4,6 +4,8 @@ definePageMeta({
   layout: "blank",
 });
 
+const { t } = useI18n();
+
 // ApiClient stashes the failing request here right before its hard
 // redirect-on-401 reload (which would otherwise wipe the console before
 // anyone could see what happened) — surface it once, then clear it.
@@ -33,13 +35,13 @@ onMounted(() => {
                                     <LayoutFullLogoDark />
                                 </div>
                                 <v-alert v-if="last401" type="warning" variant="tonal" density="compact" class="mb-4" closable @click:close="last401 = null">
-                                    Signed out: a request to <code>{{ last401.method }} {{ last401.url }}</code> returned 401. Check the console for details.
+                                    {{ t('auth.login.signedOutAlert', { method: last401.method, url: last401.url }) }}
                                 </v-alert>
                                 <AuthLoginForm />
                                 <h6 class="text-subtitle-1  text-grey100 d-flex justify-center align-center mt-3">
-                                    New here?
+                                    {{ t('auth.login.newHere') }}
                                     <v-btn class="pl-0 text-primary text-body-1 font-weight-medium  opacity-1 pl-2" height="auto"
-                                        to="/auth/register" variant="plain">Create an account</v-btn>
+                                        to="/auth/register" variant="plain">{{ t('auth.login.createAccount') }}</v-btn>
                                 </h6>
                             </v-card-item>
                         </v-card>

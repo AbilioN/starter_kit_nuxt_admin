@@ -2,6 +2,7 @@
 import { UserIcon, MailIcon, ListCheckIcon } from 'vue-tabler-icons';
 
 const { logout } = useAuth();
+const { t } = useI18n();
 
 const handleLogout = () => {
   logout();
@@ -26,17 +27,17 @@ const handleLogout = () => {
                     <template v-slot:prepend>
                         <UserIcon stroke-width="1.5" size="20"/>
                     </template>
-                    <v-list-item-title class="pl-4 text-body-1">My Profile</v-list-item-title>
+                    <v-list-item-title class="pl-4 text-body-1">{{ t('profileMenu.myProfile') }}</v-list-item-title>
                 </v-list-item>
                 <v-list-item value="item2" color="primary" to="/notifications">
                     <template v-slot:prepend>
                         <MailIcon stroke-width="1.5" size="20"/>
                     </template>
-                    <v-list-item-title class="pl-4 text-body-1">Notifications</v-list-item-title>
+                    <v-list-item-title class="pl-4 text-body-1">{{ t('profileMenu.notifications') }}</v-list-item-title>
                 </v-list-item>
             </v-list>
             <div class="pt-4 pb-4 px-5 text-center">
-                <v-btn @click="handleLogout" color="primary" variant="outlined" class="rounded-pill" block>Logout</v-btn>
+                <v-btn @click="handleLogout" color="primary" variant="outlined" class="rounded-pill" block>{{ t('profileMenu.logout') }}</v-btn>
             </div>
         </v-sheet>
     </v-menu>

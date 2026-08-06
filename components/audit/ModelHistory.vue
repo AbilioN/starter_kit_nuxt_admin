@@ -10,6 +10,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const { t } = useI18n();
 const { loadModelHistory, formatDate, getActionColor, getActionIcon, getModelName, loading, error } = useAudit();
 
 const history = ref<AuditLog[]>([]);
@@ -28,7 +29,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <UiChildCard :title="`Histórico: ${getModelName(modelType)} #${modelId}`">
+    <UiChildCard :title="t('components.modelHistory.titleWithId', { model: getModelName(modelType), id: modelId })">
       <!-- Loading -->
       <div v-if="loading" class="d-flex justify-center align-center py-8">
         <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
@@ -71,7 +72,7 @@ onMounted(() => {
                     {{ log.action }}
                   </v-chip>
                   <span class="text-body-2 text-medium-emphasis">
-                    por {{ log.user.name }} ({{ log.user.type }})
+                    {{ t('components.modelHistory.by', { name: log.user.name, type: log.user.type }) }}
                   </span>
                 </div>
                 <div class="text-body-2 text-medium-emphasis">
@@ -100,18 +101,18 @@ onMounted(() => {
               <v-expansion-panels v-if="log.changes && (log.changes.old || log.changes.new)" variant="accordion" class="mt-2">
                 <v-expansion-panel>
                   <v-expansion-panel-title>
-                    Ver Mudanças
+                    {{ t('components.modelHistory.viewChanges') }}
                   </v-expansion-panel-title>
                   <v-expansion-panel-text>
                     <v-row>
                       <v-col cols="12" md="6" v-if="log.changes.old">
-                        <div class="text-body-2 text-medium-emphasis mb-2">Valores Anteriores</div>
+                        <div class="text-body-2 text-medium-emphasis mb-2">{{ t('components.modelHistory.previousValues') }}</div>
                         <v-card variant="outlined" class="pa-3">
                           <pre class="text-body-2" style="white-space: pre-wrap; word-break: break-word; font-size: 0.75rem;">{{ JSON.stringify(log.changes.old, null, 2) }}</pre>
                         </v-card>
                       </v-col>
                       <v-col cols="12" md="6" v-if="log.changes.new">
-                        <div class="text-body-2 text-medium-emphasis mb-2">Valores Novos</div>
+                        <div class="text-body-2 text-medium-emphasis mb-2">{{ t('components.modelHistory.newValues') }}</div>
                         <v-card variant="outlined" class="pa-3">
                           <pre class="text-body-2" style="white-space: pre-wrap; word-break: break-word; font-size: 0.75rem;">{{ JSON.stringify(log.changes.new, null, 2) }}</pre>
                         </v-card>
@@ -130,7 +131,7 @@ onMounted(() => {
 
       <!-- Sem histórico -->
       <div v-else class="text-center py-8 text-medium-emphasis">
-        Nenhum histórico encontrado para este modelo
+        {{ t('components.modelHistory.noHistory') }}
       </div>
     </UiChildCard>
   </div>

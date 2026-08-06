@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 const { tenantTheme, loadTenantTheme } = useTenantTheme();
+const { t, locale } = useI18n();
 
 useHead({
   titleTemplate: (titleChunk) => {
-    const appName = tenantTheme.value?.name || "Admin Console";
+    // referencing locale.value makes this recompute when the language switches
+    const appName = tenantTheme.value?.name || t('app.title', {}, { locale: locale.value });
     return titleChunk ? `${titleChunk} - ${appName}` : appName;
   },
 });

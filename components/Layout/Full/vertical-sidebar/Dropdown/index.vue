@@ -1,5 +1,6 @@
 <script setup>
 const props = defineProps({ item: Object, level: Number });
+const { t } = useI18n();
 </script>
 
 <template>
@@ -20,7 +21,7 @@ const props = defineProps({ item: Object, level: Number });
         <template v-slot:prepend >
             <div class="sublink-dot ms-4"></div>
         </template>
-        <v-list-item-title class="ml-4 text-body-1 text-darkText">{{ item.title}}</v-list-item-title>
+        <v-list-item-title class="ml-4 text-body-1 text-darkText">{{ item.title ? t(item.title) : '' }}</v-list-item-title>
         <!---If Caption-->
         <v-list-item-subtitle v-if="item.subCaption" class="text-caption mt-n1 hide-menu">
             {{ item.subCaption }}

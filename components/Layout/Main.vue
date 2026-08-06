@@ -63,7 +63,9 @@ const sDrawer = ref(true);
             <!-- Notification -->
             <LayoutFullVerticalHeaderNotificationDD />
           </div>
-          <div>
+          <div class="d-flex align-center ga-4">
+            <!-- Language switcher -->
+            <LayoutFullVerticalHeaderLanguageSwitcher />
             <!-- User Profile -->
             <LayoutFullVerticalHeaderProfileDD />
           </div>

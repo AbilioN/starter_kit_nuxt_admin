@@ -4,6 +4,7 @@ import UiChildCard from '@/components/shared/UiChildCard.vue';
 
 definePageMeta({ middleware: 'auth' });
 
+const { t } = useI18n();
 const { profile, loading, saving, error, loadProfile, updateProfile, changePassword } = useProfile();
 
 const editName = ref('');
@@ -26,11 +27,11 @@ const handleUpdateProfile = async () => {
 const handleChangePassword = async () => {
   passwordError.value = '';
   if (newPassword.value !== confirmPassword.value) {
-    passwordError.value = 'Passwords do not match.';
+    passwordError.value = t('pages.profile.passwordsDontMatch');
     return;
   }
   if (newPassword.value.length < 8) {
-    passwordError.value = 'Password must be at least 8 characters.';
+    passwordError.value = t('pages.profile.passwordTooShort');
     return;
   }
   const ok = await changePassword(currentPassword.value, newPassword.value, confirmPassword.value);
@@ -42,7 +43,7 @@ const handleChangePassword = async () => {
 };
 
 const formatDate = (val: string | null) => {
-  if (!val) return 'Never';
+  if (!val) return t('pages.profile.never');
   return new Date(val).toLocaleDateString('en-GB', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
   });
@@ -53,8 +54,8 @@ const formatDate = (val: string | null) => {
   <div>
     <v-row class="mb-4">
       <v-col cols="12">
-        <h1 class="text-h4 font-weight-bold">My Profile</h1>
-        <p class="text-body-1 text-medium-emphasis">Manage your account information and password</p>
+        <h1 class="text-h4 font-weight-bold">{{ t('pages.profile.title') }}</h1>
+        <p class="text-body-1 text-medium-emphasis">{{ t('pages.profile.subtitle') }}</p>
       </v-col>
     </v-row>
 
@@ -72,33 +73,33 @@ const formatDate = (val: string | null) => {
       <v-row>
         <!-- Profile info -->
         <v-col cols="12" md="6">
-          <UiChildCard title="Account Information">
+          <UiChildCard :title="t('pages.profile.accountInfo')">
             <div class="mb-4">
-              <div class="text-caption text-medium-emphasis mb-1">Email</div>
+              <div class="text-caption text-medium-emphasis mb-1">{{ t('common.labels.email') }}</div>
               <div class="text-body-1 font-weight-medium">{{ profile.email }}</div>
             </div>
             <div class="mb-4">
-              <div class="text-caption text-medium-emphasis mb-1">Role</div>
+              <div class="text-caption text-medium-emphasis mb-1">{{ t('common.labels.role') }}</div>
               <v-chip color="error" variant="tonal" size="small" v-if="profile.is_super_admin">
-                Super Admin
+                {{ t('pages.profile.superAdmin') }}
               </v-chip>
-              <v-chip color="primary" variant="tonal" size="small" v-else>Admin</v-chip>
+              <v-chip color="primary" variant="tonal" size="small" v-else>{{ t('pages.profile.admin') }}</v-chip>
             </div>
             <div class="mb-4">
-              <div class="text-caption text-medium-emphasis mb-1">Last Login</div>
+              <div class="text-caption text-medium-emphasis mb-1">{{ t('common.labels.lastLogin') }}</div>
               <div class="text-body-2">{{ formatDate(profile.last_login_at) }}</div>
             </div>
             <div>
-              <div class="text-caption text-medium-emphasis mb-1">Member Since</div>
+              <div class="text-caption text-medium-emphasis mb-1">{{ t('pages.profile.memberSince') }}</div>
               <div class="text-body-2">{{ formatDate(profile.created_at) }}</div>
             </div>
 
             <v-divider class="my-5" />
 
-            <h3 class="text-subtitle-1 font-weight-bold mb-4">Edit Name</h3>
+            <h3 class="text-subtitle-1 font-weight-bold mb-4">{{ t('pages.profile.editName') }}</h3>
             <v-text-field
               v-model="editName"
-              label="Full Name"
+              :label="t('pages.profile.fullName')"
               variant="outlined"
               density="comfortable"
               prepend-inner-icon="mdi-account-outline"
@@ -111,21 +112,21 @@ const formatDate = (val: string | null) => {
               prepend-icon="mdi-content-save-outline"
               @click="handleUpdateProfile"
             >
-              Save Changes
+              {{ t('common.actions.saveChanges') }}
             </v-btn>
           </UiChildCard>
         </v-col>
 
         <!-- Change password -->
         <v-col cols="12" md="6">
-          <UiChildCard title="Change Password">
+          <UiChildCard :title="t('pages.profile.changePassword')">
             <v-alert v-if="passwordError" type="error" variant="tonal" density="compact" class="mb-4">
               {{ passwordError }}
             </v-alert>
 
             <v-text-field
               v-model="currentPassword"
-              label="Current Password"
+              :label="t('pages.profile.currentPassword')"
               :type="showCurrent ? 'text' : 'password'"
               variant="outlined"
               density="comfortable"
@@ -137,21 +138,21 @@ const formatDate = (val: string | null) => {
 
             <v-text-field
               v-model="newPassword"
-              label="New Password"
+              :label="t('pages.profile.newPassword')"
               :type="showNew ? 'text' : 'password'"
               variant="outlined"
               density="comfortable"
               prepend-inner-icon="mdi-lock-reset"
               :append-inner-icon="showNew ? 'mdi-eye-off' : 'mdi-eye'"
               @click:append-inner="showNew = !showNew"
-              hint="Minimum 8 characters"
+              :hint="t('pages.profile.newPasswordHint')"
               persistent-hint
               class="mb-3"
             />
 
             <v-text-field
               v-model="confirmPassword"
-              label="Confirm New Password"
+              :label="t('pages.profile.confirmNewPassword')"
               :type="showNew ? 'text' : 'password'"
               variant="outlined"
               density="comfortable"
@@ -166,7 +167,7 @@ const formatDate = (val: string | null) => {
               prepend-icon="mdi-lock-reset"
               @click="handleChangePassword"
             >
-              Update Password
+              {{ t('pages.profile.updatePassword') }}
             </v-btn>
           </UiChildCard>
         </v-col>

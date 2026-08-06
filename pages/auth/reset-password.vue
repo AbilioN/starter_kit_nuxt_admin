@@ -5,6 +5,7 @@ import { appendTenantQueryParam } from '~/utils/tenant';
 
 definePageMeta({ layout: 'blank' });
 
+const { t } = useI18n();
 const route = useRoute();
 const token = ref('');
 const email = ref('');
@@ -38,7 +39,7 @@ const submit = async () => {
     }) as any;
     if (res.message) done.value = true;
   } catch (err: any) {
-    error.value = err?.data?.message ?? 'Failed to reset password. The link may have expired.';
+    error.value = err?.data?.message ?? t('auth.resetPassword.errorDefault');
   } finally {
     loading.value = false;
   }
@@ -58,15 +59,15 @@ const submit = async () => {
                 </div>
                 <div class="text-center mb-6">
                   <v-icon size="40" color="primary" class="mb-2">mdi-lock-check-outline</v-icon>
-                  <h1 class="text-h5 font-weight-bold">Set New Password</h1>
+                  <h1 class="text-h5 font-weight-bold">{{ t('auth.resetPassword.title') }}</h1>
                   <p class="text-body-2 text-medium-emphasis mt-1">{{ email }}</p>
                 </div>
 
                 <div v-if="done">
                   <v-alert type="success" variant="tonal" class="mb-4">
-                    Password reset successfully! You can now log in.
+                    {{ t('auth.resetPassword.successMessage') }}
                   </v-alert>
-                  <v-btn block color="primary" to="/auth/login">Go to Login</v-btn>
+                  <v-btn block color="primary" to="/auth/login">{{ t('auth.resetPassword.goToLogin') }}</v-btn>
                 </div>
 
                 <v-form v-else @submit.prevent="submit">
@@ -76,7 +77,7 @@ const submit = async () => {
 
                   <v-text-field
                     v-model="password"
-                    label="New Password"
+                    :label="t('auth.resetPassword.newPasswordLabel')"
                     :type="showPassword ? 'text' : 'password'"
                     prepend-inner-icon="mdi-lock-outline"
                     :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
@@ -87,7 +88,7 @@ const submit = async () => {
 
                   <v-text-field
                     v-model="passwordConfirmation"
-                    label="Confirm New Password"
+                    :label="t('auth.resetPassword.confirmPasswordLabel')"
                     :type="showPassword ? 'text' : 'password'"
                     prepend-inner-icon="mdi-lock-outline"
                     class="mb-4"
@@ -102,7 +103,7 @@ const submit = async () => {
                     :loading="loading"
                     :disabled="!password || !passwordConfirmation || loading"
                   >
-                    Reset Password
+                    {{ t('auth.resetPassword.submitButton') }}
                   </v-btn>
                 </v-form>
               </v-card-item>

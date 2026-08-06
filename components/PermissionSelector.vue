@@ -1,10 +1,10 @@
 <template>
   <div>
-    <h3 class="mb-4">Select Permissions</h3>
-    
+    <h3 class="mb-4">{{ t('components.permissionSelector.title') }}</h3>
+
     <div v-if="loading" class="text-center py-4">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
-      <p class="mt-2">Loading permissions...</p>
+      <p class="mt-2">{{ t('components.permissionSelector.loading') }}</p>
     </div>
     
     <v-expansion-panels v-else variant="accordion" multiple>
@@ -30,7 +30,7 @@
               @click.stop="toggleAll(resource, perms)"
             >
               <v-icon start>{{ isAllSelected(resource, perms) ? 'mdi-checkbox-multiple-blank-outline' : 'mdi-checkbox-multiple-marked' }}</v-icon>
-              {{ isAllSelected(resource, perms) ? 'Deselect All' : 'Select All' }}
+              {{ isAllSelected(resource, perms) ? t('components.permissionSelector.deselectAll') : t('components.permissionSelector.selectAll') }}
             </v-btn>
           </div>
           
@@ -64,6 +64,8 @@
 
 <script setup lang="ts">
 import type { Permission } from '~/types/api';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: number[];

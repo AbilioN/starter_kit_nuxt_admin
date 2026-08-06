@@ -4,6 +4,7 @@ import UiChildCard from '@/components/shared/UiChildCard.vue';
 
 definePageMeta({ middleware: 'auth' });
 
+const { t } = useI18n();
 const { notifications, unreadCount, loading, error, loadNotifications, markRead, markAllRead, formatTimeAgo } =
   useAdminNotifications();
 
@@ -20,20 +21,20 @@ watch(unreadOnly, () => loadNotifications(unreadOnly.value));
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
           <div>
-            <h1 class="text-h4 font-weight-bold">Notifications</h1>
+            <h1 class="text-h4 font-weight-bold">{{ t('pages.notifications.title') }}</h1>
             <p class="text-body-1 text-medium-emphasis">
-              Your system notifications and alerts
+              {{ t('pages.notifications.subtitle') }}
             </p>
           </div>
           <div class="d-flex gap-3 align-center">
-            <v-switch v-model="unreadOnly" label="Unread only" color="primary" hide-details density="compact" />
+            <v-switch v-model="unreadOnly" :label="t('pages.notifications.unreadOnly')" color="primary" hide-details density="compact" />
             <v-btn
               v-if="unreadCount > 0"
               variant="outlined"
               prepend-icon="mdi-check-all"
               @click="markAllRead"
             >
-              Mark all as read
+              {{ t('pages.notifications.markAllRead') }}
             </v-btn>
           </div>
         </div>
@@ -61,8 +62,8 @@ watch(unreadOnly, () => loadNotifications(unreadOnly.value));
         <UiChildCard>
           <div v-if="notifications.length === 0" class="d-flex flex-column align-center py-16 text-medium-emphasis">
             <v-icon size="64" class="mb-4">mdi-bell-off-outline</v-icon>
-            <p class="text-h6">No notifications{{ unreadOnly ? ' (unread)' : '' }}</p>
-            <p class="text-body-2 mt-1">You're all caught up!</p>
+            <p class="text-h6">{{ t('pages.notifications.noNotifications', { suffix: unreadOnly ? t('pages.notifications.unreadSuffix') : '' }) }}</p>
+            <p class="text-body-2 mt-1">{{ t('pages.notifications.allCaughtUp') }}</p>
           </div>
 
           <v-list v-else lines="two">
@@ -85,7 +86,7 @@ watch(unreadOnly, () => loadNotifications(unreadOnly.value));
                 <template #append>
                   <div class="d-flex flex-column align-end gap-1">
                     <span class="text-caption text-medium-emphasis">{{ formatTimeAgo(n.created_at) }}</span>
-                    <v-chip v-if="!n.read_at" color="primary" size="x-small" variant="tonal">New</v-chip>
+                    <v-chip v-if="!n.read_at" color="primary" size="x-small" variant="tonal">{{ t('pages.notifications.new') }}</v-chip>
                   </div>
                 </template>
               </v-list-item>

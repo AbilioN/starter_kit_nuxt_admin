@@ -1,6 +1,25 @@
 export default defineNuxtConfig({
   ssr: false,
 
+  modules: ["@nuxtjs/i18n"],
+
+  i18n: {
+    locales: [
+      { code: "pt", name: "Português", file: "pt.json" },
+      { code: "en", name: "English", file: "en.json" },
+      { code: "es", name: "Español", file: "es.json" },
+      { code: "fr", name: "Français", file: "fr.json" },
+    ],
+    defaultLocale: "pt",
+    langDir: "locales/",
+    strategy: "no_prefix",
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "locale",
+      alwaysRedirect: false,
+    },
+  },
+
   typescript: {
     shim: false,
   },

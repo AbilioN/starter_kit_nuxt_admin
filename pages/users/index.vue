@@ -7,6 +7,8 @@ definePageMeta({
   middleware: 'auth'
 });
 
+const { t } = useI18n();
+
 // Usar o composable de usuários
 const {
   formattedUsers,
@@ -38,21 +40,21 @@ const showChatDialog = ref(false);
 const selectedChatUser = ref<any>(null);
 
 // Filtros disponíveis
-const statusOptions = [
-  { value: 'all', label: 'Todos os Status' },
-  { value: 'Ativo', label: 'Ativo' },
-  { value: 'Pendente', label: 'Pendente' }
-];
+const statusOptions = computed(() => [
+  { value: 'all', label: t('pages.users.allStatuses') },
+  { value: 'Ativo', label: t('pages.users.statusActive') },
+  { value: 'Pendente', label: t('pages.users.statusPending') }
+]);
 
-const roleOptions = [
-  { value: 'all', label: 'Todos os Roles' },
+const roleOptions = computed(() => [
+  { value: 'all', label: t('pages.users.allRoles') },
   { value: 'User', label: 'User' }
-];
+]);
 
-const departmentOptions = [
-  { value: 'all', label: 'Todos os Departamentos' },
+const departmentOptions = computed(() => [
+  { value: 'all', label: t('pages.users.allDepartments') },
   { value: 'TI', label: 'TI' }
-];
+]);
 
 // Computed para filtrar usuários
 const filteredUsers = computed(() => {
@@ -130,9 +132,9 @@ onMounted(() => {
       <v-col cols="12">
         <div class="d-flex align-center justify-space-between">
           <div>
-            <h1 class="text-h4 font-weight-bold">Usuários</h1>
+            <h1 class="text-h4 font-weight-bold">{{ t('pages.users.title') }}</h1>
             <p class="text-body-1 text-medium-emphasis">
-              Gerencie todos os usuários do sistema
+              {{ t('pages.users.subtitle') }}
             </p>
           </div>
           <v-btn
@@ -141,7 +143,7 @@ onMounted(() => {
             @click="addUser"
             size="large"
           >
-            Adicionar Usuário
+            {{ t('pages.users.addUser') }}
           </v-btn>
         </div>
       </v-col>
@@ -150,12 +152,12 @@ onMounted(() => {
     <!-- Filtros -->
     <v-row class="mb-6">
       <v-col cols="12">
-        <UiChildCard title="Filtros">
+        <UiChildCard :title="t('pages.users.filters')">
           <v-row>
             <v-col cols="12" md="3">
               <v-text-field
                 v-model="search"
-                label="Buscar por nome ou email"
+                :label="t('pages.users.searchPlaceholder')"
                 prepend-inner-icon="mdi-magnify"
                 variant="outlined"
                 density="compact"
@@ -168,7 +170,7 @@ onMounted(() => {
                 :items="statusOptions"
                 item-title="label"
                 item-value="value"
-                label="Status"
+                :label="t('common.labels.status')"
                 variant="outlined"
                 density="compact"
               />
@@ -179,7 +181,7 @@ onMounted(() => {
                 :items="roleOptions"
                 item-title="label"
                 item-value="value"
-                label="Role"
+                :label="t('common.labels.role')"
                 variant="outlined"
                 density="compact"
               />
@@ -190,7 +192,7 @@ onMounted(() => {
                 :items="departmentOptions"
                 item-title="label"
                 item-value="value"
-                label="Departamento"
+                :label="t('pages.users.tableDepartment')"
                 variant="outlined"
                 density="compact"
               />
@@ -204,14 +206,14 @@ onMounted(() => {
                   @click="clearFilters"
                   prepend-icon="mdi-refresh"
                 >
-                  Limpar Filtros
+                  {{ t('common.actions.clearFilters') }}
                 </v-btn>
                 <v-chip
                   color="primary"
                   variant="tonal"
                   class="ml-auto"
                 >
-                  {{ filteredUsers.length }} usuários encontrados
+                  {{ t('pages.users.usersFound', { count: filteredUsers.length }) }}
                 </v-chip>
               </div>
             </v-col>
@@ -245,18 +247,18 @@ onMounted(() => {
     <!-- Tabela de Usuários -->
     <v-row v-else>
       <v-col cols="12">
-        <UiChildCard title="Lista de Usuários">
+        <UiChildCard :title="t('pages.users.listTitle')">
           <v-table fixed-header height="600px">
             <thead>
               <tr>
-                <th class="text-left">Usuário</th>
-                <th class="text-left">Email</th>
-                <th class="text-left">Role</th>
-                <th class="text-left">Departamento</th>
-                <th class="text-left">Status</th>
-                <th class="text-left">Último Login</th>
-                <th class="text-left">Criado em</th>
-                <th class="text-center">Ações</th>
+                <th class="text-left">{{ t('pages.users.tableUser') }}</th>
+                <th class="text-left">{{ t('common.labels.email') }}</th>
+                <th class="text-left">{{ t('common.labels.role') }}</th>
+                <th class="text-left">{{ t('pages.users.tableDepartment') }}</th>
+                <th class="text-left">{{ t('common.labels.status') }}</th>
+                <th class="text-left">{{ t('common.labels.lastLogin') }}</th>
+                <th class="text-left">{{ t('common.labels.createdAt') }}</th>
+                <th class="text-center">{{ t('common.labels.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -301,7 +303,7 @@ onMounted(() => {
                       variant="text"
                       color="info"
                       @click="startChat(user)"
-                      title="Iniciar Chat"
+                      :title="t('pages.users.startChat')"
                     >
                       <v-icon>mdi-chat</v-icon>
                     </v-btn>
@@ -311,7 +313,7 @@ onMounted(() => {
                       variant="text"
                       color="primary"
                       @click="editUser(user)"
-                      title="Editar"
+                      :title="t('common.actions.edit')"
                     >
                       <v-icon>mdi-pencil</v-icon>
                     </v-btn>
@@ -321,7 +323,7 @@ onMounted(() => {
                       variant="text"
                       :color="user.status === 'Ativo' ? 'warning' : 'success'"
                       @click="toggleUserStatus(user)"
-                      :title="user.status === 'Ativo' ? 'Desativar' : 'Ativar'"
+                      :title="user.status === 'Ativo' ? t('common.actions.deactivate') : t('common.actions.activate')"
                     >
                       <v-icon>{{ user.status === 'Ativo' ? 'mdi-account-off' : 'mdi-account-check' }}</v-icon>
                     </v-btn>
@@ -331,7 +333,7 @@ onMounted(() => {
                       variant="text"
                       color="error"
                       @click="deleteUser(user)"
-                      title="Excluir"
+                      :title="t('common.actions.delete')"
                     >
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
@@ -344,7 +346,7 @@ onMounted(() => {
           <!-- Paginação -->
           <div v-if="pagination" class="d-flex align-center justify-space-between mt-4">
             <div class="text-body-2 text-medium-emphasis">
-              Mostrando {{ pagination.from }} a {{ pagination.to }} de {{ pagination.total }} usuários
+              {{ t('pages.users.showingRange', { from: pagination.from, to: pagination.to, total: pagination.total }) }}
             </div>
             
             <div class="d-flex align-center gap-2">
@@ -365,7 +367,7 @@ onMounted(() => {
                 variant="text"
                 :disabled="!canGoPrev"
                 @click="prevPage"
-                title="Página anterior"
+                :title="t('pages.users.previousPage')"
               >
                 <v-icon>mdi-chevron-left</v-icon>
               </v-btn>
@@ -389,7 +391,7 @@ onMounted(() => {
                 variant="text"
                 :disabled="!canGoNext"
                 @click="nextPage"
-                title="Próxima página"
+                :title="t('pages.users.nextPage')"
               >
                 <v-icon>mdi-chevron-right</v-icon>
               </v-btn>
@@ -403,11 +405,11 @@ onMounted(() => {
     <v-dialog v-model="showAddDialog" max-width="600px">
       <v-card>
         <v-card-title class="text-h5">
-          Adicionar Novo Usuário
+          {{ t('pages.users.addDialogTitle') }}
         </v-card-title>
         <v-card-text>
           <p class="text-body-2 text-medium-emphasis">
-            Formulário de adição de usuário será implementado aqui.
+            {{ t('pages.users.addDialogBody') }}
           </p>
         </v-card-text>
         <v-card-actions>
@@ -417,13 +419,13 @@ onMounted(() => {
             variant="text"
             @click="showAddDialog = false"
           >
-            Cancelar
+            {{ t('common.actions.cancel') }}
           </v-btn>
           <v-btn
             color="primary"
             @click="showAddDialog = false"
           >
-            Adicionar
+            {{ t('common.actions.create') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -433,11 +435,11 @@ onMounted(() => {
     <v-dialog v-model="showEditDialog" max-width="600px">
       <v-card>
         <v-card-title class="text-h5">
-          Editar Usuário
+          {{ t('pages.users.editDialogTitle') }}
         </v-card-title>
         <v-card-text>
           <p class="text-body-2 text-medium-emphasis">
-            Formulário de edição será implementado aqui.
+            {{ t('pages.users.editDialogBody') }}
           </p>
         </v-card-text>
         <v-card-actions>
@@ -447,13 +449,13 @@ onMounted(() => {
             variant="text"
             @click="showEditDialog = false"
           >
-            Cancelar
+            {{ t('common.actions.cancel') }}
           </v-btn>
           <v-btn
             color="primary"
             @click="showEditDialog = false"
           >
-            Salvar
+            {{ t('common.actions.save') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -463,14 +465,14 @@ onMounted(() => {
     <v-dialog v-model="showDeleteDialog" max-width="400px">
       <v-card>
         <v-card-title class="text-h5">
-          Confirmar Exclusão
+          {{ t('pages.users.deleteDialogTitle') }}
         </v-card-title>
         <v-card-text>
           <p class="text-body-2">
-            Tem certeza que deseja excluir o usuário <strong>{{ selectedUser?.name }}</strong>?
+            {{ t('pages.users.deleteDialogBody', { name: selectedUser?.name }) }}
           </p>
           <p class="text-caption text-medium-emphasis">
-            Esta ação não pode ser desfeita.
+            {{ t('pages.users.deleteDialogWarning') }}
           </p>
         </v-card-text>
         <v-card-actions>
@@ -480,13 +482,13 @@ onMounted(() => {
             variant="text"
             @click="showDeleteDialog = false"
           >
-            Cancelar
+            {{ t('common.actions.cancel') }}
           </v-btn>
           <v-btn
             color="error"
             @click="confirmDelete"
           >
-            Excluir
+            {{ t('common.actions.delete') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -501,7 +503,7 @@ onMounted(() => {
               <v-icon>mdi-account</v-icon>
             </v-avatar>
             <div>
-              <div class="text-h6">Chat com {{ selectedChatUser?.name }}</div>
+              <div class="text-h6">{{ t('pages.users.chatWith', { name: selectedChatUser?.name }) }}</div>
               <div class="text-caption text-medium-emphasis">{{ selectedChatUser?.email }}</div>
             </div>
           </div>
@@ -509,7 +511,7 @@ onMounted(() => {
             icon
             variant="text"
             @click="showChatDialog = false"
-            title="Fechar"
+            :title="t('common.actions.close')"
           >
             <v-icon>mdi-close</v-icon>
           </v-btn>

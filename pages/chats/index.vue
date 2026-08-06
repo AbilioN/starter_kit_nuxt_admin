@@ -3,8 +3,8 @@
     <v-container fluid>
       <v-row class="mb-4">
         <v-col>
-          <h1 class="text-h5 font-weight-bold">Chat Management</h1>
-          <p class="text-body-2 text-grey">View all conversations and message history.</p>
+          <h1 class="text-h5 font-weight-bold">{{ t('pages.chats.title') }}</h1>
+          <p class="text-body-2 text-grey">{{ t('pages.chats.subtitle') }}</p>
         </v-col>
       </v-row>
 
@@ -14,7 +14,7 @@
           <v-text-field
             v-model="searchQuery"
             @input="onSearch"
-            placeholder="Search by chat name..."
+            :placeholder="t('pages.chats.searchPlaceholder')"
             prepend-inner-icon="mdi-magnify"
             variant="outlined"
             density="compact"
@@ -37,12 +37,12 @@
         >
           <template #item.type="{ item }">
             <v-chip :color="item.type === 'group' ? 'blue' : 'purple'" size="small" label>
-              {{ item.type === 'group' ? 'Group' : 'Private' }}
+              {{ item.type === 'group' ? t('pages.chats.typeGroup') : t('pages.chats.typePrivate') }}
             </v-chip>
           </template>
 
           <template #item.name="{ item }">
-            {{ item.name || (item.type === 'private' ? 'Private Chat' : 'Unnamed Group') }}
+            {{ item.name || (item.type === 'private' ? t('pages.chats.privateChat') : t('pages.chats.unnamedGroup')) }}
           </template>
 
           <template #item.messages_count="{ item }">
@@ -61,7 +61,7 @@
               @click="openChat(item)"
             >
               <v-icon size="16" class="mr-1">mdi-eye</v-icon>
-              View
+              {{ t('common.actions.view') }}
             </v-btn>
           </template>
         </v-data-table>
@@ -73,7 +73,7 @@
       <v-card v-if="selectedChat">
         <v-card-title class="d-flex align-center">
           <v-icon class="mr-2">mdi-message-text</v-icon>
-          {{ selectedChat.name || (selectedChat.type === 'private' ? 'Private Chat' : 'Group Chat') }}
+          {{ selectedChat.name || (selectedChat.type === 'private' ? t('pages.chats.privateChat') : t('components.chatInterface.groupChat')) }}
           <v-chip :color="selectedChat.type === 'group' ? 'blue' : 'purple'" size="small" label class="ml-2">
             {{ selectedChat.type }}
           </v-chip>
@@ -90,7 +90,7 @@
             <v-progress-circular indeterminate color="primary" />
           </div>
           <div v-else-if="chatMessages.length === 0" class="text-center pa-8 text-grey">
-            No messages in this chat.
+            {{ t('pages.chats.noMessages') }}
           </div>
           <div v-else class="messages-admin-list">
             <div
@@ -103,11 +103,11 @@
                   {{ msg.sender_type }}
                 </v-chip>
                 <span class="text-caption text-grey">{{ formatDate(msg.created_at) }}</span>
-                <v-chip v-if="msg.edited_at" size="x-small" color="amber" class="ml-1">edited</v-chip>
-                <v-chip v-if="msg.deleted_at" size="x-small" color="error" class="ml-1">deleted</v-chip>
+                <v-chip v-if="msg.edited_at" size="x-small" color="amber" class="ml-1">{{ t('pages.chats.edited') }}</v-chip>
+                <v-chip v-if="msg.deleted_at" size="x-small" color="error" class="ml-1">{{ t('pages.chats.deleted') }}</v-chip>
               </div>
               <div v-if="msg.content === null || msg.deleted_at" class="text-body-2 text-grey fst-italic">
-                Message deleted
+                {{ t('pages.chats.messageDeleted') }}
               </div>
               <div v-else class="text-body-2 message-admin-content">{{ msg.content }}</div>
             </div>
@@ -116,9 +116,9 @@
 
         <v-divider />
         <v-card-actions>
-          <span class="text-caption text-grey">{{ chatMessages.length }} messages loaded</span>
+          <span class="text-caption text-grey">{{ t('pages.chats.messagesLoaded', { count: chatMessages.length }) }}</span>
           <v-spacer />
-          <v-btn @click="messagesDialog = false">Close</v-btn>
+          <v-btn @click="messagesDialog = false">{{ t('common.actions.close') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -130,6 +130,8 @@ import { ref, onMounted } from 'vue';
 import { ApiClient } from '~/infrastructure/http/ApiClient';
 
 definePageMeta({ middleware: 'auth' });
+
+const { t } = useI18n();
 
 interface AdminChat {
   id: string;
@@ -167,13 +169,13 @@ const chatMessages = ref<AdminMessage[]>([]);
 const loadingMessages = ref(false);
 const messagesDialog = ref(false);
 
-const headers = [
-  { title: 'Name', key: 'name', sortable: false },
-  { title: 'Type', key: 'type', sortable: false },
-  { title: 'Messages', key: 'messages_count', sortable: false },
-  { title: 'Last Activity', key: 'updated_at', sortable: false },
-  { title: 'Actions', key: 'actions', sortable: false },
-];
+const headers = computed(() => [
+  { title: t('pages.chats.tableName'), key: 'name', sortable: false },
+  { title: t('pages.chats.tableType'), key: 'type', sortable: false },
+  { title: t('pages.chats.tableMessages'), key: 'messages_count', sortable: false },
+  { title: t('pages.chats.tableLastActivity'), key: 'updated_at', sortable: false },
+  { title: t('common.labels.actions'), key: 'actions', sortable: false },
+]);
 
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 

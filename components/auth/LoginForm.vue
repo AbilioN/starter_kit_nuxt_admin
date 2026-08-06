@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+const { t } = useI18n();
 const checkbox = ref(false);
 const email = ref('');
 const password = ref('');
@@ -45,7 +46,7 @@ const handleLogin = async () => {
     <form @submit.prevent="handleLogin">
         <v-row class="mb-3">
             <v-col cols="12">
-                <v-label class="font-weight-medium mb-1">Email</v-label>
+                <v-label class="font-weight-medium mb-1">{{ t('auth.login.emailLabel') }}</v-label>
                 <v-text-field
                     v-model="email"
                     variant="outlined"
@@ -54,11 +55,11 @@ const handleLogin = async () => {
                     color="primary"
                     type="email"
                     :disabled="loading"
-                    placeholder="you@example.com"
+                    :placeholder="t('auth.login.emailPlaceholder')"
                 ></v-text-field>
             </v-col>
             <v-col cols="12">
-                <v-label class="font-weight-medium mb-1">Password</v-label>
+                <v-label class="font-weight-medium mb-1">{{ t('auth.login.passwordLabel') }}</v-label>
                 <v-text-field
                     v-model="password"
                     variant="outlined"
@@ -67,7 +68,7 @@ const handleLogin = async () => {
                     hide-details
                     color="primary"
                     :disabled="loading"
-                    placeholder="Enter your password"
+                    :placeholder="t('auth.login.passwordPlaceholder')"
                 ></v-text-field>
             </v-col>
             
@@ -84,12 +85,12 @@ const handleLogin = async () => {
             <v-col cols="12 " class="py-0">
                 <div class="d-flex flex-wrap align-center w-100 ">
                     <v-checkbox v-model="checkbox" hide-details color="primary">
-                        <template v-slot:label>Remember this device</template>
+                        <template v-slot:label>{{ t('auth.login.rememberDevice') }}</template>
                     </v-checkbox>
                     <div class="ml-sm-auto">
                         <RouterLink to="/auth/forgot-password"
                             class="text-primary text-decoration-none text-body-1 opacity-1 font-weight-medium">
-                            Forgot Password?
+                            {{ t('auth.login.forgotPassword') }}
                         </RouterLink>
                     </div>
                 </div>
@@ -106,7 +107,7 @@ const handleLogin = async () => {
                     :loading="loading"
                     :disabled="loading"
                 >
-                    {{ loading ? 'Signing in…' : 'Sign In' }}
+                    {{ loading ? t('auth.login.signingIn') : t('auth.login.signIn') }}
                 </v-btn>
             </v-col>
         </v-row>

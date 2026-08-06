@@ -5,6 +5,7 @@ import { appendTenantQueryParam } from '~/utils/tenant';
 
 definePageMeta({ layout: 'blank' });
 
+const { t } = useI18n();
 const email = ref('');
 const loading = ref(false);
 const sent = ref(false);
@@ -24,7 +25,7 @@ const submit = async () => {
     }) as any;
     if (res.message) sent.value = true;
   } catch (err: any) {
-    error.value = err?.data?.message ?? 'Failed to send reset email. Please try again.';
+    error.value = err?.data?.message ?? t('auth.forgotPassword.errorDefault');
   } finally {
     loading.value = false;
   }
@@ -44,17 +45,17 @@ const submit = async () => {
                 </div>
                 <div class="text-center mb-6">
                   <v-icon size="40" color="primary" class="mb-2">mdi-lock-reset</v-icon>
-                  <h1 class="text-h5 font-weight-bold">Forgot Password</h1>
+                  <h1 class="text-h5 font-weight-bold">{{ t('auth.forgotPassword.title') }}</h1>
                   <p class="text-body-2 text-medium-emphasis mt-1">
-                    Enter your email and we'll send you a reset link.
+                    {{ t('auth.forgotPassword.description') }}
                   </p>
                 </div>
 
                 <div v-if="sent">
                   <v-alert type="success" variant="tonal" class="mb-4">
-                    Check your email for a password reset link.
+                    {{ t('auth.forgotPassword.successMessage') }}
                   </v-alert>
-                  <v-btn block variant="text" to="/auth/login">Back to Login</v-btn>
+                  <v-btn block variant="text" to="/auth/login">{{ t('auth.forgotPassword.backToLogin') }}</v-btn>
                 </div>
 
                 <v-form v-else @submit.prevent="submit">
@@ -64,7 +65,7 @@ const submit = async () => {
 
                   <v-text-field
                     v-model="email"
-                    label="Email Address"
+                    :label="t('auth.forgotPassword.emailLabel')"
                     type="email"
                     prepend-inner-icon="mdi-email-outline"
                     autocomplete="email"
@@ -80,11 +81,11 @@ const submit = async () => {
                     :loading="loading"
                     :disabled="!email || loading"
                   >
-                    Send Reset Link
+                    {{ t('auth.forgotPassword.sendButton') }}
                   </v-btn>
 
                   <div class="text-center mt-4">
-                    <v-btn variant="text" size="small" to="/auth/login">Back to Login</v-btn>
+                    <v-btn variant="text" size="small" to="/auth/login">{{ t('auth.forgotPassword.backToLogin') }}</v-btn>
                   </div>
                 </v-form>
               </v-card-item>
