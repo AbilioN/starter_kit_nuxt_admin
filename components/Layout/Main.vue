@@ -13,10 +13,10 @@ const sDrawer = ref(true);
     v-model="sDrawer"
     app
     class="leftSidebar bg-containerBg"
-    elevation="10"
+    elevation="0"
     width="270"
   >
-    <div class="pa-5 pl-4">
+    <div class="pa-5 pl-4 sidebar-brand">
       <LayoutFullLogoDark />
     </div>
     <!-- ---------------------------------------------- -->

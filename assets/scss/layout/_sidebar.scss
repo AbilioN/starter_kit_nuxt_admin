@@ -3,6 +3,7 @@
     height: 100%;
     overflow: hidden;
     top: 0 !important;
+    border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 
     @media screen and (max-width:1279px) {
         height: 100% !important;
@@ -19,6 +20,20 @@
         font-weight: 500;
     }
 
+    .sidebar-brand {
+        position: relative;
+
+        &::after {
+            content: "";
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            bottom: -1px;
+            height: 1px;
+            background: rgba(var(--v-border-color), var(--v-border-opacity));
+        }
+    }
+
     .profile-name {
         background: rgba(0, 0, 0, 0.5);
 
@@ -26,21 +41,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
-        }
-    }
-
-    .bg-hover-primary {
-        &:hover {
-
-            .iconify,
-            .v-icon {
-                color: rgb(var(--v-theme-primary));
-            }
-
-            .v-list-item-title {
-                color: rgb(var(--v-theme-primary));
-            }
-
         }
     }
 }
@@ -69,26 +69,35 @@
     }
 
     .smallCap {
-        padding: 3px 12px 12px 0px !important;
-        font-weight: 500;
-        margin-top: 24px;
-        color: rgb(var(--v-theme-grey200));
+        padding: 3px 12px 8px 4px !important;
+        font-weight: 600;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        margin-top: 26px;
+        color: rgb(var(--v-theme-grey100));
 
         &:first-child {
-            margin-top: 0 !important;
+            margin-top: 4px !important;
         }
     }
 
     /*General Menu css*/
     .v-list-group__items .v-list-item,
     .v-list-item {
-        border-radius: $border-radius-root + 3px;
+        position: relative;
+        overflow: hidden;
+        // !important: Vuetify's own .rounded-0 utility class ships with
+        // border-radius: 0 !important on list items by default.
+        // Square on the left (where the accent bar lives, flush with no
+        // corner clipping it), rounded on the right — a "flag" shape rather
+        // than a plain rounded pill.
+        border-radius: 0 #{$border-radius-root + 2px} #{$border-radius-root + 2px} 0 !important;
         padding-inline-start: calc(12px + var(--indent-padding) / 10) !important;
-        margin: 0 0 2px;
+        margin: 0 0 3px;
+        transition: background-color 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 
         .v-list-item__prepend {
             margin-inline-end: 13px;
-            // position: relative;
             z-index: 2;
         }
 
@@ -99,6 +108,18 @@
             .v-icon {
                 margin-inline-start: 13px;
             }
+        }
+    }
+
+    /* Entrance stagger — nav items ease in one after another the first time
+       the sidebar mounts, instead of appearing all at once. */
+    .v-list > * {
+        animation: sidebarItemIn 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @for $i from 1 through 20 {
+        .v-list > *:nth-child(#{$i}) {
+            animation-delay: #{$i * 28}ms;
         }
     }
 
@@ -121,12 +142,6 @@
         >.v-list-group {
             position: relative;
 
-            >.v-list-item--active,
-            >.v-list-item--active:hover {
-                background: transparent;
-                color: white;
-            }
-
             .v-list-group__items .v-list-item.v-list-item--active,
             .v-list-group__items .v-list-item.v-list-item--active>.v-list-item__overlay {
                 background: transparent;
@@ -140,13 +155,15 @@
         }
 
         .icon-box {
-            height: 40px;
-            width: 40px;
+            height: 36px;
+            width: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: $border-radius-root + 3px;
-            transition: all 0.2s ease-in-out;
+            border-radius: $border-radius-root;
+            color: rgb(var(--v-theme-textSecondary));
+            background-color: transparent;
+            transition: background-color 0.25s ease, color 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .v-list-item--density-default.v-list-item--one-line {
@@ -164,111 +181,141 @@
             z-index: 2;
         }
 
-        .bg-hover-primary::before {
-            background-color: rgba(var(--v-theme-primary), 12%);
-        }
-
-        .bgicn-hover-primary {
-            background-color: rgba(var(--v-theme-primary), 12%);
-        }
-
-        .bgicn-hover-primary {
-            &::before {
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                content: "";
-                width: 40px;
-                height: 100%;
-                transition: all 0.4s ease-in-out;
-                z-index: 1;
-                border-radius: 10px;
-                left: 0;
-            }
-
-            &:hover::before {
-                z-index: 1;
-            }
-
-            &.v-list-item--active::before {
-                z-index: 1;
-            }
-        }
-
+        // Left accent bar — contained inside the item, replaces the old
+        // rounded pill that bled past the padding into the page content.
         .v-list-item {
-            .navbox {
-                &:before {
-                    position: absolute;
-                    top: 0;
-                    bottom: 0;
-                    content: "";
-                    width: 0;
-                    height: 100%;
-                    transition: all 0.4s ease-in-out;
-                    z-index: 1;
-                    border-radius: 0px;
-                    left: -16px;
-                    width: 0;
+            &::before {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 50%;
+                width: 3px;
+                height: 60%;
+                border-radius: 0 3px 3px 0;
+                background: rgb(var(--v-theme-primary));
+                transform: translateY(-50%) scaleY(0);
+                transform-origin: center;
+                transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+                z-index: 1;
+            }
+
+            &:hover {
+                background-color: rgba(var(--v-theme-primary), 0.06);
+                transform: translateX(3px);
+
+                .icon-box {
+                    background-color: rgba(var(--v-theme-primary), 0.12);
+                    color: rgb(var(--v-theme-primary));
+                    transform: scale(1.08);
+                }
+
+                .v-list-item-title {
+                    color: rgb(var(--v-theme-primary));
                 }
             }
 
             &.v-list-item--active {
-                .navbox {
-                    &:before {
-                        width: calc(100% + 16px);
-                        border-radius: 0 24px 24px 0;
-                    }
+                background-color: rgba(var(--v-theme-primary), 0.1);
 
-                    .bgicn-hover-primary {
-                        background-color: rgba(var(--v-theme-primary), 0%);
-                    }
+                &::before {
+                    transform: translateY(-50%) scaleY(1);
                 }
 
+                .icon-box {
+                    background-color: rgb(var(--v-theme-primary));
+                    color: rgb(var(--v-theme-on-primary, 255, 255, 255));
+                }
+
+                .v-list-item-title {
+                    color: rgb(var(--v-theme-primary));
+                    font-weight: 600;
+                }
+            }
+        }
+
+        // The group *activator* (e.g. "Settings") only opens/closes a
+        // submenu — being expanded isn't the same as being on that route, so
+        // it never gets the strong "current page" treatment above. Vuetify
+        // marks it with .v-list-group__header (not a plain child .v-list-item
+        // one level down, which is what the old template assumed and why
+        // this guard never actually matched anything).
+        .v-list-group__header.v-list-item--active,
+        .v-list-group__header.v-list-item--active:hover {
+            background: transparent !important;
+            transform: none;
+
+            &::before {
+                transform: translateY(-50%) scaleY(0);
             }
 
-            &:hover {
-                .navbox {
-                    &:before {
-                        width: calc(100% + 16px);
-                        border-radius: 0 24px 24px 0;
-                    }
+            .icon-box {
+                background-color: transparent !important;
+                color: rgb(var(--v-theme-textSecondary));
+            }
 
-                    .texthover-primary {
-                        color: rgb(var(--v-theme-primary));
-                    }
-
-                    .bgicn-hover-primary {
-                        background-color: rgba(var(--v-theme-primary), 0%);
-                    }
-                }
+            .v-list-item-title {
+                color: rgb(var(--v-theme-textPrimary));
+                font-weight: 500;
             }
         }
 
         .sublinks {
             .v-list-item {
-
+                transition: transform 0.2s ease;
 
                 .sublink-dot {
                     height: 6px;
                     width: 6px;
                     border-radius: 100%;
                     background-color: rgb(var(--v-theme-textSecondary));
-                    opacity: 0.7;
+                    opacity: 0.6;
+                    transition: opacity 0.2s ease, transform 0.2s ease;
                 }
+
                 .v-list-item-title {
-                    opacity: 0.7;
+                    opacity: 0.75;
+                    transition: opacity 0.2s ease, color 0.2s ease;
                 }
 
                 &:hover {
-                    .sublink-dot,.v-list-item-title {
+                    transform: translateX(3px);
+
+                    .sublink-dot {
+                        opacity: 1;
+                        transform: scale(1.3);
+                        background-color: rgb(var(--v-theme-primary));
+                    }
+
+                    .v-list-item-title {
                         opacity: 1;
                     }
                 }
 
-              
+                &.v-list-item--active {
+                    .sublink-dot {
+                        opacity: 1;
+                        background-color: rgb(var(--v-theme-primary));
+                    }
+
+                    .v-list-item-title {
+                        opacity: 1;
+                    }
+                }
             }
         }
 
+    }
+}
+
+@keyframes sidebarItemIn {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
 }
 
