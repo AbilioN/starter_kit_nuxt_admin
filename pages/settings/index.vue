@@ -25,7 +25,6 @@ const {
   updateBranding,
   updateSubscriptionPlan,
 } = useTenantSettings();
-const { uploadFile, uploading: logoUploading } = useFiles();
 
 // Active tab
 const activeTab = ref('general');
@@ -60,17 +59,10 @@ const onLogoInputChange = (e: Event) => {
 };
 
 const saveBranding = async () => {
-  let logo_path: string | undefined;
-  if (logoFile.value) {
-    const uploaded = await uploadFile(logoFile.value, 'branding');
-    // The branding endpoint stores a storage path, not a public URL — the
-    // file's id is the closest match this app's File API currently exposes.
-    logo_path = uploaded?.id;
-  }
   const ok = await updateBranding({
     theme_primary_color: brandingForm.theme_primary_color || undefined,
     theme_secondary_color: brandingForm.theme_secondary_color || undefined,
-    logo_path,
+    logo: logoFile.value ?? undefined,
   });
   if (ok) logoFile.value = null;
 };
@@ -209,7 +201,7 @@ onMounted(() => loadSettings());
             <v-divider class="my-4" />
             <v-btn
               color="primary"
-              :loading="tenantSaving || logoUploading"
+              :loading="tenantSaving"
               prepend-icon="mdi-content-save-outline"
               @click="saveBranding"
             >

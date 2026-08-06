@@ -13,6 +13,8 @@ import type {
 
 export class TenantRepository {
   private apiClient: ApiClient;
+  private baseURL = getApiConfig().baseURL;
+  private tenantQueryParam = getApiConfig().tenantQueryParam;
 
   constructor() {
     this.apiClient = new ApiClient();
@@ -27,12 +29,31 @@ export class TenantRepository {
     return response.data;
   }
 
+  // multipart/form-data (may carry a logo file) — PHP doesn't parse
+  // multipart bodies on native PATCH, so this is a real POST with a spoofed
+  // _method field, same convention FileRepository.uploadFile() uses.
   async updateBranding(data: UpdateTenantBrandingRequest): Promise<TenantBranding> {
-    const response = await this.apiClient.patch<UpdateTenantBrandingResponse>(
-      API_CONFIG.ENDPOINTS.TENANT_BRANDING,
-      data
-    );
-    return response.data;
+    const token = process.client ? localStorage.getItem('auth_token') : null;
+    const formData = new FormData();
+    formData.append('_method', 'PATCH');
+    if (data.theme_primary_color) formData.append('theme_primary_color', data.theme_primary_color);
+    if (data.theme_secondary_color) formData.append('theme_secondary_color', data.theme_secondary_color);
+    if (data.logo) formData.append('logo', data.logo);
+    else if (data.logo_path) formData.append('logo_path', data.logo_path);
+
+    const url = appendTenantQueryParam(`${this.baseURL}${API_CONFIG.ENDPOINTS.TENANT_BRANDING}`, this.tenantQueryParam);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token ?? ''}`, Accept: 'application/json' },
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({})) as { message?: string };
+      throw new Error(body.message ?? `Branding update failed: ${res.status}`);
+    }
+    const json = await res.json() as UpdateTenantBrandingResponse;
+    return json.data;
   }
 
   async updateSubscriptionPlan(data: UpdateSubscriptionPlanRequest): Promise<boolean> {

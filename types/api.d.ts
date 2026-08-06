@@ -266,13 +266,15 @@ export interface TenantThemeResponse {
 export interface UpdateTenantBrandingRequest {
   theme_primary_color?: string;
   theme_secondary_color?: string;
-  logo_path?: string;
+  logo?: File; // send the raw file — takes precedence over logo_path if both are set
+  logo_path?: string; // only for reassigning an already-hosted path; normally send `logo` instead
 }
 
 export interface TenantBranding {
   theme_primary_color: string | null;
   theme_secondary_color: string | null;
   logo_path: string | null;
+  logo_url: string | null;
 }
 
 export interface UpdateTenantBrandingResponse {
