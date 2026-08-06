@@ -100,6 +100,25 @@ export const buildLandlordApiOrigin = (rootDomain: string, protocol: string): st
 export const getTenantQueryParam = (): string | null =>
   getTenantMode() === 'query' ? resolveTenant() : null;
 
+/**
+ * Browser-navigation target for a *specific, known* tenant (post-signup
+ * redirect, "find my workspace" login) — not an API call, so it's built
+ * against the frontend's own window.location, not the backend API host.
+ * Real subdomains aren't set up yet (no wildcard DNS/hosts entries), so in
+ * "query" mode this deliberately ignores any subdomain-based URL the
+ * backend might suggest and always targets the current host with
+ * ?tenant= instead - that's the only thing that actually resolves today.
+ */
+export const buildTenantEntryUrl = (subdomain: string, path: string = '/auth/login'): string => {
+  if (typeof window === 'undefined') return path;
+
+  const { protocol, host } = window.location;
+
+  return getTenantMode() === 'query'
+    ? `${protocol}//${host}${path}?tenant=${encodeURIComponent(subdomain)}`
+    : `${protocol}//${subdomain}.${host}${path}`;
+};
+
 export const appendTenantQueryParam = (url: string, tenant: string | null): string => {
   if (!tenant) return url;
   const separator = url.includes('?') ? '&' : '?';

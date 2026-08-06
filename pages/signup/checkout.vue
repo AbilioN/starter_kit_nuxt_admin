@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicSubscriptionPlan } from '~/types/api';
 import { PublicPlansService } from '~/services/PublicPlansService';
+import { buildTenantEntryUrl } from '~/utils/tenant';
 
 definePageMeta({
   layout: 'public',
@@ -72,7 +73,10 @@ const submit = async () => {
     return;
   }
 
-  window.location.href = result.data.redirect_url;
+  // Ignore the backend's subdomain-based redirect_url — real subdomains
+  // aren't wired up yet (no wildcard DNS/hosts entries), so build the URL
+  // the same tenant-mode-aware way the "find my workspace" login page does.
+  window.location.href = buildTenantEntryUrl(result.data.subdomain);
 };
 </script>
 
