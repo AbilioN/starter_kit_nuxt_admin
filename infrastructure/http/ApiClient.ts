@@ -1,10 +1,11 @@
 import type { IHttpClient, RequestConfig } from '~/types/domain';
 import { getApiConfig } from '~/config/api';
-import { appendTenantQueryParam, getTenantSubdomain } from '~/utils/tenant';
+import { appendTenantQueryParam, getTenantSubdomain, isTenantSuspendedError, redirectToSuspendedPage } from '~/utils/tenant';
 
 interface ApiErrorResponse {
   message: string;
   errors?: Record<string, string[]>;
+  error?: string;
 }
 
 export class ApiClient implements IHttpClient {
@@ -99,6 +100,14 @@ export class ApiClient implements IHttpClient {
 
         if (isJson) {
           const errorData = await response.json() as ApiErrorResponse;
+
+          if (response.status === 403 && isTenantSuspendedError(errorData)) {
+            if (process.client) {
+              redirectToSuspendedPage();
+            }
+            throw new Error(errorData.message || 'Tenant suspended.');
+          }
+
           throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         } else {
           throw new Error(`HTTP error! status: ${response.status}`);

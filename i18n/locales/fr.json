@@ -353,6 +353,11 @@
       "enabled": "Activée",
       "disabled": "Désactivée",
       "readOnlyNotice": "Vous avez un accès en lecture seule aux feature flags."
+    },
+    "suspended": {
+      "title": "Espace de travail suspendu",
+      "message": "Cet espace de travail a été suspendu. Veuillez contacter le support pour plus d'informations.",
+      "supportHint": "Si vous pensez qu'il s'agit d'une erreur, contactez l'administrateur de votre compte ou notre équipe de support."
     }
   },
   "components": {

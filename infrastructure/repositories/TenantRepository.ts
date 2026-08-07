@@ -1,6 +1,6 @@
 import { ApiClient } from '../http/ApiClient';
 import { getApiConfig, API_CONFIG } from '~/config/api';
-import { appendTenantQueryParam } from '~/utils/tenant';
+import { appendTenantQueryParam, isTenantSuspendedError, redirectToSuspendedPage } from '~/utils/tenant';
 import type {
   TenantTheme,
   TenantThemeResponse,
@@ -25,8 +25,18 @@ export class TenantRepository {
   async getTheme(): Promise<TenantTheme> {
     const { publicBaseURL, tenantQueryParam } = getApiConfig();
     const url = appendTenantQueryParam(`${publicBaseURL}${API_CONFIG.ENDPOINTS.TENANT_THEME}`, tenantQueryParam);
-    const response = await $fetch<TenantThemeResponse>(url, { timeout: 5000 });
-    return response.data;
+    try {
+      const response = await $fetch<TenantThemeResponse>(url, { timeout: 5000 });
+      return response.data;
+    } catch (error: any) {
+      // This uses $fetch (ofetch) directly, not ApiClient, so it needs its
+      // own tenant_suspended interception — ofetch parses the error body
+      // into error.data, same shape as pages/auth/*-password.vue reads err?.data?.message.
+      if (isTenantSuspendedError(error?.data)) {
+        redirectToSuspendedPage();
+      }
+      throw error;
+    }
   }
 
   // multipart/form-data (may carry a logo file) — PHP doesn't parse

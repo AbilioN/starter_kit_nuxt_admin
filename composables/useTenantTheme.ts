@@ -37,6 +37,9 @@ export const useTenantTheme = () => {
       }
     } catch {
       // Non-critical — branding is a progressive enhancement, never block the app on it.
+      // tenant_suspended is the one exception, but it's already intercepted
+      // upstream in TenantRepository.getTheme() (hard-redirects to /suspended
+      // before this catch ever sees it) — nothing left to do here for that case.
     } finally {
       loading.value = false;
     }

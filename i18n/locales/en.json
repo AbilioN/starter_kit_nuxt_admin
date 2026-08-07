@@ -353,6 +353,11 @@
       "enabled": "Enabled",
       "disabled": "Disabled",
       "readOnlyNotice": "You have read-only access to feature flags."
+    },
+    "suspended": {
+      "title": "Workspace suspended",
+      "message": "This workspace has been suspended. Please contact support for more information.",
+      "supportHint": "If you believe this is a mistake, reach out to your account administrator or our support team."
     }
   },
   "components": {

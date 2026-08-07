@@ -124,3 +124,23 @@ export const appendTenantQueryParam = (url: string, tenant: string | null): stri
   const separator = url.includes('?') ? '&' : '?';
   return `${url}${separator}tenant=${encodeURIComponent(tenant)}`;
 };
+
+/**
+ * A suspended tenant makes every request under tenant.identify (practically
+ * the whole API) come back 403 with this machine-readable `error` field —
+ * see docs/2026-08-07_tenant-suspended-screen-prompt.md. Check this field,
+ * never string-match `message` (that's free text and can change).
+ */
+export const isTenantSuspendedError = (payload: unknown): boolean =>
+  typeof payload === 'object' && payload !== null && (payload as any).error === 'tenant_suspended';
+
+/**
+ * Hard-redirects to the "workspace suspended" page, preserving the current
+ * tenant the same way the existing 401 handler in ApiClient does — so the
+ * address bar (and dev query-mode override) doesn't silently lose it.
+ */
+export const redirectToSuspendedPage = (): void => {
+  if (typeof window === 'undefined') return;
+  const tenant = getTenantSubdomain();
+  window.location.href = tenant ? `/suspended?tenant=${encodeURIComponent(tenant)}` : '/suspended';
+};
