@@ -10,6 +10,7 @@
     "auditLogs": "Journaux d'audit",
     "chats": "Discussions",
     "files": "Fichiers",
+    "templates": "Modèles",
     "notifications": "Notifications",
     "settings": "Paramètres",
     "settingsGeneral": "Général",
@@ -292,6 +293,42 @@
       "noPreview": "Aperçu non disponible",
       "noPreviewHint": "Téléchargez le fichier pour l'ouvrir."
     },
+    "templates": {
+      "title": "Modèles",
+      "subtitle": "Gérez les modèles d'email, SMS, PDF et prompt IA",
+      "createTemplate": "Nouveau Modèle",
+      "createSubtitle": "Définissez un modèle réutilisable avec des espaces réservés de fusion",
+      "editTemplate": "Modifier le Modèle",
+      "noPermission": "Vous n'avez pas la permission de voir les modèles.",
+      "filters": "Filtres",
+      "searchPlaceholder": "Rechercher par nom ou description",
+      "allTypes": "Tous les Types",
+      "templatesFound": "{count} modèle(s) trouvé(s)",
+      "listTitle": "Modèles",
+      "noTemplatesFound": "Aucun modèle pour l'instant",
+      "totalTemplates": "{count} modèle(s) au total",
+      "tableUpdated": "Mis à jour",
+      "typeTextEmail": "Email Texte",
+      "typeSms": "SMS",
+      "typeHtmlEmail": "Email HTML",
+      "typePdf": "PDF",
+      "typeAiPrompt": "Prompt IA",
+      "nameLabel": "Nom",
+      "subjectLabel": "Objet",
+      "bodyLabel": "Contenu",
+      "bodyPlaceholder": "Bonjour {'{'}first_name{'}'}, ...",
+      "placeholderHint": "Utilisez {'{'}field{'}'} pour insérer une valeur, {'{'}field!{'}'} pour le rendre obligatoire, {'{'}{'@'}id{'}'} pour inclure un autre modèle, et {'{'}prompt:key{'}'} pour une valeur de prompt IA.",
+      "activeSwitch": "Actif",
+      "lockedSwitch": "Verrouillé (évite les modifications accidentelles)",
+      "senderLabel": "Expéditeur personnalisé",
+      "senderHint": "Optionnel — remplace l'expéditeur par défaut de ce modèle",
+      "typeImmutableHint": "Le type ne peut pas être modifié après la création",
+      "saveFailed": "Échec de l'enregistrement du modèle",
+      "notFound": "Modèle non trouvé",
+      "previewButton": "Aperçu",
+      "deleteDialogTitle": "Supprimer le modèle ?",
+      "deleteConfirmBody": "Cette action est irréversible."
+    },
     "notifications": {
       "title": "Notifications",
       "subtitle": "Vos notifications et alertes système",
@@ -414,30 +451,102 @@
       "file": "Fichiers"
     },
     "items": {
-      "admin-create": { "name": "Créer un administrateur", "description": "Permet de créer de nouveaux administrateurs" },
-      "admin-read": { "name": "Voir l'administrateur", "description": "Permet de voir les informations de l'administrateur" },
-      "admin-update": { "name": "Modifier l'administrateur", "description": "Permet de modifier les informations de l'administrateur" },
-      "admin-delete": { "name": "Supprimer l'administrateur", "description": "Permet de supprimer des administrateurs" },
-      "admin-manage": { "name": "Gérer les administrateurs", "description": "Permet de gérer tous les aspects des administrateurs" },
-      "user-create": { "name": "Créer un utilisateur", "description": "Permet de créer de nouveaux utilisateurs" },
-      "user-read": { "name": "Voir l'utilisateur", "description": "Permet de voir les informations de l'utilisateur" },
-      "user-update": { "name": "Modifier l'utilisateur", "description": "Permet de modifier les informations de l'utilisateur" },
-      "user-delete": { "name": "Supprimer l'utilisateur", "description": "Permet de supprimer des utilisateurs" },
-      "chat-manage": { "name": "Gérer les discussions", "description": "Permet de gérer les discussions et les messages" },
-      "chat-read": { "name": "Voir les discussions", "description": "Permet de voir les discussions et les messages" },
-      "role-assign": { "name": "Attribuer des rôles", "description": "Permet d'attribuer des rôles aux utilisateurs et administrateurs" },
-      "role-manage": { "name": "Gérer les rôles", "description": "Permet de créer, modifier et supprimer des rôles" },
-      "role-read": { "name": "Voir le rôle", "description": "Permet de voir les rôles" },
-      "role-delete": { "name": "Supprimer le rôle", "description": "Permet de supprimer des rôles" },
-      "role-create": { "name": "Créer un rôle", "description": "Permet de créer des rôles" },
-      "role-update": { "name": "Mettre à jour le rôle", "description": "Permet de mettre à jour des rôles" },
-      "role-unassign": { "name": "Retirer un rôle", "description": "Permet de retirer des rôles aux utilisateurs et administrateurs" },
-      "audit-read": { "name": "Voir les journaux d'audit", "description": "Permet de voir les journaux d'audit et l'historique d'activité du système" },
-      "setting-read": { "name": "Voir les paramètres", "description": "Permet de voir les paramètres de l'application" },
-      "setting-update": { "name": "Mettre à jour les paramètres", "description": "Permet de mettre à jour les paramètres de l'application" },
-      "file-read": { "name": "Voir les fichiers", "description": "Permet de voir et lister les fichiers téléversés" },
-      "file-upload": { "name": "Téléverser des fichiers", "description": "Permet de téléverser des fichiers" },
-      "file-delete": { "name": "Supprimer des fichiers", "description": "Permet de supprimer des fichiers" }
+      "admin-create": {
+        "name": "Créer un administrateur",
+        "description": "Permet de créer de nouveaux administrateurs"
+      },
+      "admin-read": {
+        "name": "Voir l'administrateur",
+        "description": "Permet de voir les informations de l'administrateur"
+      },
+      "admin-update": {
+        "name": "Modifier l'administrateur",
+        "description": "Permet de modifier les informations de l'administrateur"
+      },
+      "admin-delete": {
+        "name": "Supprimer l'administrateur",
+        "description": "Permet de supprimer des administrateurs"
+      },
+      "admin-manage": {
+        "name": "Gérer les administrateurs",
+        "description": "Permet de gérer tous les aspects des administrateurs"
+      },
+      "user-create": {
+        "name": "Créer un utilisateur",
+        "description": "Permet de créer de nouveaux utilisateurs"
+      },
+      "user-read": {
+        "name": "Voir l'utilisateur",
+        "description": "Permet de voir les informations de l'utilisateur"
+      },
+      "user-update": {
+        "name": "Modifier l'utilisateur",
+        "description": "Permet de modifier les informations de l'utilisateur"
+      },
+      "user-delete": {
+        "name": "Supprimer l'utilisateur",
+        "description": "Permet de supprimer des utilisateurs"
+      },
+      "chat-manage": {
+        "name": "Gérer les discussions",
+        "description": "Permet de gérer les discussions et les messages"
+      },
+      "chat-read": {
+        "name": "Voir les discussions",
+        "description": "Permet de voir les discussions et les messages"
+      },
+      "role-assign": {
+        "name": "Attribuer des rôles",
+        "description": "Permet d'attribuer des rôles aux utilisateurs et administrateurs"
+      },
+      "role-manage": {
+        "name": "Gérer les rôles",
+        "description": "Permet de créer, modifier et supprimer des rôles"
+      },
+      "role-read": {
+        "name": "Voir le rôle",
+        "description": "Permet de voir les rôles"
+      },
+      "role-delete": {
+        "name": "Supprimer le rôle",
+        "description": "Permet de supprimer des rôles"
+      },
+      "role-create": {
+        "name": "Créer un rôle",
+        "description": "Permet de créer des rôles"
+      },
+      "role-update": {
+        "name": "Mettre à jour le rôle",
+        "description": "Permet de mettre à jour des rôles"
+      },
+      "role-unassign": {
+        "name": "Retirer un rôle",
+        "description": "Permet de retirer des rôles aux utilisateurs et administrateurs"
+      },
+      "audit-read": {
+        "name": "Voir les journaux d'audit",
+        "description": "Permet de voir les journaux d'audit et l'historique d'activité du système"
+      },
+      "setting-read": {
+        "name": "Voir les paramètres",
+        "description": "Permet de voir les paramètres de l'application"
+      },
+      "setting-update": {
+        "name": "Mettre à jour les paramètres",
+        "description": "Permet de mettre à jour les paramètres de l'application"
+      },
+      "file-read": {
+        "name": "Voir les fichiers",
+        "description": "Permet de voir et lister les fichiers téléversés"
+      },
+      "file-upload": {
+        "name": "Téléverser des fichiers",
+        "description": "Permet de téléverser des fichiers"
+      },
+      "file-delete": {
+        "name": "Supprimer des fichiers",
+        "description": "Permet de supprimer des fichiers"
+      }
     }
   }
 }

@@ -70,6 +70,12 @@ const sidebarItem: menu[] = [
     permission: "file-read",
   },
   {
+    title: "nav.templates",
+    icon: "document-text-linear",
+    to: "/templates",
+    permission: "template-read",
+  },
+  {
     title: "nav.notifications",
     icon: "bell-outline",
     to: "/notifications",

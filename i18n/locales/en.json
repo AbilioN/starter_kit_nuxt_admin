@@ -10,6 +10,7 @@
     "auditLogs": "Audit Logs",
     "chats": "Chats",
     "files": "Files",
+    "templates": "Templates",
     "notifications": "Notifications",
     "settings": "Settings",
     "settingsGeneral": "General",
@@ -292,6 +293,42 @@
       "noPreview": "No preview available",
       "noPreviewHint": "Download the file to open it."
     },
+    "templates": {
+      "title": "Templates",
+      "subtitle": "Manage email, SMS, PDF and AI-prompt templates",
+      "createTemplate": "New Template",
+      "createSubtitle": "Define a reusable template with merge placeholders",
+      "editTemplate": "Edit Template",
+      "noPermission": "You don't have permission to view templates.",
+      "filters": "Filters",
+      "searchPlaceholder": "Search by name or description",
+      "allTypes": "All Types",
+      "templatesFound": "{count} template(s) found",
+      "listTitle": "Templates",
+      "noTemplatesFound": "No templates yet",
+      "totalTemplates": "{count} template(s) total",
+      "tableUpdated": "Updated",
+      "typeTextEmail": "Text Email",
+      "typeSms": "SMS",
+      "typeHtmlEmail": "HTML Email",
+      "typePdf": "PDF",
+      "typeAiPrompt": "AI Prompt",
+      "nameLabel": "Name",
+      "subjectLabel": "Subject",
+      "bodyLabel": "Body",
+      "bodyPlaceholder": "Hello {'{'}first_name{'}'}, ...",
+      "placeholderHint": "Use {'{'}field{'}'} to insert a value, {'{'}field!{'}'} to require it, {'{'}{'@'}id{'}'} to include another template, and {'{'}prompt:key{'}'} for an AI prompt value.",
+      "activeSwitch": "Active",
+      "lockedSwitch": "Locked (prevents accidental edits downstream)",
+      "senderLabel": "Sender override",
+      "senderHint": "Optional — overrides the default sender for this template",
+      "typeImmutableHint": "Type can't be changed after creation",
+      "saveFailed": "Failed to save template",
+      "notFound": "Template not found",
+      "previewButton": "Preview",
+      "deleteDialogTitle": "Delete template?",
+      "deleteConfirmBody": "This action cannot be undone."
+    },
     "notifications": {
       "title": "Notifications",
       "subtitle": "Your system notifications and alerts",
@@ -414,30 +451,102 @@
       "file": "Files"
     },
     "items": {
-      "admin-create": { "name": "Create Administrator", "description": "Allows creating new administrators" },
-      "admin-read": { "name": "View Administrator", "description": "Allows viewing administrator information" },
-      "admin-update": { "name": "Edit Administrator", "description": "Allows editing administrator information" },
-      "admin-delete": { "name": "Delete Administrator", "description": "Allows deleting administrators" },
-      "admin-manage": { "name": "Manage Administrators", "description": "Allows managing all aspects of administrators" },
-      "user-create": { "name": "Create User", "description": "Allows creating new users" },
-      "user-read": { "name": "View User", "description": "Allows viewing user information" },
-      "user-update": { "name": "Edit User", "description": "Allows editing user information" },
-      "user-delete": { "name": "Delete User", "description": "Allows deleting users" },
-      "chat-manage": { "name": "Manage Chat", "description": "Allows managing chats and messages" },
-      "chat-read": { "name": "View Chat", "description": "Allows viewing chats and messages" },
-      "role-assign": { "name": "Assign Roles", "description": "Allows assigning roles to users and administrators" },
-      "role-manage": { "name": "Manage Roles", "description": "Allows creating, editing and deleting roles" },
-      "role-read": { "name": "View Role", "description": "Allows viewing roles" },
-      "role-delete": { "name": "Delete Role", "description": "Allows deleting roles" },
-      "role-create": { "name": "Create Role", "description": "Allows creating roles" },
-      "role-update": { "name": "Update Role", "description": "Allows updating roles" },
-      "role-unassign": { "name": "Unassign Role", "description": "Allows unassigning roles from users and administrators" },
-      "audit-read": { "name": "View Audit Logs", "description": "Allows viewing audit logs and system activity history" },
-      "setting-read": { "name": "View Settings", "description": "Allows viewing application settings" },
-      "setting-update": { "name": "Update Settings", "description": "Allows updating application settings" },
-      "file-read": { "name": "View Files", "description": "Allows viewing and listing uploaded files" },
-      "file-upload": { "name": "Upload Files", "description": "Allows uploading files" },
-      "file-delete": { "name": "Delete Files", "description": "Allows deleting files" }
+      "admin-create": {
+        "name": "Create Administrator",
+        "description": "Allows creating new administrators"
+      },
+      "admin-read": {
+        "name": "View Administrator",
+        "description": "Allows viewing administrator information"
+      },
+      "admin-update": {
+        "name": "Edit Administrator",
+        "description": "Allows editing administrator information"
+      },
+      "admin-delete": {
+        "name": "Delete Administrator",
+        "description": "Allows deleting administrators"
+      },
+      "admin-manage": {
+        "name": "Manage Administrators",
+        "description": "Allows managing all aspects of administrators"
+      },
+      "user-create": {
+        "name": "Create User",
+        "description": "Allows creating new users"
+      },
+      "user-read": {
+        "name": "View User",
+        "description": "Allows viewing user information"
+      },
+      "user-update": {
+        "name": "Edit User",
+        "description": "Allows editing user information"
+      },
+      "user-delete": {
+        "name": "Delete User",
+        "description": "Allows deleting users"
+      },
+      "chat-manage": {
+        "name": "Manage Chat",
+        "description": "Allows managing chats and messages"
+      },
+      "chat-read": {
+        "name": "View Chat",
+        "description": "Allows viewing chats and messages"
+      },
+      "role-assign": {
+        "name": "Assign Roles",
+        "description": "Allows assigning roles to users and administrators"
+      },
+      "role-manage": {
+        "name": "Manage Roles",
+        "description": "Allows creating, editing and deleting roles"
+      },
+      "role-read": {
+        "name": "View Role",
+        "description": "Allows viewing roles"
+      },
+      "role-delete": {
+        "name": "Delete Role",
+        "description": "Allows deleting roles"
+      },
+      "role-create": {
+        "name": "Create Role",
+        "description": "Allows creating roles"
+      },
+      "role-update": {
+        "name": "Update Role",
+        "description": "Allows updating roles"
+      },
+      "role-unassign": {
+        "name": "Unassign Role",
+        "description": "Allows unassigning roles from users and administrators"
+      },
+      "audit-read": {
+        "name": "View Audit Logs",
+        "description": "Allows viewing audit logs and system activity history"
+      },
+      "setting-read": {
+        "name": "View Settings",
+        "description": "Allows viewing application settings"
+      },
+      "setting-update": {
+        "name": "Update Settings",
+        "description": "Allows updating application settings"
+      },
+      "file-read": {
+        "name": "View Files",
+        "description": "Allows viewing and listing uploaded files"
+      },
+      "file-upload": {
+        "name": "Upload Files",
+        "description": "Allows uploading files"
+      },
+      "file-delete": {
+        "name": "Delete Files",
+        "description": "Allows deleting files"
+      }
     }
   }
 }

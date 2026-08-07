@@ -10,6 +10,7 @@
     "auditLogs": "Logs de Auditoria",
     "chats": "Conversas",
     "files": "Arquivos",
+    "templates": "Templates",
     "notifications": "Notificações",
     "settings": "Configurações",
     "settingsGeneral": "Geral",
@@ -292,6 +293,42 @@
       "noPreview": "Pré-visualização não disponível",
       "noPreviewHint": "Transfira o ficheiro para o abrir."
     },
+    "templates": {
+      "title": "Templates",
+      "subtitle": "Gerencie templates de email, SMS, PDF e prompt de IA",
+      "createTemplate": "Novo Template",
+      "createSubtitle": "Defina um template reutilizável com placeholders de mesclagem",
+      "editTemplate": "Editar Template",
+      "noPermission": "Você não tem permissão para ver templates.",
+      "filters": "Filtros",
+      "searchPlaceholder": "Buscar por nome ou descrição",
+      "allTypes": "Todos os Tipos",
+      "templatesFound": "{count} template(s) encontrado(s)",
+      "listTitle": "Templates",
+      "noTemplatesFound": "Nenhum template ainda",
+      "totalTemplates": "{count} template(s) no total",
+      "tableUpdated": "Atualizado",
+      "typeTextEmail": "Email Texto",
+      "typeSms": "SMS",
+      "typeHtmlEmail": "Email HTML",
+      "typePdf": "PDF",
+      "typeAiPrompt": "Prompt de IA",
+      "nameLabel": "Nome",
+      "subjectLabel": "Assunto",
+      "bodyLabel": "Conteúdo",
+      "bodyPlaceholder": "Olá {'{'}first_name{'}'}, ...",
+      "placeholderHint": "Use {'{'}field{'}'} para inserir um valor, {'{'}field!{'}'} para exigi-lo, {'{'}{'@'}id{'}'} para incluir outro template, e {'{'}prompt:key{'}'} para um valor de prompt de IA.",
+      "activeSwitch": "Ativo",
+      "lockedSwitch": "Bloqueado (evita edições acidentais)",
+      "senderLabel": "Remetente customizado",
+      "senderHint": "Opcional — sobrepõe o remetente padrão deste template",
+      "typeImmutableHint": "O tipo não pode ser alterado após a criação",
+      "saveFailed": "Falha ao salvar o template",
+      "notFound": "Template não encontrado",
+      "previewButton": "Pré-visualizar",
+      "deleteDialogTitle": "Excluir template?",
+      "deleteConfirmBody": "Esta ação não pode ser desfeita."
+    },
     "notifications": {
       "title": "Notificações",
       "subtitle": "As suas notificações e alertas do sistema",
@@ -414,30 +451,102 @@
       "file": "Ficheiros"
     },
     "items": {
-      "admin-create": { "name": "Criar Administrador", "description": "Permite criar novos administradores" },
-      "admin-read": { "name": "Ver Administrador", "description": "Permite ver informação do administrador" },
-      "admin-update": { "name": "Editar Administrador", "description": "Permite editar informação do administrador" },
-      "admin-delete": { "name": "Eliminar Administrador", "description": "Permite eliminar administradores" },
-      "admin-manage": { "name": "Gerir Administradores", "description": "Permite gerir todos os aspetos dos administradores" },
-      "user-create": { "name": "Criar Utilizador", "description": "Permite criar novos utilizadores" },
-      "user-read": { "name": "Ver Utilizador", "description": "Permite ver informação do utilizador" },
-      "user-update": { "name": "Editar Utilizador", "description": "Permite editar informação do utilizador" },
-      "user-delete": { "name": "Eliminar Utilizador", "description": "Permite eliminar utilizadores" },
-      "chat-manage": { "name": "Gerir Conversas", "description": "Permite gerir conversas e mensagens" },
-      "chat-read": { "name": "Ver Conversas", "description": "Permite ver conversas e mensagens" },
-      "role-assign": { "name": "Atribuir Papéis", "description": "Permite atribuir papéis a utilizadores e administradores" },
-      "role-manage": { "name": "Gerir Papéis", "description": "Permite criar, editar e eliminar papéis" },
-      "role-read": { "name": "Ver Papel", "description": "Permite ver papéis" },
-      "role-delete": { "name": "Eliminar Papel", "description": "Permite eliminar papéis" },
-      "role-create": { "name": "Criar Papel", "description": "Permite criar papéis" },
-      "role-update": { "name": "Atualizar Papel", "description": "Permite atualizar papéis" },
-      "role-unassign": { "name": "Remover Atribuição de Papel", "description": "Permite remover a atribuição de papéis a utilizadores e administradores" },
-      "audit-read": { "name": "Ver Logs de Auditoria", "description": "Permite ver logs de auditoria e o histórico de atividade do sistema" },
-      "setting-read": { "name": "Ver Configurações", "description": "Permite ver as configurações da aplicação" },
-      "setting-update": { "name": "Atualizar Configurações", "description": "Permite atualizar as configurações da aplicação" },
-      "file-read": { "name": "Ver Ficheiros", "description": "Permite ver e listar os ficheiros carregados" },
-      "file-upload": { "name": "Carregar Ficheiros", "description": "Permite carregar ficheiros" },
-      "file-delete": { "name": "Eliminar Ficheiros", "description": "Permite eliminar ficheiros" }
+      "admin-create": {
+        "name": "Criar Administrador",
+        "description": "Permite criar novos administradores"
+      },
+      "admin-read": {
+        "name": "Ver Administrador",
+        "description": "Permite ver informação do administrador"
+      },
+      "admin-update": {
+        "name": "Editar Administrador",
+        "description": "Permite editar informação do administrador"
+      },
+      "admin-delete": {
+        "name": "Eliminar Administrador",
+        "description": "Permite eliminar administradores"
+      },
+      "admin-manage": {
+        "name": "Gerir Administradores",
+        "description": "Permite gerir todos os aspetos dos administradores"
+      },
+      "user-create": {
+        "name": "Criar Utilizador",
+        "description": "Permite criar novos utilizadores"
+      },
+      "user-read": {
+        "name": "Ver Utilizador",
+        "description": "Permite ver informação do utilizador"
+      },
+      "user-update": {
+        "name": "Editar Utilizador",
+        "description": "Permite editar informação do utilizador"
+      },
+      "user-delete": {
+        "name": "Eliminar Utilizador",
+        "description": "Permite eliminar utilizadores"
+      },
+      "chat-manage": {
+        "name": "Gerir Conversas",
+        "description": "Permite gerir conversas e mensagens"
+      },
+      "chat-read": {
+        "name": "Ver Conversas",
+        "description": "Permite ver conversas e mensagens"
+      },
+      "role-assign": {
+        "name": "Atribuir Papéis",
+        "description": "Permite atribuir papéis a utilizadores e administradores"
+      },
+      "role-manage": {
+        "name": "Gerir Papéis",
+        "description": "Permite criar, editar e eliminar papéis"
+      },
+      "role-read": {
+        "name": "Ver Papel",
+        "description": "Permite ver papéis"
+      },
+      "role-delete": {
+        "name": "Eliminar Papel",
+        "description": "Permite eliminar papéis"
+      },
+      "role-create": {
+        "name": "Criar Papel",
+        "description": "Permite criar papéis"
+      },
+      "role-update": {
+        "name": "Atualizar Papel",
+        "description": "Permite atualizar papéis"
+      },
+      "role-unassign": {
+        "name": "Remover Atribuição de Papel",
+        "description": "Permite remover a atribuição de papéis a utilizadores e administradores"
+      },
+      "audit-read": {
+        "name": "Ver Logs de Auditoria",
+        "description": "Permite ver logs de auditoria e o histórico de atividade do sistema"
+      },
+      "setting-read": {
+        "name": "Ver Configurações",
+        "description": "Permite ver as configurações da aplicação"
+      },
+      "setting-update": {
+        "name": "Atualizar Configurações",
+        "description": "Permite atualizar as configurações da aplicação"
+      },
+      "file-read": {
+        "name": "Ver Ficheiros",
+        "description": "Permite ver e listar os ficheiros carregados"
+      },
+      "file-upload": {
+        "name": "Carregar Ficheiros",
+        "description": "Permite carregar ficheiros"
+      },
+      "file-delete": {
+        "name": "Eliminar Ficheiros",
+        "description": "Permite eliminar ficheiros"
+      }
     }
   }
 }

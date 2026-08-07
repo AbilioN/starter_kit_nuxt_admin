@@ -333,3 +333,105 @@ export interface PublicSignupResponse {
   data: PublicSignupResult;
   message?: string;
 }
+
+// Tipos para o módulo de Templates (email texto/HTML, SMS, PDF, AI-prompt),
+// por tenant — ver docs do módulo em starter_kit_backend (TemplateController).
+export type TemplateType = 'text_email' | 'sms' | 'html_email' | 'pdf' | 'ai_prompt';
+export type TemplateBodyFormat = 'text' | 'html' | 'positions';
+
+export interface TemplateOptions {
+  sender?: string;
+  locked?: boolean;
+}
+
+export interface Template {
+  id: string;
+  name: string;
+  type: TemplateType;
+  body_format: TemplateBodyFormat;
+  body: string | null;
+  subject: string | null;
+  description: string | null;
+  is_active: boolean;
+  options: TemplateOptions | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TemplatesResponse {
+  success: boolean;
+  data: Template[];
+  pagination: Pagination;
+}
+
+export interface TemplateResponse {
+  success: boolean;
+  data: Template;
+}
+
+export interface CreateTemplateRequest {
+  name: string;
+  type: TemplateType;
+  body_format: TemplateBodyFormat;
+  body?: string | null;
+  subject?: string | null;
+  description?: string | null;
+  is_active?: boolean;
+  options?: TemplateOptions;
+}
+
+export interface UpdateTemplateRequest {
+  name?: string;
+  body_format?: TemplateBodyFormat;
+  body?: string | null;
+  subject?: string | null;
+  description?: string | null;
+  is_active?: boolean;
+  options?: TemplateOptions;
+}
+
+// One positioned text stamp on a PDF-underlay template (spec §5) — mirrors
+// App\Domain\ValueObjects\TemplateEntry on the backend 1:1. Coordinates are
+// millimetres from the page's top-left corner everywhere in the pipeline.
+export interface TemplateEntry {
+  x: number;
+  y: number;
+  text: string;
+  page: number;
+  size?: number;
+  color?: string;
+  bold?: boolean;
+  italic?: boolean;
+  width?: number;
+  space?: number;
+  boxes?: number;
+  format?: 'int' | 'floor' | 'ceil' | 'round';
+  if?: string;
+  slice?: string;
+  month?: string;
+  digits?: boolean;
+  bg?: string;
+  highlight?: boolean;
+}
+
+export interface TemplateBackgroundFile {
+  id: string;
+  original_name: string;
+  size: number;
+  sort: number | null;
+}
+
+export interface TemplateBackgroundFilesResponse {
+  success: boolean;
+  data: TemplateBackgroundFile[];
+}
+
+export interface TemplatePreviewResult {
+  content_type: string;
+  content: string;
+}
+
+export interface TemplatePreviewResponse {
+  success: boolean;
+  data: TemplatePreviewResult;
+}

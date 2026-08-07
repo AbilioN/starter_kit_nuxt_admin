@@ -23,6 +23,8 @@ export default defineNuxtRouteMiddleware((to) => {
     '/roles/create': ['role-create'],
     '/roles/edit': ['role-update'],
     '/roles/delete': ['role-delete'],
+    '/templates': ['template-read'],
+    '/templates/create': ['template-create'],
     '/chat': ['chat-read'],
     '/chat/manage': ['chat-manage'],
     '/roles/assign': ['role-assign'],

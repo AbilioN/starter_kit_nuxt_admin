@@ -10,6 +10,7 @@
     "auditLogs": "Registros de Auditoría",
     "chats": "Chats",
     "files": "Archivos",
+    "templates": "Plantillas",
     "notifications": "Notificaciones",
     "settings": "Configuración",
     "settingsGeneral": "General",
@@ -292,6 +293,42 @@
       "noPreview": "Vista previa no disponible",
       "noPreviewHint": "Descarga el archivo para abrirlo."
     },
+    "templates": {
+      "title": "Plantillas",
+      "subtitle": "Gestiona plantillas de email, SMS, PDF y prompt de IA",
+      "createTemplate": "Nueva Plantilla",
+      "createSubtitle": "Define una plantilla reutilizable con marcadores de fusión",
+      "editTemplate": "Editar Plantilla",
+      "noPermission": "No tienes permiso para ver plantillas.",
+      "filters": "Filtros",
+      "searchPlaceholder": "Buscar por nombre o descripción",
+      "allTypes": "Todos los Tipos",
+      "templatesFound": "{count} plantilla(s) encontrada(s)",
+      "listTitle": "Plantillas",
+      "noTemplatesFound": "Aún no hay plantillas",
+      "totalTemplates": "{count} plantilla(s) en total",
+      "tableUpdated": "Actualizado",
+      "typeTextEmail": "Email Texto",
+      "typeSms": "SMS",
+      "typeHtmlEmail": "Email HTML",
+      "typePdf": "PDF",
+      "typeAiPrompt": "Prompt de IA",
+      "nameLabel": "Nombre",
+      "subjectLabel": "Asunto",
+      "bodyLabel": "Contenido",
+      "bodyPlaceholder": "Hola {'{'}first_name{'}'}, ...",
+      "placeholderHint": "Usa {'{'}field{'}'} para insertar un valor, {'{'}field!{'}'} para exigirlo, {'{'}{'@'}id{'}'} para incluir otra plantilla, y {'{'}prompt:key{'}'} para un valor de prompt de IA.",
+      "activeSwitch": "Activo",
+      "lockedSwitch": "Bloqueado (evita ediciones accidentales)",
+      "senderLabel": "Remitente personalizado",
+      "senderHint": "Opcional — sobrescribe el remitente predeterminado de esta plantilla",
+      "typeImmutableHint": "El tipo no se puede cambiar después de crear",
+      "saveFailed": "Error al guardar la plantilla",
+      "notFound": "Plantilla no encontrada",
+      "previewButton": "Vista previa",
+      "deleteDialogTitle": "¿Eliminar plantilla?",
+      "deleteConfirmBody": "Esta acción no se puede deshacer."
+    },
     "notifications": {
       "title": "Notificaciones",
       "subtitle": "Tus notificaciones y alertas del sistema",
@@ -414,30 +451,102 @@
       "file": "Archivos"
     },
     "items": {
-      "admin-create": { "name": "Crear Administrador", "description": "Permite crear nuevos administradores" },
-      "admin-read": { "name": "Ver Administrador", "description": "Permite ver información del administrador" },
-      "admin-update": { "name": "Editar Administrador", "description": "Permite editar información del administrador" },
-      "admin-delete": { "name": "Eliminar Administrador", "description": "Permite eliminar administradores" },
-      "admin-manage": { "name": "Gestionar Administradores", "description": "Permite gestionar todos los aspectos de los administradores" },
-      "user-create": { "name": "Crear Usuario", "description": "Permite crear nuevos usuarios" },
-      "user-read": { "name": "Ver Usuario", "description": "Permite ver información del usuario" },
-      "user-update": { "name": "Editar Usuario", "description": "Permite editar información del usuario" },
-      "user-delete": { "name": "Eliminar Usuario", "description": "Permite eliminar usuarios" },
-      "chat-manage": { "name": "Gestionar Chat", "description": "Permite gestionar chats y mensajes" },
-      "chat-read": { "name": "Ver Chat", "description": "Permite ver chats y mensajes" },
-      "role-assign": { "name": "Asignar Roles", "description": "Permite asignar roles a usuarios y administradores" },
-      "role-manage": { "name": "Gestionar Roles", "description": "Permite crear, editar y eliminar roles" },
-      "role-read": { "name": "Ver Rol", "description": "Permite ver roles" },
-      "role-delete": { "name": "Eliminar Rol", "description": "Permite eliminar roles" },
-      "role-create": { "name": "Crear Rol", "description": "Permite crear roles" },
-      "role-update": { "name": "Actualizar Rol", "description": "Permite actualizar roles" },
-      "role-unassign": { "name": "Desasignar Rol", "description": "Permite desasignar roles de usuarios y administradores" },
-      "audit-read": { "name": "Ver Registros de Auditoría", "description": "Permite ver los registros de auditoría y el historial de actividad del sistema" },
-      "setting-read": { "name": "Ver Configuración", "description": "Permite ver la configuración de la aplicación" },
-      "setting-update": { "name": "Actualizar Configuración", "description": "Permite actualizar la configuración de la aplicación" },
-      "file-read": { "name": "Ver Archivos", "description": "Permite ver y listar los archivos subidos" },
-      "file-upload": { "name": "Subir Archivos", "description": "Permite subir archivos" },
-      "file-delete": { "name": "Eliminar Archivos", "description": "Permite eliminar archivos" }
+      "admin-create": {
+        "name": "Crear Administrador",
+        "description": "Permite crear nuevos administradores"
+      },
+      "admin-read": {
+        "name": "Ver Administrador",
+        "description": "Permite ver información del administrador"
+      },
+      "admin-update": {
+        "name": "Editar Administrador",
+        "description": "Permite editar información del administrador"
+      },
+      "admin-delete": {
+        "name": "Eliminar Administrador",
+        "description": "Permite eliminar administradores"
+      },
+      "admin-manage": {
+        "name": "Gestionar Administradores",
+        "description": "Permite gestionar todos los aspectos de los administradores"
+      },
+      "user-create": {
+        "name": "Crear Usuario",
+        "description": "Permite crear nuevos usuarios"
+      },
+      "user-read": {
+        "name": "Ver Usuario",
+        "description": "Permite ver información del usuario"
+      },
+      "user-update": {
+        "name": "Editar Usuario",
+        "description": "Permite editar información del usuario"
+      },
+      "user-delete": {
+        "name": "Eliminar Usuario",
+        "description": "Permite eliminar usuarios"
+      },
+      "chat-manage": {
+        "name": "Gestionar Chat",
+        "description": "Permite gestionar chats y mensajes"
+      },
+      "chat-read": {
+        "name": "Ver Chat",
+        "description": "Permite ver chats y mensajes"
+      },
+      "role-assign": {
+        "name": "Asignar Roles",
+        "description": "Permite asignar roles a usuarios y administradores"
+      },
+      "role-manage": {
+        "name": "Gestionar Roles",
+        "description": "Permite crear, editar y eliminar roles"
+      },
+      "role-read": {
+        "name": "Ver Rol",
+        "description": "Permite ver roles"
+      },
+      "role-delete": {
+        "name": "Eliminar Rol",
+        "description": "Permite eliminar roles"
+      },
+      "role-create": {
+        "name": "Crear Rol",
+        "description": "Permite crear roles"
+      },
+      "role-update": {
+        "name": "Actualizar Rol",
+        "description": "Permite actualizar roles"
+      },
+      "role-unassign": {
+        "name": "Desasignar Rol",
+        "description": "Permite desasignar roles de usuarios y administradores"
+      },
+      "audit-read": {
+        "name": "Ver Registros de Auditoría",
+        "description": "Permite ver los registros de auditoría y el historial de actividad del sistema"
+      },
+      "setting-read": {
+        "name": "Ver Configuración",
+        "description": "Permite ver la configuración de la aplicación"
+      },
+      "setting-update": {
+        "name": "Actualizar Configuración",
+        "description": "Permite actualizar la configuración de la aplicación"
+      },
+      "file-read": {
+        "name": "Ver Archivos",
+        "description": "Permite ver y listar los archivos subidos"
+      },
+      "file-upload": {
+        "name": "Subir Archivos",
+        "description": "Permite subir archivos"
+      },
+      "file-delete": {
+        "name": "Eliminar Archivos",
+        "description": "Permite eliminar archivos"
+      }
     }
   }
 }
