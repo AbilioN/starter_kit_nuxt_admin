@@ -397,5 +397,42 @@
       "newValues": "New Values",
       "noHistory": "No history found for this model"
     }
+  },
+  "permissions": {
+    "resources": {
+      "admin": "Administrators",
+      "user": "Users",
+      "chat": "Chat",
+      "role": "Roles",
+      "audit": "Audit",
+      "setting": "Settings",
+      "file": "Files"
+    },
+    "items": {
+      "admin-create": { "name": "Create Administrator", "description": "Allows creating new administrators" },
+      "admin-read": { "name": "View Administrator", "description": "Allows viewing administrator information" },
+      "admin-update": { "name": "Edit Administrator", "description": "Allows editing administrator information" },
+      "admin-delete": { "name": "Delete Administrator", "description": "Allows deleting administrators" },
+      "admin-manage": { "name": "Manage Administrators", "description": "Allows managing all aspects of administrators" },
+      "user-create": { "name": "Create User", "description": "Allows creating new users" },
+      "user-read": { "name": "View User", "description": "Allows viewing user information" },
+      "user-update": { "name": "Edit User", "description": "Allows editing user information" },
+      "user-delete": { "name": "Delete User", "description": "Allows deleting users" },
+      "chat-manage": { "name": "Manage Chat", "description": "Allows managing chats and messages" },
+      "chat-read": { "name": "View Chat", "description": "Allows viewing chats and messages" },
+      "role-assign": { "name": "Assign Roles", "description": "Allows assigning roles to users and administrators" },
+      "role-manage": { "name": "Manage Roles", "description": "Allows creating, editing and deleting roles" },
+      "role-read": { "name": "View Role", "description": "Allows viewing roles" },
+      "role-delete": { "name": "Delete Role", "description": "Allows deleting roles" },
+      "role-create": { "name": "Create Role", "description": "Allows creating roles" },
+      "role-update": { "name": "Update Role", "description": "Allows updating roles" },
+      "role-unassign": { "name": "Unassign Role", "description": "Allows unassigning roles from users and administrators" },
+      "audit-read": { "name": "View Audit Logs", "description": "Allows viewing audit logs and system activity history" },
+      "setting-read": { "name": "View Settings", "description": "Allows viewing application settings" },
+      "setting-update": { "name": "Update Settings", "description": "Allows updating application settings" },
+      "file-read": { "name": "View Files", "description": "Allows viewing and listing uploaded files" },
+      "file-upload": { "name": "Upload Files", "description": "Allows uploading files" },
+      "file-delete": { "name": "Delete Files", "description": "Allows deleting files" }
+    }
   }
 }

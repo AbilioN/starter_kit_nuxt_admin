@@ -397,5 +397,42 @@
       "newValues": "Valores Novos",
       "noHistory": "Nenhum histórico encontrado para este modelo"
     }
+  },
+  "permissions": {
+    "resources": {
+      "admin": "Administradores",
+      "user": "Utilizadores",
+      "chat": "Conversas",
+      "role": "Papéis",
+      "audit": "Auditoria",
+      "setting": "Configurações",
+      "file": "Ficheiros"
+    },
+    "items": {
+      "admin-create": { "name": "Criar Administrador", "description": "Permite criar novos administradores" },
+      "admin-read": { "name": "Ver Administrador", "description": "Permite ver informação do administrador" },
+      "admin-update": { "name": "Editar Administrador", "description": "Permite editar informação do administrador" },
+      "admin-delete": { "name": "Eliminar Administrador", "description": "Permite eliminar administradores" },
+      "admin-manage": { "name": "Gerir Administradores", "description": "Permite gerir todos os aspetos dos administradores" },
+      "user-create": { "name": "Criar Utilizador", "description": "Permite criar novos utilizadores" },
+      "user-read": { "name": "Ver Utilizador", "description": "Permite ver informação do utilizador" },
+      "user-update": { "name": "Editar Utilizador", "description": "Permite editar informação do utilizador" },
+      "user-delete": { "name": "Eliminar Utilizador", "description": "Permite eliminar utilizadores" },
+      "chat-manage": { "name": "Gerir Conversas", "description": "Permite gerir conversas e mensagens" },
+      "chat-read": { "name": "Ver Conversas", "description": "Permite ver conversas e mensagens" },
+      "role-assign": { "name": "Atribuir Papéis", "description": "Permite atribuir papéis a utilizadores e administradores" },
+      "role-manage": { "name": "Gerir Papéis", "description": "Permite criar, editar e eliminar papéis" },
+      "role-read": { "name": "Ver Papel", "description": "Permite ver papéis" },
+      "role-delete": { "name": "Eliminar Papel", "description": "Permite eliminar papéis" },
+      "role-create": { "name": "Criar Papel", "description": "Permite criar papéis" },
+      "role-update": { "name": "Atualizar Papel", "description": "Permite atualizar papéis" },
+      "role-unassign": { "name": "Remover Atribuição de Papel", "description": "Permite remover a atribuição de papéis a utilizadores e administradores" },
+      "audit-read": { "name": "Ver Logs de Auditoria", "description": "Permite ver logs de auditoria e o histórico de atividade do sistema" },
+      "setting-read": { "name": "Ver Configurações", "description": "Permite ver as configurações da aplicação" },
+      "setting-update": { "name": "Atualizar Configurações", "description": "Permite atualizar as configurações da aplicação" },
+      "file-read": { "name": "Ver Ficheiros", "description": "Permite ver e listar os ficheiros carregados" },
+      "file-upload": { "name": "Carregar Ficheiros", "description": "Permite carregar ficheiros" },
+      "file-delete": { "name": "Eliminar Ficheiros", "description": "Permite eliminar ficheiros" }
+    }
   }
 }

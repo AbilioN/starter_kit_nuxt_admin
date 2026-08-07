@@ -6,9 +6,11 @@ export const useAvailablePermissions = () => {
   const permissions = ref<Permission[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
-  
+
   // Instância do serviço
   const authService = new AuthService();
+
+  const { t, te } = useI18n();
 
   // Função para carregar permissions
   const loadPermissions = async () => {
@@ -49,13 +51,8 @@ export const useAvailablePermissions = () => {
 
   // Função para formatar nome do recurso
   const formatResourceName = (resource: string): string => {
-    const resourceNames: Record<string, string> = {
-      'admin': 'Administradores',
-      'user': 'Usuários',
-      'role': 'Roles',
-      'chat': 'Chat',
-    };
-    return resourceNames[resource] || resource;
+    const key = `permissions.resources.${resource}`;
+    return te(key) ? t(key) : resource;
   };
 
   return {

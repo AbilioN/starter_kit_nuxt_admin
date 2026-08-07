@@ -49,8 +49,8 @@
               >
                 <template v-slot:label>
                   <div>
-                    <div class="font-weight-medium">{{ permission.name }}</div>
-                    <div class="text-caption text-medium-emphasis">{{ permission.description }}</div>
+                    <div class="font-weight-medium">{{ permissionName(permission) }}</div>
+                    <div class="text-caption text-medium-emphasis">{{ permissionDescription(permission) }}</div>
                   </div>
                 </template>
               </v-checkbox>
@@ -65,7 +65,7 @@
 <script setup lang="ts">
 import type { Permission } from '~/types/api';
 
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const props = defineProps<{
   modelValue: number[];
@@ -83,6 +83,17 @@ const selectedPermissions = computed({
   get: () => props.modelValue,
   set: (value: number[]) => emit('update:modelValue', value)
 });
+
+// Traduz nome/descrição da permissão usando sua slug, com fallback para o valor cru do backend
+const permissionName = (permission: Permission): string => {
+  const key = `permissions.items.${permission.slug}.name`;
+  return te(key) ? t(key) : permission.name;
+};
+
+const permissionDescription = (permission: Permission): string => {
+  const key = `permissions.items.${permission.slug}.description`;
+  return te(key) ? t(key) : permission.description;
+};
 
 // Função para obter contagem de selecionados
 const getSelectedCount = (resource: string, perms: Permission[]): number => {

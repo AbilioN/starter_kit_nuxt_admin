@@ -397,5 +397,42 @@
       "newValues": "Valores Nuevos",
       "noHistory": "No se encontró historial para este modelo"
     }
+  },
+  "permissions": {
+    "resources": {
+      "admin": "Administradores",
+      "user": "Usuarios",
+      "chat": "Chat",
+      "role": "Roles",
+      "audit": "Auditoría",
+      "setting": "Configuración",
+      "file": "Archivos"
+    },
+    "items": {
+      "admin-create": { "name": "Crear Administrador", "description": "Permite crear nuevos administradores" },
+      "admin-read": { "name": "Ver Administrador", "description": "Permite ver información del administrador" },
+      "admin-update": { "name": "Editar Administrador", "description": "Permite editar información del administrador" },
+      "admin-delete": { "name": "Eliminar Administrador", "description": "Permite eliminar administradores" },
+      "admin-manage": { "name": "Gestionar Administradores", "description": "Permite gestionar todos los aspectos de los administradores" },
+      "user-create": { "name": "Crear Usuario", "description": "Permite crear nuevos usuarios" },
+      "user-read": { "name": "Ver Usuario", "description": "Permite ver información del usuario" },
+      "user-update": { "name": "Editar Usuario", "description": "Permite editar información del usuario" },
+      "user-delete": { "name": "Eliminar Usuario", "description": "Permite eliminar usuarios" },
+      "chat-manage": { "name": "Gestionar Chat", "description": "Permite gestionar chats y mensajes" },
+      "chat-read": { "name": "Ver Chat", "description": "Permite ver chats y mensajes" },
+      "role-assign": { "name": "Asignar Roles", "description": "Permite asignar roles a usuarios y administradores" },
+      "role-manage": { "name": "Gestionar Roles", "description": "Permite crear, editar y eliminar roles" },
+      "role-read": { "name": "Ver Rol", "description": "Permite ver roles" },
+      "role-delete": { "name": "Eliminar Rol", "description": "Permite eliminar roles" },
+      "role-create": { "name": "Crear Rol", "description": "Permite crear roles" },
+      "role-update": { "name": "Actualizar Rol", "description": "Permite actualizar roles" },
+      "role-unassign": { "name": "Desasignar Rol", "description": "Permite desasignar roles de usuarios y administradores" },
+      "audit-read": { "name": "Ver Registros de Auditoría", "description": "Permite ver los registros de auditoría y el historial de actividad del sistema" },
+      "setting-read": { "name": "Ver Configuración", "description": "Permite ver la configuración de la aplicación" },
+      "setting-update": { "name": "Actualizar Configuración", "description": "Permite actualizar la configuración de la aplicación" },
+      "file-read": { "name": "Ver Archivos", "description": "Permite ver y listar los archivos subidos" },
+      "file-upload": { "name": "Subir Archivos", "description": "Permite subir archivos" },
+      "file-delete": { "name": "Eliminar Archivos", "description": "Permite eliminar archivos" }
+    }
   }
 }

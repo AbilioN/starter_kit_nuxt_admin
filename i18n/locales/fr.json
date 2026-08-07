@@ -397,5 +397,42 @@
       "newValues": "Nouvelles valeurs",
       "noHistory": "Aucun historique trouvé pour ce modèle"
     }
+  },
+  "permissions": {
+    "resources": {
+      "admin": "Administrateurs",
+      "user": "Utilisateurs",
+      "chat": "Discussion",
+      "role": "Rôles",
+      "audit": "Audit",
+      "setting": "Paramètres",
+      "file": "Fichiers"
+    },
+    "items": {
+      "admin-create": { "name": "Créer un administrateur", "description": "Permet de créer de nouveaux administrateurs" },
+      "admin-read": { "name": "Voir l'administrateur", "description": "Permet de voir les informations de l'administrateur" },
+      "admin-update": { "name": "Modifier l'administrateur", "description": "Permet de modifier les informations de l'administrateur" },
+      "admin-delete": { "name": "Supprimer l'administrateur", "description": "Permet de supprimer des administrateurs" },
+      "admin-manage": { "name": "Gérer les administrateurs", "description": "Permet de gérer tous les aspects des administrateurs" },
+      "user-create": { "name": "Créer un utilisateur", "description": "Permet de créer de nouveaux utilisateurs" },
+      "user-read": { "name": "Voir l'utilisateur", "description": "Permet de voir les informations de l'utilisateur" },
+      "user-update": { "name": "Modifier l'utilisateur", "description": "Permet de modifier les informations de l'utilisateur" },
+      "user-delete": { "name": "Supprimer l'utilisateur", "description": "Permet de supprimer des utilisateurs" },
+      "chat-manage": { "name": "Gérer les discussions", "description": "Permet de gérer les discussions et les messages" },
+      "chat-read": { "name": "Voir les discussions", "description": "Permet de voir les discussions et les messages" },
+      "role-assign": { "name": "Attribuer des rôles", "description": "Permet d'attribuer des rôles aux utilisateurs et administrateurs" },
+      "role-manage": { "name": "Gérer les rôles", "description": "Permet de créer, modifier et supprimer des rôles" },
+      "role-read": { "name": "Voir le rôle", "description": "Permet de voir les rôles" },
+      "role-delete": { "name": "Supprimer le rôle", "description": "Permet de supprimer des rôles" },
+      "role-create": { "name": "Créer un rôle", "description": "Permet de créer des rôles" },
+      "role-update": { "name": "Mettre à jour le rôle", "description": "Permet de mettre à jour des rôles" },
+      "role-unassign": { "name": "Retirer un rôle", "description": "Permet de retirer des rôles aux utilisateurs et administrateurs" },
+      "audit-read": { "name": "Voir les journaux d'audit", "description": "Permet de voir les journaux d'audit et l'historique d'activité du système" },
+      "setting-read": { "name": "Voir les paramètres", "description": "Permet de voir les paramètres de l'application" },
+      "setting-update": { "name": "Mettre à jour les paramètres", "description": "Permet de mettre à jour les paramètres de l'application" },
+      "file-read": { "name": "Voir les fichiers", "description": "Permet de voir et lister les fichiers téléversés" },
+      "file-upload": { "name": "Téléverser des fichiers", "description": "Permet de téléverser des fichiers" },
+      "file-delete": { "name": "Supprimer des fichiers", "description": "Permet de supprimer des fichiers" }
+    }
   }
 }
