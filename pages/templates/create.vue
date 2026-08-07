@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import UiChildCard from '@/components/shared/UiChildCard.vue';
 import TemplateForm, { type TemplateFormData } from '~/components/Templates/TemplateForm.vue';
-import type { TemplateBodyFormat, CreateTemplateRequest } from '~/types/api';
+import type { CreateTemplateRequest } from '~/types/api';
 
 definePageMeta({
   middleware: ['auth', 'permissions'],
@@ -16,6 +16,7 @@ const { saving, createTemplate } = useTemplates();
 const form = ref<TemplateFormData>({
   name: '',
   type: 'text_email',
+  body_format: 'text',
   subject: '',
   description: '',
   is_active: true,
@@ -26,22 +27,22 @@ const form = ref<TemplateFormData>({
 
 const saveError = ref<string | null>(null);
 
-const bodyFormatFor: Record<TemplateFormData['type'], TemplateBodyFormat> = {
-  text_email: 'text',
-  sms: 'text',
-  ai_prompt: 'text',
-  html_email: 'html',
-  pdf: 'html',
-};
-
 const save = async () => {
   saveError.value = null;
+
+  // pdf+positions can't attach a background or entries until the template
+  // has an id (see TemplateForm's "save first" notice) — '[]' keeps the
+  // stored body valid JSON in the meantime, matching what the entries
+  // editor itself would produce for an empty entry list.
+  const body = form.value.type === 'pdf' && form.value.body_format === 'positions' && !form.value.body
+    ? '[]'
+    : form.value.body || null;
 
   const payload: CreateTemplateRequest = {
     name: form.value.name,
     type: form.value.type,
-    body_format: bodyFormatFor[form.value.type],
-    body: form.value.body || null,
+    body_format: form.value.body_format,
+    body,
     subject: form.value.subject || null,
     description: form.value.description || null,
     is_active: form.value.is_active,
@@ -52,10 +53,15 @@ const save = async () => {
   };
 
   const created = await createTemplate(payload);
-  if (created) {
-    router.push('/templates');
-  } else {
+  if (!created) {
     saveError.value = t('pages.templates.saveFailed');
+    return;
+  }
+
+  if (created.type === 'pdf' && created.body_format === 'positions') {
+    router.push(`/templates/${created.id}/edit`);
+  } else {
+    router.push('/templates');
   }
 };
 </script>

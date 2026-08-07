@@ -5,6 +5,7 @@ import type {
   CreateTemplateRequest,
   UpdateTemplateRequest,
   TemplatePreviewResult,
+  TemplateBackgroundFile,
 } from '~/types/api';
 import { TemplateService } from '~/services/TemplateService';
 
@@ -144,6 +145,61 @@ export const useTemplates = () => {
     }
   };
 
+  // Returns a blob: object URL — caller is responsible for
+  // URL.revokeObjectURL() once it's no longer needed (e.g. on dialog close).
+  const previewPdf = async (id: string, promptValues?: Record<string, string>): Promise<string | null> => {
+    error.value = null;
+    try {
+      const blob = await templateService.previewPdf(id, promptValues);
+      return URL.createObjectURL(blob);
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Failed to render PDF preview';
+      notification.error(error.value);
+      return null;
+    }
+  };
+
+  const backgroundFiles = ref<TemplateBackgroundFile[]>([]);
+  const backgroundLoading = ref(false);
+  const backgroundUploading = ref(false);
+
+  const loadBackgroundFiles = async (id: string) => {
+    backgroundLoading.value = true;
+    try {
+      backgroundFiles.value = await templateService.getBackgroundFiles(id);
+    } catch (err) {
+      notification.error(err instanceof Error ? err.message : 'Failed to load background files');
+    } finally {
+      backgroundLoading.value = false;
+    }
+  };
+
+  const uploadBackgroundFile = async (id: string, file: File): Promise<boolean> => {
+    backgroundUploading.value = true;
+    try {
+      backgroundFiles.value = await templateService.uploadBackgroundFile(id, file);
+      notification.success('Background uploaded successfully');
+      return true;
+    } catch (err) {
+      notification.error(err instanceof Error ? err.message : 'Failed to upload background');
+      return false;
+    } finally {
+      backgroundUploading.value = false;
+    }
+  };
+
+  const deleteBackgroundFile = async (id: string, fileId: string): Promise<boolean> => {
+    try {
+      await templateService.deleteBackgroundFile(id, fileId);
+      backgroundFiles.value = backgroundFiles.value.filter(f => f.id !== fileId);
+      notification.success('Background page removed');
+      return true;
+    } catch (err) {
+      notification.error(err instanceof Error ? err.message : 'Failed to remove background page');
+      return false;
+    }
+  };
+
   return {
     templates: readonly(templates),
     pagination: readonly(pagination),
@@ -165,5 +221,13 @@ export const useTemplates = () => {
     updateTemplate,
     deleteTemplate,
     preview,
+    previewPdf,
+
+    backgroundFiles: readonly(backgroundFiles),
+    backgroundLoading,
+    backgroundUploading,
+    loadBackgroundFiles,
+    uploadBackgroundFile,
+    deleteBackgroundFile,
   };
 };

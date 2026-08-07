@@ -51,4 +51,8 @@ export class TemplateService {
   async preview(id: string, promptValues?: Record<string, string>): Promise<TemplatePreviewResult> {
     return this.repository.preview(id, promptValues);
   }
+
+  async previewPdf(id: string, promptValues?: Record<string, string>): Promise<Blob> {
+    return this.repository.previewPdf(id, promptValues);
+  }
 }

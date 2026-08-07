@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import HtmlEditor from '~/components/Templates/HtmlEditor.vue';
-import type { TemplateType } from '~/types/api';
+import PdfBackgroundManager from '~/components/Templates/PdfBackgroundManager.vue';
+import PdfEntriesEditor from '~/components/Templates/PdfEntriesEditor.vue';
+import type { TemplateType, TemplateBodyFormat } from '~/types/api';
 
 export interface TemplateFormData {
   name: string;
   type: TemplateType;
+  body_format: TemplateBodyFormat;
   subject: string;
   description: string;
   is_active: boolean;
@@ -16,24 +19,45 @@ export interface TemplateFormData {
 
 const props = defineProps<{
   mode: 'create' | 'edit';
+  // Only set once the template has been persisted — the PDF background
+  // manager attaches files to this id, so it can't do anything until one
+  // exists (see the "save first" notice below for the create+positions case).
+  templateId?: string;
 }>();
 
 const form = defineModel<TemplateFormData>({ required: true });
 
 const { t } = useI18n();
 
-// PDF is intentionally left out of the type picker — it has its own
-// underlay/positions editor (Expert JSON mode, then the Standard canvas
-// mode) that hasn't been built yet. It stays a valid `type` server-side.
 const typeOptions = computed(() => [
   { value: 'text_email', title: t('pages.templates.typeTextEmail') },
   { value: 'sms', title: t('pages.templates.typeSms') },
   { value: 'html_email', title: t('pages.templates.typeHtmlEmail') },
   { value: 'ai_prompt', title: t('pages.templates.typeAiPrompt') },
+  { value: 'pdf', title: t('pages.templates.typePdf') },
 ]);
 
+const pdfBodyFormatOptions = computed(() => [
+  { value: 'html', title: t('pages.templates.pdfModeDocument') },
+  { value: 'positions', title: t('pages.templates.pdfModeUnderlay') },
+]);
+
+// body_format tracks type automatically for every non-pdf type (it's not a
+// real authoring choice there — the type IS the format). pdf is the only
+// type with two authoring models (spec: document-from-scratch vs. entries
+// positioned over a background), so it gets its own selector.
+watch(() => form.value.type, (type) => {
+  if (type === 'text_email' || type === 'sms' || type === 'ai_prompt') form.value.body_format = 'text';
+  else if (type === 'html_email') form.value.body_format = 'html';
+  else if (type === 'pdf' && form.value.body_format !== 'html' && form.value.body_format !== 'positions') {
+    form.value.body_format = 'html';
+  }
+});
+
 const showsSubject = computed(() => form.value.type === 'text_email' || form.value.type === 'html_email');
-const isHtml = computed(() => form.value.type === 'html_email');
+const isPlainHtml = computed(() => form.value.type === 'html_email' || (form.value.type === 'pdf' && form.value.body_format === 'html'));
+const isPdfUnderlay = computed(() => form.value.type === 'pdf' && form.value.body_format === 'positions');
+const isSimpleText = computed(() => !isPlainHtml.value && !isPdfUnderlay.value);
 </script>
 
 <template>
@@ -47,7 +71,7 @@ const isHtml = computed(() => form.value.type === 'html_email');
           required
         />
       </v-col>
-      <v-col cols="12" md="4">
+      <v-col cols="12" :md="form.type === 'pdf' ? 2 : 4">
         <v-select
           v-model="form.type"
           :items="typeOptions"
@@ -58,6 +82,16 @@ const isHtml = computed(() => form.value.type === 'html_email');
           :disabled="mode === 'edit'"
           :hint="mode === 'edit' ? t('pages.templates.typeImmutableHint') : undefined"
           persistent-hint
+        />
+      </v-col>
+      <v-col v-if="form.type === 'pdf'" cols="12" md="2">
+        <v-select
+          v-model="form.body_format"
+          :items="pdfBodyFormatOptions"
+          item-title="title"
+          item-value="value"
+          :label="t('pages.templates.pdfModeLabel')"
+          variant="outlined"
         />
       </v-col>
 
@@ -80,15 +114,32 @@ const isHtml = computed(() => form.value.type === 'html_email');
 
       <v-col cols="12">
         <label class="text-body-2 font-weight-medium d-block mb-2">{{ t('pages.templates.bodyLabel') }}</label>
-        <HtmlEditor v-if="isHtml" v-model="form.body" />
+
+        <HtmlEditor v-if="isPlainHtml" v-model="form.body" />
+
         <v-textarea
-          v-else
+          v-else-if="isSimpleText"
           v-model="form.body"
           variant="outlined"
           rows="8"
           :placeholder="t('pages.templates.bodyPlaceholder')"
         />
-        <div class="text-caption text-medium-emphasis mt-2">
+
+        <template v-else-if="isPdfUnderlay">
+          <template v-if="templateId">
+            <div class="mb-6">
+              <label class="text-body-2 font-weight-medium d-block mb-2">{{ t('pages.templates.backgroundLabel') }}</label>
+              <PdfBackgroundManager :template-id="templateId" />
+            </div>
+            <label class="text-body-2 font-weight-medium d-block mb-2">{{ t('pages.templates.entriesLabel') }}</label>
+            <PdfEntriesEditor v-model="form.body" :template-id="templateId" />
+          </template>
+          <v-alert v-else type="info" variant="tonal">
+            {{ t('pages.templates.saveFirstForPdf') }}
+          </v-alert>
+        </template>
+
+        <div v-if="isSimpleText" class="text-caption text-medium-emphasis mt-2">
           {{ t('pages.templates.placeholderHint') }}
         </div>
       </v-col>

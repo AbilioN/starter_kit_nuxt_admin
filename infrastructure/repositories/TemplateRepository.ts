@@ -84,13 +84,36 @@ export class TemplateRepository {
     await this.apiClient.delete<{ success: boolean }>(`/templates/${id}/background/${fileId}`);
   }
 
-  // Preview for text/html/positions bodies only — a 'pdf'+'html' or
-  // 'pdf'+'positions' template returns raw PDF bytes instead, which needs
-  // a separate binary-aware call (added alongside the PDF editor).
+  // Preview for text/html/positions bodies only — a 'pdf' template returns
+  // raw PDF bytes instead (see previewPdf below), which ApiClient can't
+  // carry: it calls response.text() on non-JSON bodies, corrupting binary.
   async preview(id: string, promptValues?: Record<string, string>): Promise<TemplatePreviewResult> {
     const response = await this.apiClient.post<TemplatePreviewResponse>(`/templates/${id}/preview`, {
       prompt_values: promptValues ?? {},
     });
     return response.data;
+  }
+
+  // Same endpoint as preview(), but for 'pdf' templates, which respond with
+  // raw PDF bytes (Content-Type: application/pdf) instead of JSON — needs
+  // a raw fetch() + blob() to keep the bytes intact.
+  async previewPdf(id: string, promptValues?: Record<string, string>): Promise<Blob> {
+    const token = process.client ? localStorage.getItem('auth_token') : null;
+    const url = appendTenantQueryParam(`${this.baseURL}/templates/${id}/preview`, this.tenantQueryParam);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token ?? ''}`,
+        Accept: 'application/pdf',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt_values: promptValues ?? {} }),
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({})) as { message?: string };
+      throw new Error(body.message ?? `Preview failed: ${res.status}`);
+    }
+    return res.blob();
   }
 }

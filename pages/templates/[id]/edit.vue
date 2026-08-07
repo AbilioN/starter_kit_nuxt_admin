@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import UiChildCard from '@/components/shared/UiChildCard.vue';
 import TemplateForm, { type TemplateFormData } from '~/components/Templates/TemplateForm.vue';
-import type { TemplateBodyFormat, UpdateTemplateRequest } from '~/types/api';
+import type { UpdateTemplateRequest } from '~/types/api';
 
 definePageMeta({
   middleware: ['auth', 'permissions'],
@@ -12,13 +12,14 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const { hasPermission } = usePermissions();
-const { loading, saving, getTemplate, updateTemplate, deleteTemplate, preview } = useTemplates();
+const { loading, saving, getTemplate, updateTemplate, deleteTemplate, preview, previewPdf } = useTemplates();
 
 const templateId = route.params.id as string;
 
 const form = ref<TemplateFormData>({
   name: '',
   type: 'text_email',
+  body_format: 'text',
   subject: '',
   description: '',
   is_active: true,
@@ -32,14 +33,6 @@ const saveError = ref<string | null>(null);
 const showDeleteDialog = ref(false);
 const deleting = ref(false);
 
-const bodyFormatFor: Record<TemplateFormData['type'], TemplateBodyFormat> = {
-  text_email: 'text',
-  sms: 'text',
-  ai_prompt: 'text',
-  html_email: 'html',
-  pdf: 'html',
-};
-
 const load = async () => {
   const tpl = await getTemplate(templateId);
   if (!tpl) {
@@ -49,6 +42,7 @@ const load = async () => {
   form.value = {
     name: tpl.name,
     type: tpl.type,
+    body_format: tpl.body_format,
     subject: tpl.subject ?? '',
     description: tpl.description ?? '',
     is_active: tpl.is_active,
@@ -63,7 +57,7 @@ const save = async () => {
 
   const payload: UpdateTemplateRequest = {
     name: form.value.name,
-    body_format: bodyFormatFor[form.value.type],
+    body_format: form.value.body_format,
     body: form.value.body || null,
     subject: form.value.subject || null,
     description: form.value.description || null,
@@ -91,14 +85,25 @@ const confirmDelete = async () => {
   }
 };
 
-// Preview — for non-pdf types only (pdf returns raw binary, handled by the
-// dedicated PDF editor tasks). Renders straight into the dialog since the
-// content is either plain text or already-safe HTML produced by our own editor.
+// Preview — text/html templates render straight into the dialog (the
+// content is either plain text or already-safe HTML produced by our own
+// editor). 'pdf' templates respond with raw PDF bytes instead, which get
+// opened as a blob: URL in a new tab rather than crammed into the dialog.
 const showPreviewDialog = ref(false);
 const previewLoading = ref(false);
 const previewResult = ref<{ contentType: string; content: string } | null>(null);
+let previewObjectUrl: string | null = null;
 
 const openPreview = async () => {
+  if (form.value.type === 'pdf') {
+    previewLoading.value = true;
+    if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+    previewObjectUrl = await previewPdf(templateId);
+    previewLoading.value = false;
+    if (previewObjectUrl) window.open(previewObjectUrl, '_blank');
+    return;
+  }
+
   previewLoading.value = true;
   showPreviewDialog.value = true;
   const result = await preview(templateId);
@@ -107,6 +112,10 @@ const openPreview = async () => {
     previewResult.value = { contentType: result.content_type, content: result.content };
   }
 };
+
+onBeforeUnmount(() => {
+  if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+});
 
 onMounted(load);
 </script>
@@ -152,7 +161,7 @@ onMounted(load);
     <v-row v-else>
       <v-col cols="12">
         <UiChildCard>
-          <TemplateForm v-model="form" mode="edit" />
+          <TemplateForm v-model="form" mode="edit" :template-id="templateId" />
 
           <v-alert v-if="saveError" type="error" variant="tonal" density="compact" class="mt-4">
             {{ saveError }}
@@ -163,7 +172,7 @@ onMounted(load);
             <v-btn color="primary" :loading="saving" :disabled="saving || !form.name" prepend-icon="mdi-content-save-outline" @click="save">
               {{ t('common.actions.saveChanges') }}
             </v-btn>
-            <v-btn variant="outlined" prepend-icon="mdi-eye-outline" @click="openPreview">
+            <v-btn variant="outlined" prepend-icon="mdi-eye-outline" :loading="previewLoading" @click="openPreview">
               {{ t('pages.templates.previewButton') }}
             </v-btn>
             <v-spacer />
@@ -193,7 +202,7 @@ onMounted(load);
       </v-card>
     </v-dialog>
 
-    <!-- Preview dialog -->
+    <!-- Preview dialog (text/html only — pdf opens in a new tab) -->
     <v-dialog v-model="showPreviewDialog" max-width="700px" scrollable>
       <v-card>
         <v-card-title>{{ t('pages.templates.previewButton') }}</v-card-title>
