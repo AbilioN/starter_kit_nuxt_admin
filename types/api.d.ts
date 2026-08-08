@@ -256,6 +256,11 @@ export interface TenantTheme {
   primary_color: string | null;
   secondary_color: string | null;
   logo_url: string | null;
+  // Resolved from the tenant's own broadcasting provider (or its plan's
+  // default) — null means neither is set, so the frontend should fall back
+  // to its own static/build-time Pusher config. Never a secret.
+  pusher_key: string | null;
+  pusher_cluster: string | null;
 }
 
 export interface TenantThemeResponse {
