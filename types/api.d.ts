@@ -346,6 +346,9 @@ export interface TemplateOptions {
 
 export interface Template {
   id: string;
+  // Identifies a system email slot (e.g. 'welcome_email') — read-only,
+  // never settable via create/update. Null for ordinary templates.
+  key: string | null;
   name: string;
   type: TemplateType;
   body_format: TemplateBodyFormat;

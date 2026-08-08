@@ -369,7 +369,8 @@
       "entryBg": "Couleur de fond",
       "entryHighlight": "Surligner dans l'aperçu",
       "selectEntryHint": "Cliquez sur un champ de la page pour le modifier, ou ajoutez-en un depuis la liste des champs.",
-      "emptyEntry": "(vide)"
+      "emptyEntry": "(vide)",
+      "systemBadge": "Système"
     },
     "notifications": {
       "title": "Notifications",

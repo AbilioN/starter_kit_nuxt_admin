@@ -232,7 +232,12 @@ onMounted(() => fetchWithFilters());
               <tbody>
                 <tr v-for="tpl in filteredTemplates" :key="tpl.id">
                   <td>
-                    <div class="font-weight-medium">{{ tpl.name }}</div>
+                    <div class="d-flex align-center ga-2">
+                      <div class="font-weight-medium">{{ tpl.name }}</div>
+                      <v-chip v-if="tpl.key" size="x-small" variant="tonal" color="secondary">
+                        {{ t('pages.templates.systemBadge') }}
+                      </v-chip>
+                    </div>
                     <div v-if="tpl.description" class="text-caption text-medium-emphasis">
                       {{ tpl.description }}
                     </div>

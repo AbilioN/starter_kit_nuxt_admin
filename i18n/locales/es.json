@@ -369,7 +369,8 @@
       "entryBg": "Color de fondo",
       "entryHighlight": "Resaltar en la vista previa",
       "selectEntryHint": "Haz clic en un campo de la página para editarlo, o agrega uno desde la lista de campos.",
-      "emptyEntry": "(vacío)"
+      "emptyEntry": "(vacío)",
+      "systemBadge": "Sistema"
     },
     "notifications": {
       "title": "Notificaciones",

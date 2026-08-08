@@ -369,7 +369,8 @@
       "entryBg": "Background color",
       "entryHighlight": "Highlight in preview",
       "selectEntryHint": "Click an entry on the page to edit it, or add one from the field list.",
-      "emptyEntry": "(empty)"
+      "emptyEntry": "(empty)",
+      "systemBadge": "System"
     },
     "notifications": {
       "title": "Notifications",
