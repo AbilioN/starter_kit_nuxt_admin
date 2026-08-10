@@ -127,10 +127,18 @@ export const useAuth = () => {
     }
   };
 
-  // Inicializar o estado quando o composable for usado
-  if (process.client) {
-    checkAuth();
-  }
+  // NOTE: `checkAuth()` deliberately is NOT called here.
+  //
+  // Calling it as a side effect of merely *using* the composable made every
+  // `useAuth()` call mutate reactive state. `ChatService.getChatDisplayName()`
+  // and `formatMessage()` both call `useAuth()`, and both run inside render /
+  // computed evaluation (once per chat and once per message), so opening the
+  // chat re-entered `checkAuth()` during rendering — a reactive effect writing
+  // to its own dependency, which Vue aborts with "Maximum recursive updates
+  // exceeded" after 100 passes, throwing away the render.
+  //
+  // `middleware/auth.ts` already awaits `checkAuth()` on every route change,
+  // which is the correct place for it.
 
   return {
     user: readonly(user),

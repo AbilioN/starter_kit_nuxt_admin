@@ -147,10 +147,22 @@ export const usePermissions = () => {
     }
   }
 
-  // Inicializar permissões do localStorage
-  if (process.client) {
-    loadPermissionsFromStorage()
-  }
+  // NOTE: `loadPermissionsFromStorage()` deliberately is NOT called here.
+  //
+  // It reassigns `roles`/`permissions` with freshly parsed objects, so it
+  // triggers reactivity on *every* call even when nothing changed — note that
+  // an empty roles list is stored as the string "[]", which is truthy, so the
+  // `if (savedRoles)` branch runs and hands out a brand-new array even for an
+  // admin with no roles at all. Running it as a side effect of merely *using*
+  // the composable turned any render reaching `usePermissions()` into a self-retriggering
+  // effect: `ChatService.getChatDisplayName()` calls `useAuth()`, `useAuth()`
+  // calls `usePermissions()`, and the chat list calls `getChatDisplayName()`
+  // once per conversation while rendering — so opening the chat looped until
+  // Vue aborted the render with "Maximum recursive updates exceeded".
+  //
+  // `checkAuth()` still calls it when restoring a session from localStorage,
+  // and `middleware/auth.ts` awaits `checkAuth()` on every route change, so
+  // permissions are still restored on boot.
 
   // Funções para trabalhar com roles
   const hasRole = (roleName: string): boolean => {
