@@ -1,6 +1,8 @@
 import Pusher from 'pusher-js';
 import Echo from 'laravel-echo';
 import { TenantService } from '~/services/TenantService';
+import { getApiConfig } from '~/config/api';
+import { appendTenantQueryParam } from '~/utils/tenant';
 
 declare global {
   interface Window {
@@ -34,12 +36,22 @@ export default defineNuxtPlugin(async () => {
     // own non-critical failure handling for the rest of the theme response.
   }
 
+  // Must go through the same tenant-aware URL building as ApiClient
+  // (subdomain-prefixed origin, or ?tenant= in query mode) - pusher-js
+  // posts straight to this URL itself, bypassing ApiClient entirely, so
+  // building it from the static config.public.apiBaseUrl (no tenant
+  // identification at all) made every private channel's auth callback hit
+  // IdentifyTenant with no tenant to resolve -> 404 "Tenant not found.",
+  // which fails the subscription silently and blocks all realtime delivery.
+  const { publicBaseURL, tenantQueryParam } = getApiConfig();
+  const authEndpoint = appendTenantQueryParam(`${publicBaseURL}/broadcasting/auth`, tenantQueryParam);
+
   const echo = new Echo({
     broadcaster: 'pusher',
     key: pusherKey,
     cluster: pusherCluster,
     forceTLS: true,
-    authEndpoint: `${config.public.apiBaseUrl}/broadcasting/auth`,
+    authEndpoint,
     auth: {
       headers: {
         Authorization: `Bearer ${token}`,
