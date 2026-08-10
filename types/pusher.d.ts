@@ -6,7 +6,7 @@ export interface PusherMessageSentEvent {
   id: string;
   chat_id: string;
   content: string;
-  sender_type: 'user' | 'admin';
+  sender_type: 'user' | 'admin' | 'assistant';
   sender_id: string;
   is_read: boolean;
   created_at: string;

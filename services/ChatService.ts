@@ -24,7 +24,7 @@ export class ChatService {
   /**
    * Criar chat privado
    */
-  async createPrivateChat(otherUserId: string | number, otherUserType: 'user' | 'admin'): Promise<Chat> {
+  async createPrivateChat(otherUserId: string | number, otherUserType: 'user' | 'admin' | 'assistant'): Promise<Chat> {
     try {
       const response: ChatCreateResponse = await this.chatRepository.createPrivateChat(otherUserId, otherUserType);
       console.log('🔍 ChatService - createPrivateChat response:', response);
@@ -254,7 +254,11 @@ export class ChatService {
       // Explicit Number() coercion guards against id being stored as a string
       // after a JSON.parse round-trip through localStorage.
       isOwn: String(message.sender_id) === String(currentUser?.id),
-      user_name: message.sender_type === 'admin' ? 'Admin' : 'Usuário'
+      user_name: message.sender_type === 'admin'
+        ? 'Admin'
+        : message.sender_type === 'assistant'
+          ? 'Agente IA'
+          : 'Usuário'
     };
   }
 

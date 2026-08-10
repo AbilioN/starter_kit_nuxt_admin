@@ -122,7 +122,7 @@ export class ChatRepository {
   /**
    * Criar chat privado
    */
-  async createPrivateChat(otherUserId: string | number, otherUserType: 'user' | 'admin'): Promise<ChatCreateResponse> {
+  async createPrivateChat(otherUserId: string | number, otherUserType: 'user' | 'admin' | 'assistant'): Promise<ChatCreateResponse> {
     try {
       const response = await this.chatApiClient.post<ChatCreateResponse>('/chat/create-private', {
         other_user_id: otherUserId,

@@ -109,7 +109,11 @@ export const useChatManager = () => {
           // Notify about the incoming message in a non-active chat
           if (!isActive) {
             const chatName = chatService.getChatDisplayName(chats.value[chatIndex]);
-            const senderLabel = event.sender_type === 'user' ? 'Usuário' : 'Admin';
+            const senderLabel = event.sender_type === 'user'
+              ? 'Usuário'
+              : event.sender_type === 'assistant'
+                ? 'Agente IA'
+                : 'Admin';
             const preview = event.content.length > 60
               ? event.content.slice(0, 60) + '…'
               : event.content;
@@ -225,7 +229,7 @@ export const useChatManager = () => {
     }
   };
 
-  const startChatWithUser = async (userId: string | number, userType: 'user' | 'admin' = 'user') => {
+  const startChatWithUser = async (userId: string | number, userType: 'user' | 'admin' | 'assistant' = 'user') => {
     loading.value = true;
     error.value = null;
     try {

@@ -67,6 +67,27 @@
         </div>
       </div>
 
+      <!-- AI Agents — only shown when the tenant's plan has ai_agent enabled -->
+      <div v-if="showAiAgents" class="pa-2 pt-0">
+        <div class="text-caption text-grey font-weight-medium mb-1">{{ t('components.chatInterface.aiAgentsTitle') }}</div>
+        <div
+          v-for="assistant in assistants"
+          :key="assistant.id"
+          class="user-search-item agent-item"
+          @click="startChatWithAgent(assistant)"
+        >
+          <v-avatar size="32" color="deep-purple" class="mr-2">
+            <v-img v-if="assistant.avatar" :src="assistant.avatar" />
+            <v-icon v-else size="18">mdi-robot-outline</v-icon>
+          </v-avatar>
+          <div class="flex-1">
+            <div class="text-body-2 font-weight-medium">{{ assistant.name }}</div>
+            <div v-if="assistant.description" class="text-caption text-grey">{{ assistant.description }}</div>
+          </div>
+          <v-icon size="16" color="grey">mdi-message-arrow-right-outline</v-icon>
+        </div>
+      </div>
+
       <div v-if="loading" class="text-center pa-4">
         <v-progress-circular indeterminate color="primary" />
       </div>
@@ -139,9 +160,12 @@
               </span>
             </div>
 
-            <div class="message-bubble" :class="{ 'bubble-own': message.isOwn }">
+            <div class="message-bubble" :class="{ 'bubble-own': message.isOwn, 'bubble-assistant': message.sender_type === 'assistant' }">
               <div class="message-header">
-                <span class="message-author">{{ message.isOwn ? t('components.chatInterface.you') : (message.user_name || t('components.chatInterface.user')) }}</span>
+                <span class="message-author">
+                  <v-icon v-if="message.sender_type === 'assistant'" size="12" class="mr-1">mdi-robot-outline</v-icon>
+                  {{ message.isOwn ? t('components.chatInterface.you') : (message.user_name || t('components.chatInterface.user')) }}
+                </span>
                 <span class="message-time">{{ message.time }}</span>
               </div>
 
@@ -311,6 +335,17 @@ const {
   sendTypingIndicator,
 } = useChatManager();
 
+const { assistants, loadAssistants } = useAssistants();
+const { isFeatureEnabled } = useSettings();
+const showAiAgents = computed(() => isFeatureEnabled('ai_agent') && assistants.value.length > 0);
+
+const startChatWithAgent = async (assistant: { id: string; name: string; description: string | null }) => {
+  await startChatWithUser(assistant.id, 'assistant');
+  if (currentChat.value) {
+    await loadChatMessages(currentChat.value.id);
+  }
+};
+
 const chatTitle = computed(() => {
   if (currentChat.value) return getChatDisplayName(currentChat.value);
   if (props.initialUser) return t('components.chatInterface.chatWith', { name: props.initialUser.name });
@@ -446,7 +481,10 @@ const formatTime = (dateString?: string) => {
 };
 
 onMounted(async () => {
-  if (!props.initialUser) await loadChats();
+  if (!props.initialUser) {
+    await loadChats();
+    loadAssistants();
+  }
   window.addEventListener('scroll-to-bottom', scrollToBottom);
 });
 
@@ -502,6 +540,8 @@ watch(currentChat, async (chat) => {
   transition: background-color 0.15s;
 }
 .user-search-item:hover { background-color: #f5f5f5; }
+.agent-item { border-radius: 8px; }
+.agent-item:hover { background-color: #f3e8ff; }
 
 .chats { padding: 8px; }
 
@@ -573,6 +613,12 @@ watch(currentChat, async (chat) => {
   color: white;
   border-radius: 12px 12px 4px 12px;
 }
+.message-bubble.bubble-assistant {
+  background-color: #f3e8ff;
+  border: 1px solid #d8b4fe;
+  border-radius: 12px 12px 12px 4px;
+}
+.message-bubble.bubble-assistant .message-author { color: #7c3aed; }
 
 .message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; }
 .message-author { font-weight: 600; font-size: 0.8rem; }

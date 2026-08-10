@@ -4,7 +4,7 @@ export interface ChatMessage {
   chat_id: string;
   content: string | null;
   sender_id: string;
-  sender_type: 'user' | 'admin';
+  sender_type: 'user' | 'admin' | 'assistant';
   message_type: 'text' | 'image' | 'file' | 'audio' | 'video';
   metadata: any | null;
   is_read: boolean;
@@ -14,6 +14,19 @@ export interface ChatMessage {
   reply: { id: string; content: string | null; sender_id: string } | null;
   created_at: string;
   updated_at: string | null;
+}
+
+export interface Assistant {
+  id: string;
+  name: string;
+  description: string | null;
+  avatar: string | null;
+  is_active: boolean;
+}
+
+export interface AssistantsResponse {
+  success: boolean;
+  data: Assistant[];
 }
 
 export interface UserSearchResult {
