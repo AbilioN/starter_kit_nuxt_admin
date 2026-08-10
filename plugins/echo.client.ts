@@ -20,7 +20,6 @@ export default defineNuxtPlugin(async () => {
   window.Pusher = Pusher;
 
   const config = useRuntimeConfig();
-  const token = process.client ? (localStorage.getItem('auth_token') ?? '') : '';
 
   let pusherKey = config.public.pusherKey;
   let pusherCluster = config.public.pusherCluster;
@@ -51,13 +50,46 @@ export default defineNuxtPlugin(async () => {
     key: pusherKey,
     cluster: pusherCluster,
     forceTLS: true,
-    authEndpoint,
-    auth: {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
+
+    // A custom authorizer instead of `authEndpoint` + a static
+    // `auth.headers.Authorization`.
+    //
+    // This plugin runs ONCE, at app boot. On a cold start that is the login
+    // page, where `auth_token` does not exist yet — so a header captured here
+    // would be the literal string "Bearer " with no token. Logging in is a
+    // client-side navigation, so Echo is never rebuilt and would keep that
+    // empty header for the whole session: every private-channel auth call
+    // returned 401 and every subscription failed silently, leaving the chat
+    // with no realtime at all until the user happened to hard-refresh.
+    // (Measured: `Bearer` -> 401 right after login, `Bearer 99|...` -> 200
+    // after a reload.)
+    //
+    // Reading the token inside authorize() means it is resolved per request,
+    // so it is always the current one — this also survives logout/login and a
+    // token being replaced mid-session.
+    authorizer: (channel: { name: string }) => ({
+      authorize: (socketId: string, callback: (error: Error | null, data?: any) => void) => {
+        fetch(authEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
+          },
+          body: JSON.stringify({ socket_id: socketId, channel_name: channel.name }),
+        })
+          .then(res => (res.ok
+            ? res.json()
+            : Promise.reject(new Error(`broadcasting/auth returned ${res.status} for ${channel.name}`))))
+          .then(data => callback(null, data))
+          .catch((err: Error) => {
+            // pusher-js swallows subscription errors by default, which is what
+            // made the 401 above invisible for so long — log it loudly.
+            console.error('[echo] channel authorization failed:', err.message);
+            callback(err);
+          });
       },
-    },
+    }),
   });
 
   return {
