@@ -4,6 +4,7 @@ import type {
   TenantBranding,
   UpdateTenantBrandingRequest,
   UpdateSubscriptionPlanRequest,
+  SubscriptionHistoryResponse,
 } from '~/types/api';
 import { TenantRepository } from '~/infrastructure/repositories/TenantRepository';
 
@@ -36,6 +37,15 @@ export class TenantService {
     try {
       const result = await this.tenantRepository.updateSubscriptionPlan(data);
       return { success: true, data: result, message: 'Subscription plan updated successfully' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  async getSubscriptionHistory(page = 1, perPage = 15): Promise<ApiResponse<SubscriptionHistoryResponse>> {
+    try {
+      const data = await this.tenantRepository.getSubscriptionHistory(page, perPage);
+      return { success: true, data };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }

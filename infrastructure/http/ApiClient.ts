@@ -39,11 +39,19 @@ export class ApiClient implements IHttpClient {
     config?: RequestConfig
   ): Promise<T> {
     const fullURL = appendTenantQueryParam(`${this.baseURL}${url}`, this.tenantQueryParam);
-    
+
+    // Uploads chegam como FormData. Nesse caso o Content-Type TEM de ser omitido:
+    // o browser precisa de o gerar sozinho para incluir o `boundary` do multipart.
+    // Sem esta ramificação o corpo seria `JSON.stringify(formData)` === "{}".
+    const isForm = typeof FormData !== 'undefined' && data instanceof FormData;
+
     const headers = {
       ...this.defaultHeaders,
       ...config?.headers,
     };
+    if (isForm) {
+      delete headers['Content-Type'];
+    }
 
     // Adicionar token de autenticação se disponível — exceto quando skipAuth
     // pede explicitamente pra não carregar um token de sessão anterior
@@ -56,13 +64,16 @@ export class ApiClient implements IHttpClient {
     const requestConfig: RequestInit = {
       method,
       headers,
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? (isForm ? data : JSON.stringify(data)) : undefined,
     };
 
     try {
-      // Criar um timeout para a requisição
+      // `config.timeout` já existia no tipo RequestConfig mas era ignorado. Faz
+      // diferença nos uploads: 10s fixos abortam um ficheiro de 2 MB em ligação
+      // lenta e reportam falha para um request que pode até ter tido sucesso.
+      const timeoutMs = config?.timeout ?? this.timeout;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       
       const response = await fetch(fullURL, {
         ...requestConfig,
@@ -134,6 +145,16 @@ export class ApiClient implements IHttpClient {
 
   async post<T>(url: string, data?: any, config?: RequestConfig): Promise<T> {
     return this.request<T>('POST', url, data, config);
+  }
+
+  /**
+   * POST multipart. Passa pelo mesmo `request()` que todo o resto, portanto
+   * mantém o tratamento de 401 e de tenant suspenso — que os uploads feitos com
+   * `fetch` cru nos repositórios (FileRepository, TemplateRepository,
+   * TenantRepository) perdem.
+   */
+  async postForm<T>(url: string, formData: FormData, config?: RequestConfig): Promise<T> {
+    return this.request<T>('POST', url, formData, config);
   }
 
   async put<T>(url: string, data?: any, config?: RequestConfig): Promise<T> {

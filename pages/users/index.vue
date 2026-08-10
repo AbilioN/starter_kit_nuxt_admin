@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import UiChildCard from '@/components/shared/UiChildCard.vue';
+import UserAvatar from '@/components/shared/UserAvatar.vue';
 
 // Definir middleware de autenticação
 definePageMeta({
@@ -265,9 +266,7 @@ onMounted(() => {
               <tr v-for="user in filteredUsers" :key="user.id">
                 <td>
                   <div class="d-flex align-center">
-                    <v-avatar size="40" class="mr-3">
-                      <img :src="user.avatar" :alt="user.name" />
-                    </v-avatar>
+                    <UserAvatar :name="user.name" :size="40" class="mr-3" />
                     <div>
                       <div class="font-weight-medium">{{ user.name }}</div>
                     </div>

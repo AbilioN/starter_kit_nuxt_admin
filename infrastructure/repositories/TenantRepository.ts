@@ -9,6 +9,7 @@ import type {
   UpdateTenantBrandingResponse,
   UpdateSubscriptionPlanRequest,
   UpdateSubscriptionPlanResponse,
+  SubscriptionHistoryResponse,
 } from '~/types/api';
 
 export class TenantRepository {
@@ -72,5 +73,12 @@ export class TenantRepository {
       data
     );
     return response.success;
+  }
+
+  // Tenant owner only — 403 para qualquer outro admin (middleware `tenant.owner`).
+  async getSubscriptionHistory(page = 1, perPage = 15): Promise<SubscriptionHistoryResponse> {
+    return this.apiClient.get<SubscriptionHistoryResponse>(
+      `${API_CONFIG.ENDPOINTS.TENANT_SUBSCRIPTION_HISTORY}?page=${page}&per_page=${perPage}`
+    );
   }
 }

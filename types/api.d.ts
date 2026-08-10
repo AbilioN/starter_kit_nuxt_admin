@@ -19,6 +19,11 @@ export interface Admin {
   is_tenant_owner: boolean;
   last_login_at: string | null;
   channel?: string;
+  // URL pública servida pelo backend — um <img :src> simples funciona, sem auth.
+  // Opcionais: sessões guardadas em localStorage ANTES destes campos existirem
+  // são reidratadas tal e qual em checkAuth(), logo não os têm.
+  avatar_url?: string | null;
+  notification_email?: string | null;
 }
 
 export interface Role {
@@ -442,4 +447,67 @@ export interface TemplatePreviewResult {
 export interface TemplatePreviewResponse {
   success: boolean;
   data: TemplatePreviewResult;
+}
+
+// ── Perfil do admin autenticado (/api/admin/me) ─────────────────────────────
+
+export interface AdminProfile {
+  id: string;
+  name: string;
+  email: string;
+  is_active: boolean;
+  is_super_admin: boolean;
+  is_tenant_owner: boolean;
+  avatar_path: string | null;
+  avatar_url: string | null;
+  notification_email: string | null;
+  last_login_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface AdminProfileResponse {
+  success: boolean;
+  data: AdminProfile;
+}
+
+export interface UpdateAdminProfileRequest {
+  name?: string;
+  // Só aceite pelo backend para tenant owners (403 caso contrário) — a UI
+  // esconde o campo, mas a validação real está no servidor.
+  notification_email?: string | null;
+}
+
+export interface ChangeAdminPasswordRequest {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}
+
+// ── Histórico de subscrição (tenant owner) ──────────────────────────────────
+
+export interface SubscriptionHistoryEntry {
+  id: string;
+  amount_cents: number;
+  status: string;
+  /** signup | plan_change */
+  trigger: string | null;
+  plan_id: string | null;
+  plan_slug: string | null;
+  plan_name: string | null;
+  created_at: string | null;
+}
+
+export interface SubscriptionCurrentPlan {
+  id: string;
+  name: string;
+  slug: string;
+  price_cents: number | null;
+}
+
+export interface SubscriptionHistoryResponse {
+  success: boolean;
+  data: SubscriptionHistoryEntry[];
+  current_plan: SubscriptionCurrentPlan | null;
+  pagination: Pagination;
 }

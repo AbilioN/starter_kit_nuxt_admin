@@ -69,7 +69,9 @@ export const useAdmins = () => {
       role: admin.is_super_admin ? 'Super Admin' : 'Admin',
       status: admin.is_active ? 'Ativo' : 'Inativo',
       statusColor: admin.is_active ? 'success' : 'error',
-      avatar: `/images/profile/user-${(parseInt(String(admin.id).replace(/-/g, '').slice(0, 8), 16) % 8) + 1}.jpg`,
+      // `avatar` fabricado removido: fazia hash do UUID numa de 8 fotos de stock,
+      // atribuindo a cada admin o rosto de um desconhecido. O avatar real vem em
+      // `admin.avatar_url` (AdminDto), e <UserAvatar> cai nas iniciais quando é null.
       phone: `+55 (11) ${String(admin.id).padStart(5, '0')}-${String(admin.id).padStart(4, '0')}`,
       department: 'Administração', // Valor padrão
       lastLogin: admin.last_login_at ? new Date(admin.last_login_at).toLocaleDateString('pt-BR') : 'Nunca'

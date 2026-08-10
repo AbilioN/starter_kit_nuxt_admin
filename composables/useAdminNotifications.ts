@@ -1,3 +1,4 @@
+import type { Pagination } from '~/types/api';
 import { ApiClient } from '~/infrastructure/http/ApiClient';
 
 export interface DbNotification {
@@ -18,7 +19,7 @@ export const useAdminNotifications = () => {
 
   const loadUnreadCount = async () => {
     try {
-      const res = await apiClient.get<{ success: boolean; count: number }>('/admin/notifications/unread-count');
+      const res = await apiClient.get<{ success: boolean; count: number }>('/notifications/unread-count');
       if (res.success) unreadCount.value = res.count;
     } catch {
       // fail silently — bell count is non-critical
@@ -30,8 +31,8 @@ export const useAdminNotifications = () => {
     error.value = '';
     try {
       const params = `?per_page=${perPage}${unreadOnly ? '&unread_only=1' : ''}`;
-      const res = await apiClient.get<{ success: boolean; data: DbNotification[]; total: number }>(
-        `/admin/notifications${params}`
+      const res = await apiClient.get<{ success: boolean; data: DbNotification[]; pagination: Pagination }>(
+        `/notifications${params}`
       );
       if (res.success) {
         notifications.value = res.data;
@@ -46,7 +47,7 @@ export const useAdminNotifications = () => {
 
   const markRead = async (id: string) => {
     try {
-      await apiClient.post(`/admin/notifications/${id}/read`);
+      await apiClient.post(`/notifications/${id}/read`);
       const n = notifications.value.find(n => n.id === id);
       if (n && !n.read_at) {
         n.read_at = new Date().toISOString();
@@ -59,7 +60,7 @@ export const useAdminNotifications = () => {
 
   const markAllRead = async () => {
     try {
-      await apiClient.post('/admin/notifications/read-all');
+      await apiClient.post('/notifications/read-all');
       notifications.value.forEach(n => { n.read_at = n.read_at ?? new Date().toISOString(); });
       unreadCount.value = 0;
     } catch {

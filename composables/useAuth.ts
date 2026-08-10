@@ -110,6 +110,23 @@ export const useAuth = () => {
     return isAuthenticated.value;
   }
 
+  /**
+   * Único ponto de mutação suportado do admin em sessão.
+   *
+   * `user` é exposto como `readonly()`, então quem está de fora (useProfile) não
+   * consegue atribuir-lhe diretamente. Antes disto o useProfile escrevia só no
+   * localStorage depois de renomear, e o `useState('user')` ficava desatualizado
+   * — a topbar só mostrava o nome novo depois de um reload. Escrever nos dois
+   * aqui faz a topbar (e qualquer outro consumidor) atualizar na hora.
+   */
+  const updateUser = (patch: Partial<Admin>) => {
+    if (!user.value) return;
+    user.value = { ...user.value, ...patch };
+    if (process.client) {
+      localStorage.setItem('user', JSON.stringify(user.value));
+    }
+  };
+
   // Inicializar o estado quando o composable for usado
   if (process.client) {
     checkAuth();
@@ -120,6 +137,7 @@ export const useAuth = () => {
     isAuthenticated,
     login,
     logout,
-    checkAuth
+    checkAuth,
+    updateUser
   }
 } 

@@ -18,6 +18,7 @@ export const API_CONFIG = {
     TENANT_THEME: '/tenant/theme', // relative to publicBaseURL (/api)
     TENANT_SUBSCRIPTION_PLAN: '/tenant/subscription-plan', // relative to baseURL (/api/admin)
     TENANT_BRANDING: '/tenant/branding', // relative to baseURL (/api/admin)
+    TENANT_SUBSCRIPTION_HISTORY: '/tenant/subscription-history', // relative to baseURL (/api/admin), tenant owner only
     PUBLIC_SUBSCRIPTION_PLANS: '/subscription-plans', // relative to getLandlordApiConfig().publicBaseURL (/api/public)
     PUBLIC_SIGNUP: '/signup', // relative to getLandlordApiConfig().publicBaseURL (/api/public)
   }

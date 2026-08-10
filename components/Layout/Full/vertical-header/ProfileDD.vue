@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { UserIcon, MailIcon, ListCheckIcon } from 'vue-tabler-icons';
+import UserAvatar from '@/components/shared/UserAvatar.vue';
 
-const { logout } = useAuth();
+// `user` é o mesmo useState('user') que useProfile atualiza via
+// useAuth().updateUser() — por isso a foto muda aqui sem reload.
+const { user, logout } = useAuth();
 const { t } = useI18n();
 
 const handleLogout = () => {
@@ -16,12 +19,15 @@ const handleLogout = () => {
     <v-menu :close-on-content-click="false">
         <template v-slot:activator="{ props }">
             <v-btn class="" variant="text" v-bind="props" icon>
-                <v-avatar size="35">
-                    <img src="/images/profile/user-1.jpg" height="35" alt="user" />
-                </v-avatar>
+                <UserAvatar :src="user?.avatar_url" :name="user?.name" :size="35" />
             </v-btn>
         </template>
-        <v-sheet rounded="xl" width="200" elevation="10" class="mt-2">
+        <v-sheet rounded="xl" width="240" elevation="10" class="mt-2">
+            <div v-if="user" class="px-5 pt-4 pb-2">
+                <div class="text-body-1 font-weight-medium text-truncate">{{ user.name }}</div>
+                <div class="text-caption text-medium-emphasis text-truncate">{{ user.email }}</div>
+            </div>
+            <v-divider v-if="user" />
             <v-list class="py-0" lines="one" density="compact">
                 <v-list-item value="item1" color="primary" to="/profile">
                     <template v-slot:prepend>
