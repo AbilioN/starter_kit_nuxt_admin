@@ -6,21 +6,24 @@
         <div class="d-flex align-center">
           <v-btn
             v-if="currentChat"
-            @click="closeChat"
+            @click="backToList"
             icon
             size="small"
             variant="text"
             class="mr-2"
+            :title="initialUser ? t('common.actions.close') : t('components.chatInterface.backToList')"
           >
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
-          <v-icon color="primary" class="mr-2">mdi-chat</v-icon>
+          <!-- Sem color="primary": o header agora É um gradiente da cor primária
+               do tenant, então um ícone primário sobre ele fica invisível. -->
+          <v-icon class="mr-2">mdi-chat</v-icon>
           <div>
             <h3 class="text-h6">{{ chatTitle }}</h3>
-            <p v-if="currentChat" class="text-caption text-grey">
+            <p v-if="currentChat" class="text-caption header-subtitle">
               {{ currentChat.type === 'private' ? t('components.chatInterface.privateChat') : t('components.chatInterface.groupChat') }}
             </p>
-            <p v-else-if="initialUser" class="text-caption text-grey">
+            <p v-else-if="initialUser" class="text-caption header-subtitle">
               {{ initialUser.email }}
             </p>
           </div>
@@ -87,7 +90,7 @@
           class="user-search-item agent-item"
           @click="startChatWithAgent(assistant)"
         >
-          <v-avatar size="32" color="deep-purple" class="mr-2">
+          <v-avatar size="32" color="secondary" class="mr-2">
             <v-img v-if="assistant.avatar" :src="assistant.avatar" />
             <v-icon v-else size="18">mdi-robot-outline</v-icon>
           </v-avatar>
@@ -191,7 +194,14 @@
               <div class="message-meta">
                 <span v-if="message.edited_at" class="text-caption edited-label">{{ t('components.chatInterface.edited') }}</span>
                 <span v-if="message.isOwn" class="read-ticks" :title="message.is_read ? t('components.chatInterface.read') : t('components.chatInterface.sent')">
-                  <v-icon size="12" :color="message.is_read ? '#4fc3f7' : 'rgba(255,255,255,0.6)'">
+                  <!-- Sem cor fixa: o "enviado" herda a cor do texto do balão
+                       (on-primary, que o Vuetify recalcula por contraste), então
+                       funciona tanto com primária clara quanto escura. -->
+                  <v-icon
+                    size="12"
+                    class="read-tick"
+                    :class="{ 'read-tick--read': message.is_read }"
+                  >
                     {{ message.is_read ? 'mdi-check-all' : 'mdi-check' }}
                   </v-icon>
                 </span>
@@ -381,7 +391,19 @@ const chatTitle = computed(() => {
   return t('components.chatInterface.chatDefaultTitle');
 });
 
-const closeChat = () => emit('close');
+// A seta volta para a lista de conversas em vez de fechar o widget. Exceção:
+// no modo `initialUser` (aberto a partir da página de um usuário) o componente
+// está preso a uma conversa só — não existe lista atrás, então voltar = fechar.
+const backToList = async () => {
+  if (props.initialUser) {
+    emit('close');
+    return;
+  }
+  resetChat();
+  // Recarrega para a lista já refletir a última mensagem e o contador de não
+  // lidas da conversa que acabou de ser fechada.
+  await loadChats();
+};
 
 const handleSendMessage = async () => {
   if (!newMessage.value.trim()) return;
@@ -543,20 +565,40 @@ watch(currentChat, async (chat) => {
 </script>
 
 <style scoped>
+/*
+ * Cores: nada de hex fixo aqui. O Vuetify publica cada cor do tema como uma
+ * CSS var com o triplete RGB cru (`--v-theme-primary: 15,118,110`), e o
+ * composable `useTenantTheme` sobrescreve `primary`/`secondary` em runtime com
+ * a marca do tenant (GET /api/tenant/theme) — então usar essas vars faz o chat
+ * seguir o tenant sozinho, sem prop nem watcher.
+ *
+ * Mapeamento: `primary` = o usuário/a marca (header, balão próprio, destaques);
+ * `secondary` = o agente de IA. Usar as duas cores que o tenant realmente
+ * configura mantém o balão do agente distinguível do balão próprio — se ambos
+ * fossem `primary`, a conversa com IA ficaria ilegível.
+ *
+ * `on-primary`/`on-surface` são gerados pelo próprio Vuetify por contraste, e
+ * recalculados quando a cor muda: é o que evita texto branco sobre uma primária
+ * clara se o tenant escolher, digamos, amarelo.
+ */
 .chat-interface {
   display: flex;
   flex-direction: column;
   height: 600px;
-  background-color: #f8f9fa;
+  background-color: rgb(var(--v-theme-background));
 }
 
 .chat-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
+  color: rgb(var(--v-theme-on-primary));
   padding: 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(var(--v-theme-on-primary), 0.12);
   height: 80px;
   flex-shrink: 0;
+}
+.header-subtitle {
+  color: rgb(var(--v-theme-on-primary));
+  opacity: 0.75;
 }
 
 .conversations-list {
@@ -565,9 +607,9 @@ watch(currentChat, async (chat) => {
 }
 
 .user-search-results {
-  border: 1px solid #e0e0e0;
+  border: 1px solid rgb(var(--v-theme-borderColor));
   border-radius: 8px;
-  background: white;
+  background: rgb(var(--v-theme-surface));
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
@@ -578,9 +620,9 @@ watch(currentChat, async (chat) => {
   cursor: pointer;
   transition: background-color 0.15s;
 }
-.user-search-item:hover { background-color: #f5f5f5; }
+.user-search-item:hover { background-color: rgba(var(--v-theme-primary), 0.06); }
 .agent-item { border-radius: 8px; }
-.agent-item:hover { background-color: #f3e8ff; }
+.agent-item:hover { background-color: rgba(var(--v-theme-secondary), 0.12); }
 
 .chats { padding: 8px; }
 
@@ -593,8 +635,8 @@ watch(currentChat, async (chat) => {
   cursor: pointer;
   transition: background-color 0.2s;
 }
-.conversation-item:hover { background-color: rgba(0,0,0,0.04); }
-.conversation-item.active { background-color: rgba(102,126,234,0.1); }
+.conversation-item:hover { background-color: rgba(var(--v-theme-primary), 0.06); }
+.conversation-item.active { background-color: rgba(var(--v-theme-primary), 0.12); }
 .conversation-avatar { position: relative; margin-right: 12px; }
 .conversation-badge { position: absolute; top: -2px; right: -2px; }
 .conversation-content { flex: 1; min-width: 0; }
@@ -631,33 +673,38 @@ watch(currentChat, async (chat) => {
 .reply-preview {
   display: flex;
   align-items: center;
-  background: rgba(0,0,0,0.06);
-  border-left: 3px solid #667eea;
+  background: rgba(var(--v-theme-on-surface), 0.06);
+  border-left: 3px solid rgb(var(--v-theme-primary));
   border-radius: 4px 4px 0 0;
   padding: 2px 8px;
   max-width: 70%;
 }
-.reply-preview.reply-own { border-left-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.15); }
+.reply-preview.reply-own {
+  border-left-color: rgba(var(--v-theme-on-primary), 0.6);
+  background: rgba(var(--v-theme-primary), 0.18);
+}
 .reply-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .message-bubble {
   max-width: 70%;
   padding: 8px 12px;
   border-radius: 12px;
-  background-color: white;
+  background-color: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-on-surface));
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 .message-bubble.bubble-own {
-  background-color: #667eea;
-  color: white;
+  background-color: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-primary));
   border-radius: 12px 12px 4px 12px;
 }
 .message-bubble.bubble-assistant {
-  background-color: #f3e8ff;
-  border: 1px solid #d8b4fe;
+  background-color: rgba(var(--v-theme-secondary), 0.12);
+  border: 1px solid rgba(var(--v-theme-secondary), 0.35);
+  color: rgb(var(--v-theme-on-surface));
   border-radius: 12px 12px 12px 4px;
 }
-.message-bubble.bubble-assistant .message-author { color: #7c3aed; }
+.message-bubble.bubble-assistant .message-author { color: rgb(var(--v-theme-secondary)); }
 
 .message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px; }
 .message-author { font-weight: 600; font-size: 0.8rem; }
@@ -674,6 +721,9 @@ watch(currentChat, async (chat) => {
 }
 .edited-label { font-size: 0.65rem; opacity: 0.65; }
 .read-ticks { display: flex; align-items: center; }
+/* Herda a cor do texto do balão; "lido" ganha destaque com a cor `info` do tema. */
+.read-tick { opacity: 0.6; }
+.read-tick--read { opacity: 1; color: rgb(var(--v-theme-info)); }
 
 .message-actions {
   display: flex;
@@ -688,14 +738,14 @@ watch(currentChat, async (chat) => {
 .typing-indicator {
   padding: 4px 16px;
   font-size: 0.75rem;
-  color: #888;
+  color: rgb(var(--v-theme-textSecondary));
   display: flex;
   align-items: center;
 }
 
 .chat-input {
-  background-color: white;
-  border-top: 1px solid #e0e0e0;
+  background-color: rgb(var(--v-theme-surface));
+  border-top: 1px solid rgb(var(--v-theme-borderColor));
   padding: 12px 16px;
   position: absolute;
   bottom: 0;
@@ -708,20 +758,20 @@ watch(currentChat, async (chat) => {
 .reply-banner, .edit-banner {
   display: flex;
   align-items: center;
-  background: #f0f4ff;
-  border-left: 3px solid #667eea;
+  background: rgba(var(--v-theme-primary), 0.08);
+  border-left: 3px solid rgb(var(--v-theme-primary));
   border-radius: 4px;
   padding: 4px 8px;
   margin-bottom: 6px;
   font-size: 0.78rem;
-  color: #555;
+  color: rgb(var(--v-theme-textSecondary));
 }
 .reply-preview-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
 
 .conversations-list::-webkit-scrollbar,
 .chat-messages::-webkit-scrollbar { width: 6px; }
 .conversations-list::-webkit-scrollbar-track,
-.chat-messages::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+.chat-messages::-webkit-scrollbar-track { background: rgba(var(--v-theme-on-surface), 0.06); border-radius: 3px; }
 .conversations-list::-webkit-scrollbar-thumb,
-.chat-messages::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: rgba(var(--v-theme-on-surface), 0.22); border-radius: 3px; }
 </style>

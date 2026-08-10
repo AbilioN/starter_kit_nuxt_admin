@@ -444,6 +444,7 @@
     "chatInterface": {
       "privateChat": "Chat privado",
       "groupChat": "Chat en grupo",
+      "backToList": "Volver a las conversaciones",
       "searchUserPlaceholder": "Buscar usuario para nuevo chat...",
       "noChats": "Sin chats",
       "noChatsHint": "Busca un usuario arriba para comenzar.",

@@ -353,8 +353,25 @@ export const useChatManager = () => {
   };
 
   const resetChat = () => {
+    // Limpa o estado PRIMEIRO. Largar o canal do Pusher é um efeito colateral que
+    // depende do Echo estar disponível (`useNuxtApp()` lança fora de contexto Nuxt,
+    // e `$echo.leave` é código de terceiro) — se ele falhar, o chat ainda tem que
+    // ter sido fechado, senão a UI trava numa conversa que não dá mais pra sair.
     currentChat.value = null;
     messages.value = [];
+
+    // `selectChat()` só desinscreve o canal anterior quando enxerga um currentChat
+    // — depois deste reset ele não enxerga, então sem isto a inscrição em
+    // `chat.{id}` vazaria e seguiria alimentando o indicador de "digitando" de uma
+    // conversa fechada.
+    if (currentTypingChatId !== null) {
+      try {
+        unsubscribeFromTypingChannel(currentTypingChatId);
+      } catch (err) {
+        console.warn('Failed to leave typing channel on reset:', err);
+        currentTypingChatId = null;
+      }
+    }
   };
 
   const selectChat = async (chat: Readonly<Chat>) => {
