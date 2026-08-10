@@ -336,7 +336,7 @@ const {
 } = useChatManager();
 
 const { assistants, loadAssistants } = useAssistants();
-const { isFeatureEnabled } = useSettings();
+const { isFeatureEnabled, featureFlags, loadSettings } = useSettings();
 const showAiAgents = computed(() => isFeatureEnabled('ai_agent') && assistants.value.length > 0);
 
 const startChatWithAgent = async (assistant: { id: string; name: string; description: string | null }) => {
@@ -484,6 +484,16 @@ onMounted(async () => {
   if (!props.initialUser) {
     await loadChats();
     loadAssistants();
+    // features.ai_agent isn't public (is_public=false, same as most plan
+    // feature flags), so the boot-time useTenantTheme/publicSettings fetch
+    // never carries it — nothing else loads the authenticated settings list
+    // outside the /settings pages, and this widget is global/floating, so
+    // most admins would open it without ever having visited Settings first.
+    // Without this, showAiAgents silently stays false even when the
+    // tenant's plan genuinely has the feature enabled.
+    if (featureFlags.value.length === 0) {
+      loadSettings('features');
+    }
   }
   window.addEventListener('scroll-to-bottom', scrollToBottom);
 });
