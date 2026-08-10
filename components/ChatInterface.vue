@@ -26,6 +26,17 @@
           </div>
         </div>
         <div class="d-flex align-center">
+          <v-btn
+            v-if="currentChatAssistant"
+            @click="startNewConversationWithAgent"
+            icon
+            size="small"
+            variant="text"
+            :title="t('components.chatInterface.newConversationWithAgent')"
+            class="mr-1"
+          >
+            <v-icon>mdi-plus-circle-outline</v-icon>
+          </v-btn>
           <v-btn @click="$emit('close')" icon size="small" variant="text">
             <v-icon>mdi-close</v-icon>
           </v-btn>
@@ -341,6 +352,24 @@ const showAiAgents = computed(() => isFeatureEnabled('ai_agent') && assistants.v
 
 const startChatWithAgent = async (assistant: { id: string; name: string; description: string | null }) => {
   await startChatWithUser(assistant.id, 'assistant');
+  if (currentChat.value) {
+    await loadChatMessages(currentChat.value.id);
+  }
+};
+
+// Private chats have no participant-type field of their own - chat.name is
+// just the other participant's name (see Chat::toEntityFromReciever on the
+// backend) - so matching it against the loaded agent list is the only way
+// to tell "this open chat is with an AI agent" without a dedicated field.
+const currentChatAssistant = computed(() => {
+  if (!currentChat.value) return null;
+  return assistants.value.find(a => a.name === currentChat.value?.name) ?? null;
+});
+
+const startNewConversationWithAgent = async () => {
+  const assistant = currentChatAssistant.value;
+  if (!assistant) return;
+  await startChatWithUser(assistant.id, 'assistant', true);
   if (currentChat.value) {
     await loadChatMessages(currentChat.value.id);
   }

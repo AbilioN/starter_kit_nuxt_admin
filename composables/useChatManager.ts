@@ -229,11 +229,11 @@ export const useChatManager = () => {
     }
   };
 
-  const startChatWithUser = async (userId: string | number, userType: 'user' | 'admin' | 'assistant' = 'user') => {
+  const startChatWithUser = async (userId: string | number, userType: 'user' | 'admin' | 'assistant' = 'user', newConversation = false) => {
     loading.value = true;
     error.value = null;
     try {
-      const chat = await chatService.createPrivateChat(userId, userType);
+      const chat = await chatService.createPrivateChat(userId, userType, newConversation);
 
       if (!chat?.id) throw new Error('Chat created without valid ID');
 

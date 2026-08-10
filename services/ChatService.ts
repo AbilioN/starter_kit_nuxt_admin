@@ -24,9 +24,9 @@ export class ChatService {
   /**
    * Criar chat privado
    */
-  async createPrivateChat(otherUserId: string | number, otherUserType: 'user' | 'admin' | 'assistant'): Promise<Chat> {
+  async createPrivateChat(otherUserId: string | number, otherUserType: 'user' | 'admin' | 'assistant', newConversation = false): Promise<Chat> {
     try {
-      const response: ChatCreateResponse = await this.chatRepository.createPrivateChat(otherUserId, otherUserType);
+      const response: ChatCreateResponse = await this.chatRepository.createPrivateChat(otherUserId, otherUserType, newConversation);
       console.log('🔍 ChatService - createPrivateChat response:', response);
       
       // A API retorna { success: true, data: { ... } }
