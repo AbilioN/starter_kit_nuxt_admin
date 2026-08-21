@@ -1,0 +1,28 @@
+name: build
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  build:
+    name: Type-check and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # There is no test suite in this repo yet (roadmap: no e2e/browser tests),
+      # so the build IS the gate: it catches broken imports, missing components
+      # and template syntax errors, which is most of what breaks here in practice.
+      - run: npx nuxt build
+        env:
+          NUXT_PUBLIC_TENANT_MODE: query
