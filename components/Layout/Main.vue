@@ -47,6 +47,9 @@ const sDrawer = ref(true);
     </perfect-scrollbar>
   </v-navigation-drawer>
   <div class="container verticalLayout">
+    <!-- Above everything, on every page: a support session must never be
+         something you have to go looking for. -->
+    <ImpersonationBanner />
     <div class="maxWidth px-xl-0 px-sm-5 px-0">
       <v-app-bar elevation="0" height="70" class="top-header">
         <div class="d-flex align-center justify-space-between w-100">

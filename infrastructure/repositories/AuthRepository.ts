@@ -52,8 +52,15 @@ export class AuthRepository implements IAuthRepository {
 
   async getCurrentUser(): Promise<Admin | null> {
     try {
-      const response = await this.apiClient.get<{ admin: Admin }>(API_CONFIG.ENDPOINTS.ME);
-      return response.admin;
+      // GET /api/admin/me answers with the standard envelope, `{ success, data }`
+      // — not `{ admin }`, which is only the login response's shape. Reading the
+      // wrong key made this return undefined every time, silently: it is only
+      // reached when a token exists without a cached `user` (session recovery,
+      // and the GodAdmin support-session handover), so an ordinary login never
+      // exercised it. `admin` is still accepted in case an older deployment
+      // answers that way.
+      const response = await this.apiClient.get<{ data?: Admin; admin?: Admin }>(API_CONFIG.ENDPOINTS.ME);
+      return response.data ?? response.admin ?? null;
     } catch (error) {
       console.error('Get current user failed:', error);
       return null;

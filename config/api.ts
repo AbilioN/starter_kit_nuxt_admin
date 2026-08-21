@@ -15,6 +15,8 @@ export const API_CONFIG = {
     LOGIN: '/login',
     LOGOUT: '/logout',
     ME: '/me',
+    IMPERSONATION: '/impersonation', // relative to baseURL (/api/admin)
+    IMPERSONATION_STOP: '/impersonation/stop',
     TENANT_THEME: '/tenant/theme', // relative to publicBaseURL (/api)
     TENANT_SUBSCRIPTION_PLAN: '/tenant/subscription-plan', // relative to baseURL (/api/admin)
     TENANT_BRANDING: '/tenant/branding', // relative to baseURL (/api/admin)
