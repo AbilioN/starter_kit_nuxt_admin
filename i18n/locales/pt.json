@@ -33,7 +33,13 @@
       "signingIn": "Entrando…",
       "newHere": "Novo por aqui?",
       "createAccount": "Criar uma conta",
-      "signedOutAlert": "Sessão encerrada: uma requisição para {method} {url} retornou 401. Veja o console para detalhes."
+      "signedOutAlert": "Sessão encerrada: uma requisição para {method} {url} retornou 401. Veja o console para detalhes.",
+      "heading": "Iniciar sessão",
+      "subheading": "Use as credenciais da sua área de trabalho para continuar.",
+      "brandTagline": "Uma área de trabalho isolada para a sua equipa — papéis, conversas e registo de auditoria completo.",
+      "pointRoles": "Papéis e permissões detalhados",
+      "pointChat": "Chat em tempo real, incluído",
+      "pointAudit": "Registo de auditoria imutável"
     },
     "register": {
       "nameLabel": "Nome",

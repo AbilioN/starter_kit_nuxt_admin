@@ -36,7 +36,7 @@ const APP_THEME: ThemeTypes = {
         borderColor: '#e2e8f0',
         inputBorder: '#d7dee8',
         containerBg: '#ffffff',
-        background: '#f5f7f8',
+        background: '#f7f9fb',
         hoverColor: '#f1f5f4',
         surface: '#ffffff',
         grey100: '#64748b',

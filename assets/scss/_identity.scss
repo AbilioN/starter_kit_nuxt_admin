@@ -1,0 +1,391 @@
+// =============================================================================
+// Visual identity
+// =============================================================================
+//
+// Everything here exists to stop the panel looking like the admin template it
+// started from. The rule that shapes all of it: colour comes from the TENANT,
+// never from this file. Every value below is expressed through
+// rgb(var(--v-theme-primary|secondary|tertiary)), which useTenantTheme rewrites
+// at runtime from GET /api/tenant/theme — so the same stylesheet renders as a
+// deep blue product for tenant-a, a coral one for tenant-b and a violet one for
+// tenant-c, with no per-tenant CSS anywhere.
+//
+// The three colours are given distinct JOBS rather than being used
+// interchangeably, because the demo palettes make that unavoidable: every
+// tenant's tertiary is a pale tint (#85B7EB, #F5B895, #E8E4F5) and would be
+// illegible as text on white.
+//
+//   primary    structure and action — sidebar, primary buttons, active states
+//   secondary  depth — the far end of every gradient, hover states
+//   tertiary   light — washes, surface tints, badges, the accent rule
+//
+// =============================================================================
+
+:root {
+    // Asymmetric radius: one square corner is the cheapest way to stop a card
+    // reading as the default rounded rectangle every admin template ships.
+    --identity-radius: 14px;
+    --identity-radius-flat: 3px;
+
+    // Shadows are tinted with the tenant's primary instead of neutral grey —
+    // grey shadow on a coloured product is what makes a theme look painted on.
+    --identity-shadow: 0 1px 2px rgba(var(--v-theme-primary), 0.06),
+        0 8px 24px -12px rgba(var(--v-theme-primary), 0.22);
+    --identity-shadow-lifted: 0 2px 4px rgba(var(--v-theme-primary), 0.08),
+        0 18px 40px -18px rgba(var(--v-theme-primary), 0.34);
+}
+
+// -----------------------------------------------------------------------------
+// Typography — a display face for headings, the body face left alone
+// -----------------------------------------------------------------------------
+// The single change that does most of the work: the template's Inter-for-
+// everything is what makes one admin panel look like the next. Space Grotesk
+// carries the headings; Inter still runs the body, where readability wins.
+
+.text-h1, .text-h2, .text-h3, .text-h4, .text-h5,
+.v-card-title, .v-toolbar-title {
+    font-family: 'Space Grotesk', 'Inter', sans-serif !important;
+    letter-spacing: -0.02em !important;
+}
+
+.text-h1, .text-h2, .text-h3, .text-h4 {
+    font-weight: 700 !important;
+}
+
+// Section labels read as small caps rather than as another paragraph.
+.v-list-subheader__text,
+.smallCap .mini-text {
+    font-family: 'Space Grotesk', 'Inter', sans-serif !important;
+    letter-spacing: 0.14em !important;
+    font-size: 0.66rem !important;
+    font-weight: 600 !important;
+}
+
+// -----------------------------------------------------------------------------
+// The page itself — lit from the top, not flat grey
+// -----------------------------------------------------------------------------
+
+.v-application__wrap,
+.v-main {
+    background:
+        // A wash of the tenant's own colour behind the content, strongest at
+        // the top where the header sits, so the page has a light source.
+        radial-gradient(1100px 460px at 12% -14%, rgba(var(--v-theme-primary), 0.16), transparent 66%),
+        radial-gradient(1000px 420px at 92% -8%, rgba(var(--v-theme-tertiary), 0.60), transparent 60%),
+        rgb(var(--v-theme-background)) !important;
+}
+
+// -----------------------------------------------------------------------------
+// Sidebar — the strongest single departure from the template
+// -----------------------------------------------------------------------------
+// The stock sidebar is white with grey labels: neutral furniture. This one is
+// the product's colour, running primary -> secondary, which is where two of the
+// three tenant colours become impossible to miss.
+
+// Selector doubled up (drawer + leftSidebar) to outrank the template's own
+// .bg-containerBg utility, which is applied to this same element and would
+// otherwise repaint it white. Listing &.bg-containerBg among the transparent
+// children below is what broke the first attempt: it matches the drawer
+// ITSELF at higher specificity, so the gradient was overridden by its own
+// rule set.
+.v-navigation-drawer.leftSidebar {
+    background: linear-gradient(168deg,
+        rgb(var(--v-theme-primary)) 0%,
+        rgb(var(--v-theme-secondary)) 92%) !important;
+    border-right: none !important;
+
+    // The children carry the same background utility and paint over the
+    // gradient unless cleared.
+    .scrollnavbar,
+    .v-list,
+    .v-list-item {
+        background: transparent !important;
+    }
+
+    .sidebar-brand {
+        padding-bottom: 22px !important;
+
+        &::after {
+            // A tertiary rule instead of the template's grey divider — the
+            // accent colour's first appearance, right under the logo.
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            border-radius: 2px;
+            background: linear-gradient(90deg,
+                rgba(var(--v-theme-tertiary), 0.95),
+                rgba(var(--v-theme-tertiary), 0)) !important;
+        }
+    }
+
+    .v-list-subheader {
+        color: rgba(255, 255, 255, 0.52) !important;
+        min-height: 34px !important;
+    }
+
+    .v-list-item-title {
+        color: rgba(255, 255, 255, 0.82) !important;
+        font-weight: 500 !important;
+    }
+
+    .v-list-item {
+        border-radius: var(--identity-radius-flat) var(--identity-radius) var(--identity-radius) var(--identity-radius) !important;
+        margin-bottom: 2px;
+        // The marker the active state slides in; laid out here so it does not
+        // shift the row when it appears.
+        position: relative;
+        transition: background-color 0.18s ease;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 0;
+            border-radius: 0 3px 3px 0;
+            background: rgb(var(--v-theme-tertiary));
+            transition: height 0.18s ease;
+        }
+
+        .v-icon,
+        svg {
+            color: rgba(255, 255, 255, 0.72) !important;
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.10) !important;
+
+            .v-list-item-title,
+            .v-icon,
+            svg {
+                color: #fff !important;
+            }
+        }
+    }
+
+    // Active row: a light plate rather than a tinted one, so it reads as the
+    // page you are on even against the darkest end of the gradient.
+    .v-list-item--active {
+        background: rgba(255, 255, 255, 0.16) !important;
+
+        &::before {
+            height: 60%;
+        }
+
+        .v-list-item-title {
+            color: #fff !important;
+            font-weight: 600 !important;
+        }
+
+        .v-icon,
+        svg {
+            color: rgb(var(--v-theme-tertiary)) !important;
+        }
+    }
+
+    .v-list-item__overlay {
+        display: none !important;
+    }
+
+    .tenant-logo {
+        // Tenant logos are drawn for light backgrounds; give them a plate to
+        // sit on rather than letting them disappear into the gradient.
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 10px;
+        padding: 6px 10px;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Header — dissolved into the page
+// -----------------------------------------------------------------------------
+// The template's header is a white bar with a border, which visually competes
+// with the content beneath it. Removing it makes the content the top of the
+// page.
+
+.top-header {
+    background: transparent !important;
+    border: none !important;
+    backdrop-filter: none !important;
+
+    .v-toolbar__content {
+        padding-inline: 0;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Cards — the accent rule is what makes them ours
+// -----------------------------------------------------------------------------
+
+.v-main .v-card {
+    border-radius: var(--identity-radius-flat) var(--identity-radius) var(--identity-radius) var(--identity-radius) !important;
+    border: 1px solid rgba(var(--v-theme-primary), 0.10) !important;
+    box-shadow: var(--identity-shadow) !important;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.22s ease, transform 0.22s ease;
+
+    // A gradient hairline across the top edge, running primary -> tertiary.
+    // This is the motif repeated on tables and dialogs, and the reason a
+    // screenshot of any page reads as the same product.
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg,
+            rgb(var(--v-theme-primary)) 0%,
+            rgb(var(--v-theme-secondary)) 45%,
+            rgb(var(--v-theme-tertiary)) 100%);
+        opacity: 0.9;
+    }
+
+    &:hover {
+        box-shadow: var(--identity-shadow-lifted) !important;
+    }
+}
+
+// Nested cards would otherwise draw a second rule inside the first.
+.v-main .v-card .v-card::before {
+    display: none;
+}
+
+.v-card-title {
+    padding-top: 20px !important;
+}
+
+// -----------------------------------------------------------------------------
+// Buttons — weight and a coloured shadow, not a flat rectangle
+// -----------------------------------------------------------------------------
+
+.v-btn {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.v-btn--elevated.bg-primary,
+.v-btn.v-btn--variant-flat.text-primary,
+.v-btn--variant-flat.bg-primary {
+    box-shadow: 0 2px 6px rgba(var(--v-theme-primary), 0.28),
+        0 10px 20px -10px rgba(var(--v-theme-primary), 0.5) !important;
+
+    &:hover {
+        box-shadow: 0 3px 8px rgba(var(--v-theme-primary), 0.34),
+            0 14px 26px -12px rgba(var(--v-theme-primary), 0.6) !important;
+    }
+}
+
+.v-btn--variant-outlined {
+    border-width: 1.5px !important;
+}
+
+// -----------------------------------------------------------------------------
+// Tables — tinted headers, no heavy rules
+// -----------------------------------------------------------------------------
+
+.v-main .v-table {
+    .v-table__wrapper > table > thead > tr > th {
+        background: rgba(var(--v-theme-tertiary), 0.30) !important;
+        color: rgb(var(--v-theme-secondary)) !important;
+        font-family: 'Space Grotesk', 'Inter', sans-serif !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.06em !important;
+        text-transform: uppercase !important;
+        border-bottom: none !important;
+    }
+
+    .v-table__wrapper > table > tbody > tr {
+        transition: background-color 0.15s ease;
+
+        &:hover {
+            background: rgba(var(--v-theme-tertiary), 0.16) !important;
+        }
+
+        > td {
+            border-bottom: 1px solid rgba(var(--v-theme-primary), 0.07) !important;
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Chips, inputs, dialogs
+// -----------------------------------------------------------------------------
+
+.v-chip.v-chip--variant-tonal,
+.v-chip.bg-lightprimary {
+    background: rgba(var(--v-theme-tertiary), 0.45) !important;
+    color: rgb(var(--v-theme-secondary)) !important;
+    font-weight: 600 !important;
+    border-radius: 7px !important;
+}
+
+// A focus ring in the tenant's colour, which the template does not draw at all.
+.v-field--focused .v-field__outline {
+    --v-field-border-width: 1.5px;
+}
+
+.v-field--focused {
+    box-shadow: 0 0 0 3px rgba(var(--v-theme-primary), 0.14);
+    border-radius: 10px;
+}
+
+.v-text-field .v-field,
+.v-select .v-field,
+.v-textarea .v-field {
+    border-radius: 10px !important;
+}
+
+.v-overlay__content > .v-card {
+    border-radius: var(--identity-radius-flat) var(--identity-radius) var(--identity-radius) var(--identity-radius) !important;
+}
+
+// -----------------------------------------------------------------------------
+// Page headers — a tertiary rule under every h1, tying pages to the sidebar
+// -----------------------------------------------------------------------------
+
+.v-main h1 {
+    position: relative;
+    padding-bottom: 10px;
+
+    &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 42px;
+        height: 3px;
+        border-radius: 3px;
+        background: linear-gradient(90deg,
+            rgb(var(--v-theme-primary)),
+            rgb(var(--v-theme-tertiary)));
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Stat tiles
+// -----------------------------------------------------------------------------
+// The tertiary is a pale tint in every demo palette, so a tonal avatar built
+// from it would put a light icon on a lighter plate. Here it is used as a solid
+// surface with the secondary carrying the icon — the one combination of the
+// three that stays legible whichever tenant is loaded.
+
+.stat-avatar-tertiary {
+    background: rgb(var(--v-theme-tertiary)) !important;
+
+    .v-icon {
+        color: rgb(var(--v-theme-secondary)) !important;
+    }
+}
+
+// The number is the point of the tile; the display face makes it read as one.
+.v-main .text-h4.font-weight-bold {
+    font-family: 'Space Grotesk', 'Inter', sans-serif !important;
+    letter-spacing: -0.03em !important;
+}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
+import { useTheme } from 'vuetify';
 import UiChildCard from '@/components/shared/UiChildCard.vue';
 import LineChart from '@/components/charts/LineChart.vue';
 import BarChart from '@/components/charts/BarChart.vue';
@@ -12,10 +13,17 @@ const { metrics, loading, error, loadMetrics, formatBytes } = useDashboard();
 
 onMounted(loadMetrics);
 
+// Charts read their colours from the live theme rather than the template's
+// hardcoded #5D87FF / #13DEB9, so a chart belongs to the tenant the same way
+// the sidebar does. Computed off theme.current so it follows useTenantTheme's
+// runtime override instead of freezing whatever was set at boot.
+const theme = useTheme();
+const brand = computed(() => theme.current.value.colors);
+
 const newUsersChartOptions = computed(() => ({
   chart: { id: 'new-users', toolbar: { show: false } },
   xaxis: { categories: metrics.value?.users.per_day_last_7.map(d => d.date.slice(5)) ?? [] },
-  colors: ['#5D87FF'],
+  colors: [brand.value.primary],
   stroke: { curve: 'smooth', width: 2 },
   fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0 } },
   dataLabels: { enabled: false },
@@ -29,7 +37,7 @@ const newUsersSeries = computed(() => [{
 const messagesChartOptions = computed(() => ({
   chart: { id: 'messages', toolbar: { show: false } },
   xaxis: { categories: metrics.value?.chats.messages_per_day_last_7.map(d => d.date.slice(5)) ?? [] },
-  colors: ['#13DEB9'],
+  colors: [brand.value.secondary],
   plotOptions: { bar: { borderRadius: 4 } },
   dataLabels: { enabled: false },
 }));
@@ -86,7 +94,7 @@ const messagesSeries = computed(() => [{
         <v-col cols="12" sm="6" lg="3">
           <UiChildCard>
             <div class="d-flex align-center gap-4">
-              <v-avatar size="56" color="success" variant="tonal">
+              <v-avatar size="56" color="secondary" variant="tonal">
                 <v-icon size="28">mdi-shield-account</v-icon>
               </v-avatar>
               <div>
@@ -100,7 +108,7 @@ const messagesSeries = computed(() => [{
         <v-col cols="12" sm="6" lg="3">
           <UiChildCard>
             <div class="d-flex align-center gap-4">
-              <v-avatar size="56" color="warning" variant="tonal">
+              <v-avatar size="56" class="stat-avatar-tertiary">
                 <v-icon size="28">mdi-chat-outline</v-icon>
               </v-avatar>
               <div>
@@ -115,7 +123,7 @@ const messagesSeries = computed(() => [{
         <v-col cols="12" sm="6" lg="3">
           <UiChildCard>
             <div class="d-flex align-center gap-4">
-              <v-avatar size="56" color="info" variant="tonal">
+              <v-avatar size="56" color="primary" variant="tonal">
                 <v-icon size="28">mdi-file-multiple-outline</v-icon>
               </v-avatar>
               <div>

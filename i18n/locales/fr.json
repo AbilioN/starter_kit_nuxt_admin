@@ -33,7 +33,13 @@
       "signingIn": "Connexion…",
       "newHere": "Nouveau ici ?",
       "createAccount": "Créer un compte",
-      "signedOutAlert": "Déconnecté : une requête vers {method} {url} a retourné 401. Consultez la console pour plus de détails."
+      "signedOutAlert": "Déconnecté : une requête vers {method} {url} a retourné 401. Consultez la console pour plus de détails.",
+      "heading": "Connexion",
+      "subheading": "Utilisez les identifiants de votre espace de travail pour continuer.",
+      "brandTagline": "Un espace de travail isolé pour votre équipe — rôles, conversations et piste d'audit complète.",
+      "pointRoles": "Rôles et permissions détaillés",
+      "pointChat": "Chat en temps réel, intégré",
+      "pointAudit": "Piste d'audit inaltérable"
     },
     "register": {
       "nameLabel": "Nom",

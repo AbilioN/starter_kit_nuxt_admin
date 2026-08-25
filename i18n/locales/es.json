@@ -33,7 +33,13 @@
       "signingIn": "Iniciando sesión…",
       "newHere": "¿Nuevo aquí?",
       "createAccount": "Crear una cuenta",
-      "signedOutAlert": "Sesión cerrada: una solicitud a {method} {url} devolvió 401. Consulta la consola para más detalles."
+      "signedOutAlert": "Sesión cerrada: una solicitud a {method} {url} devolvió 401. Consulta la consola para más detalles.",
+      "heading": "Iniciar sesión",
+      "subheading": "Usa las credenciales de tu espacio de trabajo para continuar.",
+      "brandTagline": "Un espacio de trabajo aislado para tu equipo: roles, conversaciones y registro de auditoría completo.",
+      "pointRoles": "Roles y permisos detallados",
+      "pointChat": "Chat en tiempo real, incluido",
+      "pointAudit": "Registro de auditoría inmutable"
     },
     "register": {
       "nameLabel": "Nombre",
