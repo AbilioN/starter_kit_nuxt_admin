@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import UiChildCard from '@/components/shared/UiChildCard.vue';
+import LocaleTabs from '~/components/Templates/LocaleTabs.vue';
 import TemplateForm, { type TemplateFormData } from '~/components/Templates/TemplateForm.vue';
-import type { UpdateTemplateRequest } from '~/types/api';
+import type { CreateTemplateRequest, UpdateTemplateRequest } from '~/types/api';
 
 definePageMeta({
   middleware: ['auth', 'permissions'],
@@ -12,9 +13,13 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const { hasPermission } = usePermissions();
-const { loading, saving, getTemplate, updateTemplate, deleteTemplate, preview, previewPdf } = useTemplates();
+const { loading, saving, getTemplate, createTemplate, updateTemplate, deleteTemplate, preview, previewPdf, loadTranslations } = useTemplates();
 
-const templateId = route.params.id as string;
+// Computed, not read once: the language tabs navigate between translations,
+// which is the SAME route with a different id — the router reuses this
+// component and onMounted never fires again, so a captured const would keep
+// editing the template the author just navigated away from.
+const templateId = computed(() => route.params.id as string);
 
 const form = ref<TemplateFormData>({
   name: '',
@@ -28,17 +33,24 @@ const form = ref<TemplateFormData>({
   locked: false,
 });
 
+// Which language THIS row is, and which group it belongs to — needed to add
+// a sibling translation without the new row starting a group of its own.
+const currentLocale = ref<string | null>(null);
+const translationGroupId = ref<string | null>(null);
+
 const notFound = ref(false);
 const saveError = ref<string | null>(null);
 const showDeleteDialog = ref(false);
 const deleting = ref(false);
 
 const load = async () => {
-  const tpl = await getTemplate(templateId);
+  const tpl = await getTemplate(templateId.value);
   if (!tpl) {
     notFound.value = true;
     return;
   }
+  currentLocale.value = tpl.locale;
+  translationGroupId.value = tpl.translation_group_id;
   form.value = {
     name: tpl.name,
     type: tpl.type,
@@ -68,15 +80,49 @@ const save = async () => {
     },
   };
 
-  const updated = await updateTemplate(templateId, payload);
+  const updated = await updateTemplate(templateId.value, payload);
   if (!updated) {
     saveError.value = t('pages.templates.saveFailed');
   }
 };
 
+// Adding a language starts from the current translation rather than from a
+// blank form: an author translating a template wants the text in front of
+// them to work from, and a body of "" would also lose every placeholder they
+// would otherwise only have to leave alone.
+const creatingTranslation = ref(false);
+
+const createTranslation = async (locale: string) => {
+  creatingTranslation.value = true;
+
+  const payload: CreateTemplateRequest = {
+    name: `${form.value.name} (${locale.toUpperCase()})`,
+    type: form.value.type,
+    body_format: form.value.body_format,
+    body: form.value.body || null,
+    subject: form.value.subject || null,
+    description: form.value.description || null,
+    is_active: form.value.is_active,
+    options: {
+      sender: form.value.sender || undefined,
+      locked: form.value.locked || undefined,
+    },
+    locale,
+    translation_group_id: translationGroupId.value ?? undefined,
+  };
+
+  const created = await createTemplate(payload);
+  creatingTranslation.value = false;
+
+  if (created) {
+    await loadTranslations(created.id);
+    router.push(`/templates/${created.id}/edit`);
+  }
+};
+
 const confirmDelete = async () => {
   deleting.value = true;
-  const ok = await deleteTemplate(templateId);
+  const ok = await deleteTemplate(templateId.value);
   deleting.value = false;
   if (ok) {
     router.push('/templates');
@@ -98,7 +144,7 @@ const openPreview = async () => {
   if (form.value.type === 'pdf') {
     previewLoading.value = true;
     if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
-    previewObjectUrl = await previewPdf(templateId);
+    previewObjectUrl = await previewPdf(templateId.value);
     previewLoading.value = false;
     if (previewObjectUrl) window.open(previewObjectUrl, '_blank');
     return;
@@ -106,7 +152,7 @@ const openPreview = async () => {
 
   previewLoading.value = true;
   showPreviewDialog.value = true;
-  const result = await preview(templateId);
+  const result = await preview(templateId.value);
   previewLoading.value = false;
   if (result) {
     previewResult.value = { contentType: result.content_type, content: result.content };
@@ -118,6 +164,13 @@ onBeforeUnmount(() => {
 });
 
 onMounted(load);
+
+// Re-load when the id changes under a reused component (tab navigation).
+watch(templateId, () => {
+  notFound.value = false;
+  saveError.value = null;
+  load();
+});
 </script>
 
 <template>
@@ -161,6 +214,16 @@ onMounted(load);
     <v-row v-else>
       <v-col cols="12">
         <UiChildCard>
+          <LocaleTabs
+            :template-id="templateId"
+            :current-locale="currentLocale"
+            @create="createTranslation"
+          />
+
+          <v-overlay :model-value="creatingTranslation" contained class="align-center justify-center">
+            <v-progress-circular indeterminate color="primary" />
+          </v-overlay>
+
           <TemplateForm v-model="form" mode="edit" :template-id="templateId" />
 
           <v-alert v-if="saveError" type="error" variant="tonal" density="compact" class="mt-4">

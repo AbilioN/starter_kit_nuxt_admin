@@ -21,6 +21,16 @@ const editor = useEditor({
   },
 });
 
+// Inserting at the caret is the whole point of the field picker — appending
+// to the end would make it useless for anything but an empty template.
+// insertContent() is used rather than a string splice because the model here
+// is HTML: splicing text into markup can land inside a tag.
+const insertAtCursor = (text: string) => {
+  editor.value?.chain().focus().insertContent(text).run();
+};
+
+defineExpose({ insertAtCursor });
+
 // Keep the editor in sync if the parent replaces modelValue out-of-band
 // (e.g. loading a template into an already-mounted editor).
 watch(() => props.modelValue, (value) => {

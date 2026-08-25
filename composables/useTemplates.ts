@@ -6,6 +6,8 @@ import type {
   UpdateTemplateRequest,
   TemplatePreviewResult,
   TemplateBackgroundFile,
+  TemplateFieldCatalog,
+  TemplateFindings,
 } from '~/types/api';
 import { TemplateService } from '~/services/TemplateService';
 
@@ -20,6 +22,45 @@ export const useTemplates = () => {
   const loading = ref(false);
   const saving = ref(false);
   const error = ref<string | null>(null);
+
+  // Shared across the editor: the field picker, the language tabs and the
+  // validator all read the same catalog, so one fetch per session rather than
+  // one per component — and no chance of the tabs and the picker disagreeing
+  // about which languages the tenant runs.
+  const fieldCatalog = useState<TemplateFieldCatalog | null>('templateFieldCatalog', () => null);
+
+  const loadFieldCatalog = async (force = false) => {
+    if (fieldCatalog.value && !force) return;
+    try {
+      fieldCatalog.value = await templateService.getFieldCatalog();
+    } catch {
+      // Non-blocking: without the catalog the author types placeholders by
+      // hand, which is exactly how it worked before — never a reason to stop
+      // them editing.
+    }
+  };
+
+  const translations = ref<Template[]>([]);
+
+  const loadTranslations = async (id: string) => {
+    try {
+      translations.value = await templateService.getTranslations(id);
+    } catch {
+      translations.value = [];
+    }
+    return translations.value;
+  };
+
+  const findings = ref<TemplateFindings | null>(null);
+
+  const validateBody = async (body: string | null, subject?: string | null) => {
+    try {
+      findings.value = await templateService.validateBody(body, subject);
+    } catch {
+      findings.value = null;
+    }
+    return findings.value;
+  };
 
   const loadTemplates = async (page = 1, perPage = 15, type?: TemplateType) => {
     loading.value = true;
@@ -201,6 +242,12 @@ export const useTemplates = () => {
   };
 
   return {
+    fieldCatalog,
+    loadFieldCatalog,
+    translations,
+    loadTranslations,
+    findings,
+    validateBody,
     templates: readonly(templates),
     pagination: readonly(pagination),
     loading,

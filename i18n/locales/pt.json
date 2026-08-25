@@ -373,7 +373,16 @@
       "entryHighlight": "Destacar no preview",
       "selectEntryHint": "Clique em um campo na página para editá-lo, ou adicione um a partir da lista de campos.",
       "emptyEntry": "(vazio)",
-      "systemBadge": "Sistema"
+      "systemBadge": "Sistema",
+      "fieldsTitle": "Campos disponíveis",
+      "fieldsHint": "Clique num campo para o inserir onde está o cursor.",
+      "unknownPlaceholders": "Estes marcadores não são reconhecidos e ficarão vazios:",
+      "promptHint": "fornecido no momento do envio (nome do destinatário, uma ligação única).",
+      "strictHint": "obrigatório — o envio é cancelado se o valor estiver vazio.",
+      "includeHint": "insere outro modelo pelo id.",
+      "languagesLabel": "Idiomas",
+      "notTranslated": "vazio",
+      "defaultLanguage": "Idioma predefinido"
     },
     "notifications": {
       "title": "Notificações",

@@ -7,6 +7,8 @@ import type {
   UpdateTemplateRequest,
   TemplateBackgroundFile,
   TemplatePreviewResult,
+  TemplateFieldCatalog,
+  TemplateFindings,
 } from '~/types/api';
 
 export class TemplateService {
@@ -22,6 +24,18 @@ export class TemplateService {
 
   async getTemplate(id: string): Promise<Template> {
     return this.repository.getTemplate(id);
+  }
+
+  async getTranslations(id: string): Promise<Template[]> {
+    return this.repository.getTranslations(id);
+  }
+
+  async getFieldCatalog(): Promise<TemplateFieldCatalog> {
+    return this.repository.getFieldCatalog();
+  }
+
+  async validateBody(body: string | null, subject?: string | null): Promise<TemplateFindings> {
+    return this.repository.validateBody(body, subject);
   }
 
   async createTemplate(data: CreateTemplateRequest): Promise<Template> {

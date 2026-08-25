@@ -373,7 +373,16 @@
       "entryHighlight": "Surligner dans l'aperçu",
       "selectEntryHint": "Cliquez sur un champ de la page pour le modifier, ou ajoutez-en un depuis la liste des champs.",
       "emptyEntry": "(vide)",
-      "systemBadge": "Système"
+      "systemBadge": "Système",
+      "fieldsTitle": "Champs disponibles",
+      "fieldsHint": "Cliquez sur un champ pour l'insérer à l'emplacement du curseur.",
+      "unknownPlaceholders": "Ces variables ne sont pas reconnues et resteront vides :",
+      "promptHint": "fourni au moment de l'envoi (nom du destinataire, un lien à usage unique).",
+      "strictHint": "obligatoire — l'envoi est annulé si la valeur est vide.",
+      "includeHint": "insère un autre modèle par son id.",
+      "languagesLabel": "Langues",
+      "notTranslated": "vide",
+      "defaultLanguage": "Langue par défaut"
     },
     "notifications": {
       "title": "Notifications",

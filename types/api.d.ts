@@ -368,6 +368,11 @@ export interface Template {
   // Identifies a system email slot (e.g. 'welcome_email') — read-only,
   // never settable via create/update. Null for ordinary templates.
   key: string | null;
+  // Which language THIS row is written in, and what ties it to the same
+  // template in other languages. A monolingual tenant has one row per
+  // template and never sees either.
+  locale: string | null;
+  translation_group_id: string | null;
   name: string;
   type: TemplateType;
   body_format: TemplateBodyFormat;
@@ -400,6 +405,10 @@ export interface CreateTemplateRequest {
   description?: string | null;
   is_active?: boolean;
   options?: TemplateOptions;
+  locale?: string;
+  // Set when adding a language to an existing template — the new row joins
+  // that group instead of starting one of its own.
+  translation_group_id?: string;
 }
 
 export interface UpdateTemplateRequest {
@@ -410,6 +419,41 @@ export interface UpdateTemplateRequest {
   description?: string | null;
   is_active?: boolean;
   options?: TemplateOptions;
+  locale?: string;
+}
+
+// What the editor may insert, grouped by where the value comes from.
+export interface TemplateField {
+  key: string;
+  label: string;
+  placeholder: string;
+}
+
+export interface TemplateFieldGroup {
+  group: string;
+  label: string;
+  description: string;
+  fields: TemplateField[];
+}
+
+export interface TemplateFieldCatalog {
+  groups: TemplateFieldGroup[];
+  locales: {
+    // What the tenant OFFERS — the tabs to draw, empty ones included.
+    enabled: string[];
+    default: string;
+  };
+}
+
+// What a body refers to and whether it exists. `unknown` is the one that
+// matters: those placeholders render as an empty string with no error, so
+// without this the author finds out from a customer.
+export interface TemplateFindings {
+  used: string[];
+  unknown: string[];
+  strict: string[];
+  prompts: string[];
+  missing_includes: string[];
 }
 
 // One positioned text stamp on a PDF-underlay template (spec §5) — mirrors
@@ -451,6 +495,10 @@ export interface TemplateBackgroundFilesResponse {
 export interface TemplatePreviewResult {
   content_type: string;
   content: string;
+  // Sent with the preview rather than behind a separate call: a preview
+  // renders an unknown placeholder as empty, which looks exactly like a
+  // field the record has no value for. These tell the two apart.
+  findings?: TemplateFindings;
 }
 
 export interface TemplatePreviewResponse {

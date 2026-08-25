@@ -373,7 +373,16 @@
       "entryHighlight": "Highlight in preview",
       "selectEntryHint": "Click an entry on the page to edit it, or add one from the field list.",
       "emptyEntry": "(empty)",
-      "systemBadge": "System"
+      "systemBadge": "System",
+      "fieldsTitle": "Available fields",
+      "fieldsHint": "Click a field to insert it where the cursor is.",
+      "unknownPlaceholders": "These placeholders are not recognised and will render as empty:",
+      "promptHint": "supplied when the message is sent (recipient name, a one-time link).",
+      "strictHint": "required — sending is aborted if the value is empty.",
+      "includeHint": "inserts another template by id.",
+      "languagesLabel": "Languages",
+      "notTranslated": "empty",
+      "defaultLanguage": "Default language"
     },
     "notifications": {
       "title": "Notifications",

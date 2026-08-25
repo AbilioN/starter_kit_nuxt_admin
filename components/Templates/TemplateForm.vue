@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import FieldPicker from '~/components/Templates/FieldPicker.vue';
 import HtmlEditor from '~/components/Templates/HtmlEditor.vue';
 import PdfBackgroundManager from '~/components/Templates/PdfBackgroundManager.vue';
 import PdfEntriesEditor from '~/components/Templates/PdfEntriesEditor.vue';
@@ -58,6 +59,54 @@ const showsSubject = computed(() => form.value.type === 'text_email' || form.val
 const isPlainHtml = computed(() => form.value.type === 'html_email' || (form.value.type === 'pdf' && form.value.body_format === 'html'));
 const isPdfUnderlay = computed(() => form.value.type === 'pdf' && form.value.body_format === 'positions');
 const isSimpleText = computed(() => !isPlainHtml.value && !isPdfUnderlay.value);
+
+// Insertion has to reach whichever editor is on screen, and they insert
+// differently: the rich-text one goes through TipTap's caret, the plain
+// textarea through a string splice at selectionStart. A PDF-underlay
+// template has no body text at all — each positioned entry carries its own,
+// so the picker is hidden there rather than inserting into nothing.
+const showsFieldPicker = computed(() => !isPdfUnderlay.value);
+
+const htmlEditorRef = ref<InstanceType<typeof HtmlEditor> | null>(null);
+const textareaRef = ref<{ $el: HTMLElement } | null>(null);
+
+const { findings, validateBody } = useTemplates();
+
+const insertPlaceholder = (placeholder: string) => {
+  if (isPlainHtml.value) {
+    htmlEditorRef.value?.insertAtCursor(placeholder);
+    return;
+  }
+
+  const el = textareaRef.value?.$el?.querySelector('textarea') as HTMLTextAreaElement | null;
+
+  if (!el) {
+    // No caret to insert at (the field never got focus) — appending still
+    // beats doing nothing, since the author can move it afterwards.
+    form.value.body = (form.value.body ?? '') + placeholder;
+    return;
+  }
+
+  const start = el.selectionStart ?? el.value.length;
+  const end = el.selectionEnd ?? start;
+  const body = form.value.body ?? '';
+  form.value.body = body.slice(0, start) + placeholder + body.slice(end);
+
+  // Put the caret after what was just inserted, so inserting two fields in a
+  // row does not stack them backwards.
+  requestAnimationFrame(() => {
+    el.focus();
+    el.selectionStart = el.selectionEnd = start + placeholder.length;
+  });
+};
+
+// Debounced so the check follows typing without a request per keystroke.
+let validateTimer: ReturnType<typeof setTimeout> | null = null;
+
+watch(() => [form.value.body, form.value.subject], () => {
+  if (validateTimer) clearTimeout(validateTimer);
+  validateTimer = setTimeout(() => validateBody(form.value.body, form.value.subject), 600);
+}, { immediate: true });
 </script>
 
 <template>
@@ -115,17 +164,25 @@ const isSimpleText = computed(() => !isPlainHtml.value && !isPdfUnderlay.value);
       <v-col cols="12">
         <label class="text-body-2 font-weight-medium d-block mb-2">{{ t('pages.templates.bodyLabel') }}</label>
 
-        <HtmlEditor v-if="isPlainHtml" v-model="form.body" />
+        <v-row v-if="!isPdfUnderlay">
+          <v-col :cols="12" :md="showsFieldPicker ? 8 : 12">
+            <HtmlEditor v-if="isPlainHtml" ref="htmlEditorRef" v-model="form.body" />
 
-        <v-textarea
-          v-else-if="isSimpleText"
-          v-model="form.body"
-          variant="outlined"
-          rows="8"
-          :placeholder="t('pages.templates.bodyPlaceholder')"
-        />
+            <v-textarea
+              v-else
+              ref="textareaRef"
+              v-model="form.body"
+              variant="outlined"
+              rows="8"
+              :placeholder="t('pages.templates.bodyPlaceholder')"
+            />
+          </v-col>
+          <v-col v-if="showsFieldPicker" cols="12" md="4">
+            <FieldPicker :unknown="findings?.unknown" @insert="insertPlaceholder" />
+          </v-col>
+        </v-row>
 
-        <template v-else-if="isPdfUnderlay">
+        <template v-else>
           <template v-if="templateId">
             <div class="mb-6">
               <label class="text-body-2 font-weight-medium d-block mb-2">{{ t('pages.templates.backgroundLabel') }}</label>

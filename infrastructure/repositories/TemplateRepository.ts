@@ -13,6 +13,8 @@ import type {
   TemplateBackgroundFilesResponse,
   TemplatePreviewResult,
   TemplatePreviewResponse,
+  TemplateFieldCatalog,
+  TemplateFindings,
 } from '~/types/api';
 
 export class TemplateRepository {
@@ -29,6 +31,26 @@ export class TemplateRepository {
     if (type) url += `&type=${encodeURIComponent(type)}`;
     const response = await this.apiClient.get<TemplatesResponse>(url);
     return { data: response.data, pagination: response.pagination };
+  }
+
+  async getFieldCatalog(): Promise<TemplateFieldCatalog> {
+    const response = await this.apiClient.get<{ success: boolean; data: TemplateFieldCatalog }>('/templates/fields');
+    return response.data;
+  }
+
+  // Takes the raw text, not a template id, so a bad placeholder surfaces
+  // while the author is still typing rather than after a save.
+  async validateBody(body: string | null, subject?: string | null): Promise<TemplateFindings> {
+    const response = await this.apiClient.post<{ success: boolean; data: TemplateFindings }>(
+      '/templates/validate',
+      { body, subject },
+    );
+    return response.data;
+  }
+
+  async getTranslations(id: string): Promise<Template[]> {
+    const response = await this.apiClient.get<{ success: boolean; data: Template[] }>(`/templates/${id}/translations`);
+    return response.data;
   }
 
   async getTemplate(id: string): Promise<Template> {
