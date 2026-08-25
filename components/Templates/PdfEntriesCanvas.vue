@@ -70,16 +70,42 @@ const loadPdf = async (url: string) => {
   const workerUrl = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default;
   pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
-  pdfDoc = await pdfjsLib.getDocument(url).promise;
+  // { url }, not the bare string: pdf.js v6 removed the string overload and
+  // reads src.url off the argument, so getDocument(url) leaves src.url
+  // undefined and throws "expected either `data`, `range`, or `url`
+  // parameter" — which is what this canvas did for every template, since a
+  // positions template with a background is the only thing that reaches here.
+  pdfDoc = await pdfjsLib.getDocument({ url }).promise;
   numPages.value = pdfDoc.numPages;
   if (currentPage.value > numPages.value) currentPage.value = 1;
   await renderPage(currentPage.value);
 };
 
+// Renders whatever is CURRENTLY PERSISTED, without writing anything. This
+// is what runs on mount, and it must stay read-only: the parent form starts
+// with an empty body and fills it in after its own fetch resolves, so a save
+// here would persist that empty in-memory state — which is exactly what used
+// to happen, wiping every entry of any positions template the moment someone
+// opened it.
+const loadPreview = async () => {
+  refreshing.value = true;
+  try {
+    const url = await previewPdf(props.templateId);
+    if (url) {
+      if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+      previewObjectUrl = url;
+      await loadPdf(url);
+    }
+  } finally {
+    refreshing.value = false;
+  }
+};
+
 // The full round-trip the spec calls for: persist the in-memory entries,
 // ask the server to render them over the real background, then load that
 // rendered PDF into the canvas — never the raw background, so the author
-// sees the actual resolved values and any real text overflow.
+// sees the actual resolved values and any real text overflow. Only ever
+// triggered by the author (the Refresh button), never automatically.
 const refreshPreview = async () => {
   refreshing.value = true;
   try {
@@ -165,7 +191,7 @@ const removeSelectedEntry = () => {
   selectedIndex.value = null;
 };
 
-onMounted(refreshPreview);
+onMounted(loadPreview);
 
 onBeforeUnmount(() => {
   if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);

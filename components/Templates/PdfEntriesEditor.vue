@@ -64,7 +64,7 @@ watch(entries, (value) => {
   if (mode.value === 'standard') body.value = JSON.stringify(value);
 }, { deep: true });
 
-onMounted(() => {
+const adoptBody = () => {
   const parsed = parseEntries(body.value ?? '');
   if (parsed === null) {
     // Existing body isn't valid entries JSON — start in Expert so the
@@ -73,6 +73,18 @@ onMounted(() => {
   } else {
     entries.value = parsed;
   }
+};
+
+onMounted(adoptBody);
+
+// The body arrives AFTER this mounts: the parent form is created with empty
+// values and filled in when its fetch resolves, so reading it once on mount
+// saw '' and left the canvas with no entries at all. Guarded against the
+// echo of our own watch below by comparing the serialized form.
+watch(body, (value) => {
+  if (mode.value !== 'standard') return;
+  if (value === JSON.stringify(entries.value)) return;
+  adoptBody();
 });
 </script>
 
