@@ -3,7 +3,12 @@ import type { ThemeTypes } from '@/types/themeTypes/ThemeType';
 // Original palette for this admin console — slate neutrals with a deep teal
 // accent, distinct from the generic light-blue look of the base template.
 // This is the pre-tenant-branding default; useTenantTheme overrides
-// primary/secondary at runtime once a tenant's branding loads.
+// primary/secondary/tertiary at runtime once a tenant's branding loads.
+//
+// `tertiary` is declared here rather than only assigned at runtime: Vuetify
+// generates the bg-*/text-* utility classes from the keys present at build
+// time, so a color that only ever appears at runtime gets its CSS variable
+// but no usable class.
 const APP_THEME: ThemeTypes = {
     name: 'APP_THEME',
     dark: false,
@@ -13,6 +18,7 @@ const APP_THEME: ThemeTypes = {
     colors: {
         primary: '#0f766e',
         secondary: '#475569',
+        tertiary: '#94a3b8',
         info: '#0ea5e9',
         success: '#15803d',
         warning: '#b45309',

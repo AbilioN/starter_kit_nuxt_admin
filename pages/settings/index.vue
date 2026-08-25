@@ -46,11 +46,27 @@ const tabs = computed(() => {
 const brandingForm = reactive({
   theme_primary_color: '',
   theme_secondary_color: '',
+  theme_tertiary_color: '',
 });
 watch(tenantTheme, (theme) => {
   brandingForm.theme_primary_color = theme?.primary_color ?? '';
   brandingForm.theme_secondary_color = theme?.secondary_color ?? '';
+  brandingForm.theme_tertiary_color = theme?.tertiary_color ?? '';
 }, { immediate: true });
+
+// The three square variants the backend generated from the uploaded logo.
+// Rendered at their true pixel size below, so what the resizer produced is
+// visible rather than described.
+const generatedIcons = computed(() => {
+  const icons = tenantTheme.value?.icon_urls ?? {};
+  return ([
+    { size: 'small', px: 32 },
+    { size: 'medium', px: 128 },
+    { size: 'large', px: 512 },
+  ] as const)
+    .filter((variant) => icons[variant.size])
+    .map((variant) => ({ ...variant, url: icons[variant.size]! }));
+});
 
 const logoFile = ref<File | null>(null);
 const logoInputRef = ref<HTMLInputElement | null>(null);
@@ -63,6 +79,7 @@ const saveBranding = async () => {
   const ok = await updateBranding({
     theme_primary_color: brandingForm.theme_primary_color || undefined,
     theme_secondary_color: brandingForm.theme_secondary_color || undefined,
+    theme_tertiary_color: brandingForm.theme_tertiary_color || undefined,
     logo: logoFile.value ?? undefined,
   });
   if (ok) logoFile.value = null;
@@ -189,6 +206,19 @@ onMounted(() => loadSettings());
                   </template>
                 </v-text-field>
               </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="brandingForm.theme_tertiary_color"
+                  :label="t('pages.settings.tertiaryColor')"
+                  placeholder="#8899aa"
+                  variant="outlined"
+                  density="comfortable"
+                >
+                  <template v-slot:prepend-inner>
+                    <div class="color-swatch" :style="{ backgroundColor: brandingForm.theme_tertiary_color || 'transparent' }" />
+                  </template>
+                </v-text-field>
+              </v-col>
               <v-col cols="12">
                 <input ref="logoInputRef" type="file" accept="image/*" style="display:none" @change="onLogoInputChange" />
                 <div class="d-flex align-center ga-3">
@@ -196,6 +226,23 @@ onMounted(() => loadSettings());
                     {{ logoFile ? logoFile.name : t('pages.settings.chooseLogo') }}
                   </v-btn>
                   <img v-if="tenantTheme?.logo_url" :src="tenantTheme.logo_url" alt="Current logo" class="current-logo" />
+                </div>
+              </v-col>
+              <v-col v-if="generatedIcons.length" cols="12">
+                <div class="text-caption text-medium-emphasis mb-2">
+                  {{ t('pages.settings.generatedIcons') }}
+                </div>
+                <div class="d-flex align-end ga-4">
+                  <div v-for="icon in generatedIcons" :key="icon.size" class="text-center">
+                    <img
+                      :src="icon.url"
+                      :alt="icon.size"
+                      :width="Math.min(icon.px, 96)"
+                      :height="Math.min(icon.px, 96)"
+                      class="generated-icon"
+                    />
+                    <div class="text-caption text-medium-emphasis mt-1">{{ icon.px }}px</div>
+                  </div>
                 </div>
               </v-col>
             </v-row>
@@ -392,6 +439,15 @@ onMounted(() => loadSettings());
   max-height: 48px;
   max-width: 160px;
   object-fit: contain;
+  display: block;
+}
+
+/* Rendered at true size up to 96px so the 32px variant looks like a 32px
+   icon rather than a blurry upscale of one. */
+.generated-icon {
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   display: block;
 }
 </style>

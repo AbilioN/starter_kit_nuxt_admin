@@ -21,6 +21,7 @@ export const useTenantTheme = () => {
 
     if (data.primary_color) activeTheme.colors.primary = data.primary_color;
     if (data.secondary_color) activeTheme.colors.secondary = data.secondary_color;
+    if (data.tertiary_color) activeTheme.colors.tertiary = data.tertiary_color;
   };
 
   const loadTenantTheme = async (force = false): Promise<void> => {
@@ -45,9 +46,30 @@ export const useTenantTheme = () => {
     }
   };
 
+  // Square icon for a given context, falling back UP the sizes and finally to
+  // the wide logo — a tenant branded before icon generation existed has
+  // icon_urls empty, and rendering nothing would be worse than rendering the
+  // logo slightly squeezed.
+  const iconUrl = (size: 'small' | 'medium' | 'large' = 'medium'): string | null => {
+    const icons = tenantTheme.value?.icon_urls;
+    if (!icons) return tenantTheme.value?.logo_url ?? null;
+
+    const order: Array<'small' | 'medium' | 'large'> =
+      size === 'small' ? ['small', 'medium', 'large']
+      : size === 'medium' ? ['medium', 'large', 'small']
+      : ['large', 'medium', 'small'];
+
+    for (const candidate of order) {
+      if (icons[candidate]) return icons[candidate]!;
+    }
+
+    return tenantTheme.value?.logo_url ?? null;
+  };
+
   return {
     tenantTheme: readonly(tenantTheme),
     loading: readonly(loading),
     loadTenantTheme,
+    iconUrl,
   };
 };

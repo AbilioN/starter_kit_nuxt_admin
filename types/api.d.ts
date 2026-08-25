@@ -260,7 +260,13 @@ export interface TenantTheme {
   name: string;
   primary_color: string | null;
   secondary_color: string | null;
+  tertiary_color: string | null;
   logo_url: string | null;
+  // Square 32/128/512 variants of the logo, keyed by size — pick per context
+  // instead of scaling logo_url down. Empty for a tenant whose logo was
+  // uploaded before icon generation existed, which is why logo_url stays the
+  // fallback rather than being replaced.
+  icon_urls: Partial<Record<'small' | 'medium' | 'large', string>>;
   // Resolved from the tenant's own broadcasting provider (or its plan's
   // default) — null means neither is set, so the frontend should fall back
   // to its own static/build-time Pusher config. Never a secret.
@@ -276,6 +282,7 @@ export interface TenantThemeResponse {
 export interface UpdateTenantBrandingRequest {
   theme_primary_color?: string;
   theme_secondary_color?: string;
+  theme_tertiary_color?: string;
   logo?: File; // send the raw file — takes precedence over logo_path if both are set
   logo_path?: string; // only for reassigning an already-hosted path; normally send `logo` instead
 }
@@ -283,8 +290,10 @@ export interface UpdateTenantBrandingRequest {
 export interface TenantBranding {
   theme_primary_color: string | null;
   theme_secondary_color: string | null;
+  theme_tertiary_color: string | null;
   logo_path: string | null;
   logo_url: string | null;
+  icon_urls: Partial<Record<'small' | 'medium' | 'large', string>>;
 }
 
 export interface UpdateTenantBrandingResponse {

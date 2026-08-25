@@ -460,6 +460,8 @@
       "brandingTitle": "Marca",
       "primaryColor": "Color primario",
       "secondaryColor": "Color secundario",
+      "tertiaryColor": "Color terciario",
+      "generatedIcons": "Iconos generados",
       "chooseLogo": "Elegir Logo",
       "saveBranding": "Guardar Marca",
       "subscriptionPlanTitle": "Plan de Suscripción",

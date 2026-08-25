@@ -49,6 +49,7 @@ export class TenantRepository {
     formData.append('_method', 'PATCH');
     if (data.theme_primary_color) formData.append('theme_primary_color', data.theme_primary_color);
     if (data.theme_secondary_color) formData.append('theme_secondary_color', data.theme_secondary_color);
+    if (data.theme_tertiary_color) formData.append('theme_tertiary_color', data.theme_tertiary_color);
     if (data.logo) formData.append('logo', data.logo);
     else if (data.logo_path) formData.append('logo_path', data.logo_path);
 

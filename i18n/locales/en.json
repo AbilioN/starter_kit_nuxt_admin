@@ -460,6 +460,8 @@
       "brandingTitle": "Branding",
       "primaryColor": "Primary color",
       "secondaryColor": "Secondary color",
+      "tertiaryColor": "Tertiary color",
+      "generatedIcons": "Generated icons",
       "chooseLogo": "Choose Logo",
       "saveBranding": "Save Branding",
       "subscriptionPlanTitle": "Subscription Plan",
