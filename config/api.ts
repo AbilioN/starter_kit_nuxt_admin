@@ -23,6 +23,9 @@ export const API_CONFIG = {
     TENANT_SUBSCRIPTION_HISTORY: '/tenant/subscription-history', // relative to baseURL (/api/admin), tenant owner only
     PUBLIC_SUBSCRIPTION_PLANS: '/subscription-plans', // relative to getLandlordApiConfig().publicBaseURL (/api/public)
     PUBLIC_SIGNUP: '/signup', // relative to getLandlordApiConfig().publicBaseURL (/api/public)
+    AGENDA: '/agenda', // relative to baseURL (/api/admin) — one call returns the whole screen
+    APPOINTMENTS: '/appointments',
+    ROUTES_OPTIMIZE: '/routes/optimize', // server-side; the maps key never reaches this app
   }
 } as const;
 
