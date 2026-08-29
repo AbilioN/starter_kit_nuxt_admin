@@ -58,6 +58,15 @@ const sidebarItem: menu[] = [
     permission: "audit-read",
   },
   {
+    title: "nav.agenda",
+    icon: "calendar-linear",
+    to: "/agenda",
+    // Hidden from anyone who cannot read it. The feature flag is a separate
+    // matter and is handled on the page: an admin whose workspace has the
+    // agenda switched off should be told so, not silently shown nothing.
+    permission: "appointment-read",
+  },
+  {
     title: "nav.chats",
     icon: "chat-round-line-duotone",
     to: "/chats",

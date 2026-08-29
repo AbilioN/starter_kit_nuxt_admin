@@ -14,7 +14,8 @@
     "notifications": "Notificações",
     "settings": "Configurações",
     "settingsGeneral": "Geral",
-    "settingsFeatureFlags": "Feature Flags"
+    "settingsFeatureFlags": "Feature Flags",
+    "agenda": "Agenda"
   },
   "profileMenu": {
     "myProfile": "Meu Perfil",
@@ -658,5 +659,31 @@
         "description": "Permite eliminar ficheiros"
       }
     }
+  },
+  "agenda": {
+    "title": "Agenda",
+    "today": "Hoje",
+    "day": "Dia",
+    "week": "Semana",
+    "month": "Mês",
+    "groupBy": "Agrupar por",
+    "none": "Nenhum",
+    "byAssignee": "Responsável",
+    "byType": "Tipo",
+    "byStatus": "Estado",
+    "byCity": "Cidade",
+    "appointments": "compromissos",
+    "confirmed": "confirmados",
+    "empty": "Nada agendado",
+    "disabled": "A agenda não está ativa neste workspace.",
+    "week_of": "Semana",
+    "actions": "Ações",
+    "planRoute": "Calcular rota",
+    "routeNotIncluded": "A otimização de rotas não está incluída no seu plano.",
+    "stops": "paradas",
+    "estimated": "Estimativa em linha reta",
+    "selectStops": "Selecione pelo menos duas paradas com localização.",
+    "clear": "Limpar",
+    "total": "Total"
   }
 }

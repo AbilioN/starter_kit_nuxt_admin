@@ -14,7 +14,8 @@
     "notifications": "Notifications",
     "settings": "Settings",
     "settingsGeneral": "General",
-    "settingsFeatureFlags": "Feature Flags"
+    "settingsFeatureFlags": "Feature Flags",
+    "agenda": "Agenda"
   },
   "profileMenu": {
     "myProfile": "My Profile",
@@ -658,5 +659,31 @@
         "description": "Allows deleting files"
       }
     }
+  },
+  "agenda": {
+    "title": "Agenda",
+    "today": "Today",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "groupBy": "Group by",
+    "none": "None",
+    "byAssignee": "Assignee",
+    "byType": "Type",
+    "byStatus": "Status",
+    "byCity": "City",
+    "appointments": "appointments",
+    "confirmed": "confirmed",
+    "empty": "Nothing scheduled",
+    "disabled": "The agenda is not enabled for this workspace.",
+    "week_of": "Week",
+    "actions": "Actions",
+    "planRoute": "Plan a route",
+    "routeNotIncluded": "Route optimisation is not included in your plan.",
+    "stops": "stops",
+    "estimated": "Straight-line estimate",
+    "selectStops": "Select at least two stops with a location.",
+    "clear": "Clear",
+    "total": "Total"
   }
 }
