@@ -9,6 +9,68 @@ html {
 .v-main {
     min-height: 100vh;
     padding-left:calc(var(--v-layout-left) + 0px) !important;
+
+    // A height chain, so a page CAN fill the viewport instead of stopping at
+    // its natural height and leaving the rest as background.
+    //
+    // Opt-in by design: making the chain flex does not stretch anything on its
+    // own, because a child only grows if it asks to (`.page-fill` below). Every
+    // existing page keeps flowing exactly as it did; the ones that want the
+    // space — grids, calendars, tables with their own scroll — can now take it.
+    display: flex;
+    flex-direction: column;
+}
+
+.page-wrapper {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    // Both axes. Without these a flex child refuses to shrink below its
+    // content: min-height keeps an inner scroll area from growing instead of
+    // scrolling, and min-width keeps a wide grid from pushing the whole page
+    // sideways rather than scrolling inside its own box.
+    min-height: 0;
+    min-width: 0;
+}
+
+.maxWidth {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+
+    // Explicit, because this element carries `margin: 0 auto` for centering —
+    // and an auto margin on the cross axis switches OFF a flex item's stretch.
+    // Without stretch it sizes itself to its content instead of its container,
+    // so one wide child (a seven-column grid) made this box wider than the page
+    // and the toolbar fell off the right edge. `width: 100%` restores the
+    // container-driven size; `max-width` still caps it on a wide screen.
+    width: 100%;
+}
+
+/**
+ * Opt in from a page's root element to take the leftover height.
+ *
+ * The child that should scroll needs `min-height: 0` too, or it grows to its
+ * content and pushes the page long instead of scrolling inside it — the single
+ * most common way this goes wrong.
+ */
+.page-fill {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    // Width pinned to the parent, not merely allowed to shrink.
+    //
+    // `min-width: 0` is not enough on the cross axis of a column flexbox: a
+    // child whose content is wider still sizes itself to that content and
+    // overflows, which pushed the whole page sideways and cut the toolbar off
+    // instead of letting a wide grid scroll inside its own box.
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .v-application {

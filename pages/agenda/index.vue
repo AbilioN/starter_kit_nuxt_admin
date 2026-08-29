@@ -73,7 +73,7 @@ const legBefore = (stopId: string, index: number) => {
 </script>
 
 <template>
-  <div>
+  <div class="page-fill">
     <!-- A switched-off feature says so. Showing an empty grid instead would be
          indistinguishable from a quiet week, which is the wrong answer. -->
     <v-alert v-if="disabled" type="info" variant="tonal" class="mb-4">
@@ -135,7 +135,8 @@ const legBefore = (stopId: string, index: number) => {
       <v-alert v-if="error" type="error" variant="tonal" class="mb-4">{{ error }}</v-alert>
       <v-progress-linear v-if="loading" indeterminate class="mb-2" />
 
-      <div v-for="group in agenda?.groups ?? []" :key="group.key ?? 'all'" class="mb-6">
+      <div class="agenda-scroll">
+      <div v-for="group in agenda?.groups ?? []" :key="group.key ?? 'all'" class="mb-6 agenda-group">
         <div v-if="group.label" class="d-flex align-center ga-2 mb-2">
           <span class="text-subtitle-2 font-weight-bold">{{ group.label }}</span>
           <v-chip size="x-small" variant="tonal">
@@ -187,6 +188,7 @@ const legBefore = (stopId: string, index: number) => {
           </div>
         </div>
       </div>
+      </div>
     </template>
 
     <!-- The route: an ordered list with per-leg figures. The map is how you
@@ -237,6 +239,31 @@ const legBefore = (stopId: string, index: number) => {
 </template>
 
 <style scoped>
+/* Fills whatever the toolbar leaves, and scrolls inside itself rather than
+   stretching the page — the columns keep their headers in view. */
+.agenda-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* One group takes the height; several stack and scroll together, which is what
+   grouping is for — you scan down the groups. */
+.agenda-group:only-child {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .agenda-grid {
   display: grid;
   /* Below about 180px a column cannot hold a title, a time and a
@@ -247,6 +274,15 @@ const legBefore = (stopId: string, index: number) => {
   overflow-x: auto;
 }
 .agenda-grid--month { grid-auto-rows: minmax(78px, auto); }
+
+/* Only the single-group case stretches: with several groups the grids are
+   stacked and each should be as tall as its own content. */
+.agenda-group:only-child .agenda-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+}
 
 .agenda-col {
   background: rgb(var(--v-theme-background));
@@ -264,7 +300,14 @@ const legBefore = (stopId: string, index: number) => {
   padding: 6px 8px;
   border-bottom: 1px solid rgba(var(--v-border-color), 0.12);
 }
-.agenda-col__body { padding: 6px; flex: 1; }
+.agenda-col__body {
+  padding: 6px;
+  flex: 1 1 auto;
+  min-height: 0;
+  /* A busy day scrolls in its own column instead of making every other column
+     as tall as the busiest one. */
+  overflow-y: auto;
+}
 
 .agenda-hour { width: 56px; padding-top: 6px; text-align: right; flex: 0 0 56px; }
 </style>
