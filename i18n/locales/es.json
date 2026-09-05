@@ -16,7 +16,8 @@
     "settingsGeneral": "General",
     "settingsFeatureFlags": "Feature Flags",
     "agenda": "Agenda",
-    "settingsCustomFields": "Custom fields"
+    "settingsCustomFields": "Custom fields",
+    "settingsAssistant": "AI assistant"
   },
   "profileMenu": {
     "myProfile": "Mi Perfil",
@@ -115,7 +116,8 @@
       "loading": "Cargando...",
       "noDataYet": "Aún no hay datos",
       "unexpectedError": "Error inesperado"
-    }
+    },
+    "saved": "Saved"
   },
   "pages": {
     "dashboard": {
@@ -756,5 +758,40 @@
     "noCustomFields": "This workspace has not defined any custom fields for appointments yet.",
     "loadFailed": "Could not load the appointment.",
     "saveFailed": "Could not save the appointment."
+  },
+  "assistant": {
+    "title": "AI assistant",
+    "subtitle": "What your assistant always knows, and what it can look up.",
+    "instructionsTitle": "Standing instructions",
+    "instructionsHelp": "Followed in every conversation. Say what your business is, and what the assistant must never do.",
+    "instructionsPlaceholder": "We are an events venue in Sintra. Never quote a price — offer to put the client in touch. Opening hours are 09:00 to 18:00, Tuesday to Saturday.",
+    "instructionsTooLong": "Too long for standing instructions. Anything longer than a couple of paragraphs belongs in a document below — it is only read when it is relevant, instead of on every message.",
+    "documentsTitle": "Documents",
+    "documentsHelp": "Manuals, policies, price lists, house rules. The assistant searches these and answers in their own words.",
+    "addDocument": "Add document",
+    "editDocument": "Edit document",
+    "document": "Document",
+    "audience": "Who can see it",
+    "audience_internal": "Internal",
+    "audience_published": "Published",
+    "audienceInternalHelp": "Your staff only",
+    "audiencePublishedHelp": "Anyone your assistant serves, including your customers",
+    "inactive": "Inactive",
+    "noDocuments": "No documents yet. Add one and the assistant can answer from it.",
+    "documentTitle": "Title",
+    "documentDescription": "What it covers",
+    "documentDescriptionHint": "One line. Helps the assistant pick the right document.",
+    "documentFile": "Upload a PDF, TXT or Markdown file",
+    "documentFileHint": "Its text is read once, on upload. A scanned PDF has no text and will be refused.",
+    "documentContent": "Or paste the text",
+    "documentContentHint": "Use this when there is no file — house rules typed straight in, for example.",
+    "documentContentEditHint": "Leave as it is to keep the current text.",
+    "documentActive": "Available to the assistant",
+    "deleteTitle": "Delete this document?",
+    "deleteBody": "\"{title}\" will no longer be available to the assistant. This cannot be undone.",
+    "instructionsPublicHelp": "Everyone the assistant talks to, including your customers.",
+    "instructionsInternalHelp": "Only your team. Never shown to your customers.",
+    "instructionsInternalPlaceholder": "Our floor price is 800 EUR. The small hall seats 55 but we only sell it as 40.",
+    "instructionsSaveFailed": "Could not save the instructions."
   }
 }

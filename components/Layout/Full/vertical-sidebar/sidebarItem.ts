@@ -108,6 +108,11 @@ const sidebarItem: menu[] = [
         to: "/settings/custom-fields",
         permission: "custom-field-read",
       },
+      {
+        title: "nav.settingsAssistant",
+        to: "/settings/assistant",
+        permission: "document-read",
+      },
     ],
   },
 ];

@@ -16,7 +16,8 @@
     "settingsGeneral": "Geral",
     "settingsFeatureFlags": "Feature Flags",
     "agenda": "Agenda",
-    "settingsCustomFields": "Campos personalizados"
+    "settingsCustomFields": "Campos personalizados",
+    "settingsAssistant": "Assistente de IA"
   },
   "profileMenu": {
     "myProfile": "Meu Perfil",
@@ -115,7 +116,8 @@
       "loading": "A carregar...",
       "noDataYet": "Ainda sem dados",
       "unexpectedError": "Erro inesperado"
-    }
+    },
+    "saved": "Guardado"
   },
   "pages": {
     "dashboard": {
@@ -756,5 +758,40 @@
     "noCustomFields": "Esta área de trabalho ainda não definiu campos personalizados para compromissos.",
     "loadFailed": "Não foi possível carregar o compromisso.",
     "saveFailed": "Não foi possível guardar o compromisso."
+  },
+  "assistant": {
+    "title": "Assistente de IA",
+    "subtitle": "O que o assistente sabe sempre, e o que pode consultar.",
+    "instructionsTitle": "Instruções permanentes",
+    "instructionsHelp": "Seguidas em todas as conversas. Diga qual é o seu negócio e o que o assistente nunca deve fazer.",
+    "instructionsPlaceholder": "Somos uma quinta de eventos em Sintra. Nunca indique preços — proponha pôr o cliente em contacto connosco. Horário: 09:00 às 18:00, de terça a sábado.",
+    "instructionsTooLong": "Demasiado longo para instruções permanentes. Mais do que dois parágrafos pertence a um documento abaixo — assim só é lido quando é relevante, em vez de em todas as mensagens.",
+    "documentsTitle": "Documentos",
+    "documentsHelp": "Manuais, políticas, tabelas de preços, regulamentos. O assistente procura nestes e responde com as palavras deles.",
+    "addDocument": "Adicionar documento",
+    "editDocument": "Editar documento",
+    "document": "Documento",
+    "audience": "Quem pode ver",
+    "audience_internal": "Interno",
+    "audience_published": "Publicado",
+    "audienceInternalHelp": "Apenas a sua equipa",
+    "audiencePublishedHelp": "Qualquer pessoa que o assistente atenda, incluindo os seus clientes",
+    "inactive": "Inativo",
+    "noDocuments": "Ainda não há documentos. Adicione um e o assistente passa a responder a partir dele.",
+    "documentTitle": "Título",
+    "documentDescription": "Sobre o que é",
+    "documentDescriptionHint": "Uma linha. Ajuda o assistente a escolher o documento certo.",
+    "documentFile": "Carregar um ficheiro PDF, TXT ou Markdown",
+    "documentFileHint": "O texto é lido uma vez, no carregamento. Um PDF digitalizado não tem texto e será recusado.",
+    "documentContent": "Ou cole o texto",
+    "documentContentHint": "Use isto quando não há ficheiro — regras da casa escritas diretamente, por exemplo.",
+    "documentContentEditHint": "Deixe como está para manter o texto atual.",
+    "documentActive": "Disponível ao assistente",
+    "deleteTitle": "Eliminar este documento?",
+    "deleteBody": "\"{title}\" deixará de estar disponível ao assistente. Esta ação não pode ser revertida.",
+    "instructionsPublicHelp": "Toda a gente com quem o assistente fala, incluindo os seus clientes.",
+    "instructionsInternalHelp": "Apenas a sua equipa. Nunca mostrado aos seus clientes.",
+    "instructionsInternalPlaceholder": "O nosso preço mínimo é 800 EUR. O salão pequeno leva 55 mas só o vendemos como 40.",
+    "instructionsSaveFailed": "Não foi possível guardar as instruções."
   }
 }
