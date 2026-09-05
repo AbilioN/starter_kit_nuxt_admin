@@ -1,15 +1,34 @@
 <script setup lang="ts">
+import CustomFieldValue from '~/components/CustomFields/CustomFieldValue.vue';
 import type { AppointmentCard } from '~/types/agenda';
+import type { CustomFieldDescriptor } from '~/types/custom-fields';
 
 const props = defineProps<{
   card: AppointmentCard;
   selectable?: boolean;
   selected?: boolean;
+  /**
+   * The tenant's field descriptors, passed down from the screen rather than
+   * fetched here. A card renders once per appointment per week, so a component
+   * that loaded its own catalogue would be the single highest-frequency
+   * caller in the app — exactly the shape that froze this panel once with
+   * "Maximum recursive updates exceeded".
+   */
+  fields?: CustomFieldDescriptor[];
 }>();
+
+/**
+ * Values joined to their descriptors. The server already decided which fields
+ * this reader may see and formatted each value; nothing here interprets one.
+ */
+const customChips = computed(() => (props.card.custom ?? [])
+  .map(value => ({ value, descriptor: (props.fields ?? []).find(f => f.field === value.field) }))
+  .filter((pair): pair is { value: typeof pair.value; descriptor: CustomFieldDescriptor } => !!pair.descriptor));
 
 const emit = defineEmits<{
   (e: 'toggle', id: string): void;
   (e: 'status', payload: { id: string; statusId: string }): void;
+  (e: 'edit', id: string): void;
 }>();
 
 // 24-hour, and not only for brevity: "09:00 AM" wraps onto two lines in a
@@ -118,7 +137,18 @@ const menuGroups = computed(() =>
       <!-- Two lines rather than one truncated one: "Visita — Clínica Boavista"
            is the whole point of the card, and half of it is not enough to tell
            two appointments apart. -->
-      <div class="text-body-2 font-weight-medium agenda-card__title">{{ card.title }}</div>
+      <!--
+        The title opens the record. In a triage screen the cost of acting on a
+        row should not be "find the menu" — the MADCRM study's own point about
+        one-click editing, applied to the one action that needs a form.
+      -->
+      <div
+        class="text-body-2 font-weight-medium agenda-card__title agenda-card__title--clickable"
+        role="button"
+        tabindex="0"
+        @click="emit('edit', card.id)"
+        @keydown.enter="emit('edit', card.id)"
+      >{{ card.title }}</div>
 
       <div class="d-flex align-center ga-1 mt-1 flex-wrap">
         <v-chip
@@ -134,6 +164,23 @@ const menuGroups = computed(() =>
           {{ card.location.city }}
         </span>
       </div>
+
+      <!--
+        The tenant's own fields — the "supplements" the MADCRM agenda study
+        describes ("extra fields a vertical adds — surface areas, product
+        strips…"), and the reason appointments was the first host.
+
+        Only fields the tenant placed in the card.badges slot arrive here; one
+        with no slot belongs on the form rather than on every card of the week.
+      -->
+      <div v-if="customChips.length" class="d-flex flex-wrap mt-1">
+        <CustomFieldValue
+          v-for="chip in customChips"
+          :key="chip.value.field"
+          :descriptor="chip.descriptor"
+          :value="chip.value"
+        />
+      </div>
     </div>
   </v-card>
 </template>
@@ -144,6 +191,8 @@ const menuGroups = computed(() =>
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 .agenda-card__head { min-height: 22px; }
+.agenda-card__title--clickable { cursor: pointer; }
+.agenda-card__title--clickable:hover { text-decoration: underline; }
 .agenda-card__check { min-width: 24px; }
 
 .agenda-card__title {

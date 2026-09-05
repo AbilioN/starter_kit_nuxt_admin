@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import AppointmentCard from '~/components/agenda/AppointmentCard.vue';
+// Explicit: Nuxt derives the auto-import name from the directory, so this
+// would be `AgendaAppointmentEditDialog`. A name that does not resolve renders
+// nothing at all, with no error and a passing build.
+import AppointmentEditDialog from '~/components/agenda/AppointmentEditDialog.vue';
+import { ApiError } from '~/infrastructure/http/ApiClient';
 import type { AgendaGroupBy, AgendaView } from '~/types/agenda';
 
 definePageMeta({ middleware: 'auth' });
@@ -7,6 +12,7 @@ definePageMeta({ middleware: 'auth' });
 const { t } = useI18n();
 
 const {
+  saving, appointmentValues, fetchAppointment, saveAppointment,
   agenda, view, date, groupBy, loading, error, disabled,
   routableCards, load, setView, setGroupBy, setDate, shift, changeStatus,
 } = useAgenda();
@@ -39,6 +45,60 @@ const goToday = () => setDate(new Date().toISOString().slice(0, 10));
 const toggle = (id: string) => {
   const at = selected.value.indexOf(id);
   at === -1 ? selected.value.push(id) : selected.value.splice(at, 1);
+};
+
+const notification = useNotification();
+
+const editOpen = ref(false);
+const editingId = ref<string | null>(null);
+const editLoading = ref(false);
+const editDialog = ref<{ setTitle: (v: string) => void } | null>(null);
+
+/**
+ * Opens the record. Fetched on OPEN, never on render — the agenda draws a
+ * hundred cards and a fetch on the render path is the shape that froze this
+ * panel once.
+ */
+const onEdit = async (id: string) => {
+  editingId.value = id;
+  editOpen.value = true;
+  editLoading.value = true;
+
+  try {
+    const record = await fetchAppointment(id);
+    editDialog.value?.setTitle(String((record as any)?.title ?? ''));
+  } catch (e: any) {
+    notification.error(e?.message ?? t('agenda.loadFailed'));
+    editOpen.value = false;
+  } finally {
+    editLoading.value = false;
+  }
+};
+
+const onEditSubmit = async (payload: { title: string; custom: Record<string, unknown> }) => {
+  if (!editingId.value) return;
+
+  try {
+    const ignored = await saveAppointment(editingId.value, payload);
+
+    if (ignored === null) {
+      notification.error(error.value ?? t('agenda.saveFailed'));
+
+      return;
+    }
+
+    if (ignored.length > 0) {
+      // Dropped and reported, not refused: a form loaded before somebody
+      // changed the per-role rules must still be submittable.
+      notification.warning(t('pages.users.someFieldsIgnored', { count: ignored.length }));
+    }
+
+    editOpen.value = false;
+  } catch (e: any) {
+    // A 422 names its fields; there is nowhere on this small form to place
+    // them per-input yet, so the message is shown whole rather than swallowed.
+    notification.error(e instanceof ApiError ? e.message : (e?.message ?? t('agenda.saveFailed')));
+  }
 };
 
 const onStatus = async ({ id, statusId }: { id: string; statusId: string }) => {
@@ -165,7 +225,8 @@ const legBefore = (stopId: string, index: number) => {
               <AppointmentCard
                 v-for="card in day.appointments ?? []" :key="card.id"
                 :card="card" selectable :selected="selected.includes(card.id)"
-                @toggle="toggle" @status="onStatus"
+                :fields="agenda?.custom_fields"
+                @toggle="toggle" @status="onStatus" @edit="onEdit"
               />
               <div v-if="!day.count" class="text-caption text-disabled pa-2">
                 {{ t('agenda.empty') }}
@@ -182,7 +243,8 @@ const legBefore = (stopId: string, index: number) => {
               <AppointmentCard
                 v-for="card in hour.appointments" :key="card.id"
                 :card="card" selectable :selected="selected.includes(card.id)"
-                @toggle="toggle" @status="onStatus"
+                :fields="agenda?.custom_fields"
+                @toggle="toggle" @status="onStatus" @edit="onEdit"
               />
             </div>
           </div>
@@ -235,6 +297,22 @@ const legBefore = (stopId: string, index: number) => {
         </template>
       </div>
     </v-navigation-drawer>
+
+    <!--
+      The record's own form. Its field descriptors come from the agenda payload
+      that is already on screen, so opening it costs one request for the values
+      rather than two.
+    -->
+    <AppointmentEditDialog
+      ref="editDialog"
+      v-model="editOpen"
+      :appointment-id="editingId"
+      :descriptors="agenda?.custom_fields ?? []"
+      :values="appointmentValues"
+      :loading="editLoading"
+      :saving="saving"
+      @submit="onEditSubmit"
+    />
   </div>
 </template>
 

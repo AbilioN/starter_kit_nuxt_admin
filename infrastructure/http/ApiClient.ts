@@ -8,6 +8,32 @@ interface ApiErrorResponse {
   error?: string;
 }
 
+/**
+ * An HTTP failure that keeps what the server actually said.
+ *
+ * The body is parsed here already — `errors` (Laravel's per-field 422 map) and
+ * `error` (a machine code like `feature_disabled`) were both read and then
+ * thrown away, so every caller got one flat sentence. A form whose entire
+ * point is server-driven per-field validation could only show it above the
+ * whole form.
+ *
+ * Strictly additive: `.message` is unchanged, so `catch (e) { e.message }`
+ * everywhere else behaves exactly as before.
+ */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    /** Laravel's 422 map: field name -> messages. */
+    public readonly errors: Record<string, string[]> = {},
+    /** A machine-readable code, e.g. `feature_disabled`. */
+    public readonly code: string | null = null,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 export class ApiClient implements IHttpClient {
   private baseURL: string;
   private defaultHeaders: Record<string, string>;
@@ -119,7 +145,12 @@ export class ApiClient implements IHttpClient {
             throw new Error(errorData.message || 'Tenant suspended.');
           }
 
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+          throw new ApiError(
+            errorData.message || `HTTP error! status: ${response.status}`,
+            response.status,
+            errorData.errors ?? {},
+            errorData.error ?? null,
+          );
         } else {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

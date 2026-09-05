@@ -1,4 +1,5 @@
 import { AgendaRepository } from '~/infrastructure/repositories/AgendaRepository';
+import type { AppointmentDetailResponse } from '~/infrastructure/repositories/AgendaRepository';
 import type { Agenda, AgendaFilters, AgendaGroupBy, AgendaView } from '~/types/agenda';
 
 export class AgendaService {
@@ -18,6 +19,14 @@ export class AgendaService {
 
   update(appointmentId: string, payload: Record<string, unknown>): Promise<void> {
     return this.repository.update(appointmentId, payload);
+  }
+
+  getAppointment(appointmentId: string): Promise<AppointmentDetailResponse> {
+    return this.repository.getAppointment(appointmentId);
+  }
+
+  updateAppointment(appointmentId: string, payload: Record<string, unknown>): Promise<AppointmentDetailResponse> {
+    return this.repository.updateWithFields(appointmentId, payload);
   }
 
   remove(appointmentId: string): Promise<void> {

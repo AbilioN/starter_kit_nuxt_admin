@@ -15,7 +15,8 @@
     "settings": "Configurações",
     "settingsGeneral": "Geral",
     "settingsFeatureFlags": "Feature Flags",
-    "agenda": "Agenda"
+    "agenda": "Agenda",
+    "settingsCustomFields": "Campos personalizados"
   },
   "profileMenu": {
     "myProfile": "Meu Perfil",
@@ -163,7 +164,11 @@
       "deleteDialogTitle": "Confirmar Eliminação",
       "deleteDialogBody": "Tem a certeza que deseja eliminar o utilizador {name}?",
       "deleteDialogWarning": "Esta ação não pode ser desfeita.",
-      "chatWith": "Conversa com {name}"
+      "chatWith": "Conversa com {name}",
+      "name": "Nome",
+      "email": "E-mail",
+      "emailNotEditable": "O e-mail é a identidade de login e muda por reverificação, não aqui.",
+      "someFieldsIgnored": "{count} campo(s) não foram guardados: o seu papel não pode editá-los."
     },
     "admins": {
       "title": "Administradores",
@@ -503,6 +508,68 @@
       "title": "Espaço de trabalho suspenso",
       "message": "Este espaço de trabalho foi suspenso. Contacte o suporte para mais informações.",
       "supportHint": "Se acha que isto é um engano, contacte o administrador da sua conta ou a nossa equipa de suporte."
+    },
+    "customFields": {
+      "title": "Campos personalizados",
+      "subtitle": "Campos que a sua empresa cria, guardados como colunas reais.",
+      "newField": "Novo campo",
+      "reconcile": "Sincronizar esquema",
+      "budget": "Campos usados",
+      "unlimited": "ilimitado",
+      "indexBudget": "Até {max} campos filtráveis nesta tabela",
+      "label": "Nome",
+      "helpText": "Texto de ajuda",
+      "fieldType": "Tipo",
+      "slot": "Mostrar no cartão",
+      "section": "Secção do formulário",
+      "icon": "Ícone",
+      "colour": "Cor",
+      "colourDark": "Cor (tema escuro)",
+      "filterable": "Filtrável",
+      "filterableHint": "Define como a coluna é guardada. Não pode ser alterado depois sem reescrever a tabela.",
+      "roleRules": "Regras por papel",
+      "status": "Estado",
+      "storage": "Armazenamento",
+      "storageIndexed": "Indexado",
+      "storageDisplayOnly": "Só exibição",
+      "formOnly": "Só no formulário",
+      "empty": "Ainda não há campos definidos.",
+      "queued": "Campo criado. A coluna está a ser adicionada.",
+      "featureDisabled": "Os campos personalizados não estão activos nesta área de trabalho.",
+      "readOnlySession": "Esta é uma sessão de suporte só de leitura, por isso não é possível gravar.",
+      "unsupportedType": "Este painel ainda não sabe desenhar um campo do tipo \"{type}\".",
+      "hosts": {
+        "appointments": "Compromissos",
+        "users": "Utilizadores"
+      },
+      "types": {
+        "text": "Texto de uma linha"
+      },
+      "rules": {
+        "hidden": "Escondido para",
+        "readonly": "Só leitura para",
+        "required": "Obrigatório para"
+      },
+      "state": {
+        "pending": "A criar coluna",
+        "live": "Activo",
+        "retiring": "A reformar",
+        "retired": "Reformado",
+        "purged": "Removido",
+        "failed": "Falhou",
+        "missing": "Coluna em falta"
+      },
+      "errors": {
+        "index_budget_exhausted": "Não restam campos filtráveis nesta tabela.",
+        "column_budget_exhausted": "Esta tabela não tem espaço para outra coluna (limite {limit}).",
+        "row_byte_budget_exhausted": "Este campo precisa de {needed} bytes e só restam {remaining}.",
+        "row_version_budget_exhausted": "Esta tabela foi alterada demasiadas vezes ({limit}) para adicionar uma coluna instantaneamente.",
+        "type_change_not_supported_yet": "Mudar o armazenamento de {from} para {to} ainda não é suportado.",
+        "illegal_column_name": "Recusado: {column} não é uma coluna de campo personalizado."
+      },
+      "showEntities": "Entidades a mostrar",
+      "noneSelected": "Escolha uma entidade acima para ver os seus campos.",
+      "fieldCount": "{count} campo(s)"
     }
   },
   "components": {
@@ -661,7 +728,7 @@
     }
   },
   "agenda": {
-    "title": "Agenda",
+    "title": "Título",
     "today": "Hoje",
     "day": "Dia",
     "week": "Semana",
@@ -684,6 +751,10 @@
     "estimated": "Estimativa em linha reta",
     "selectStops": "Selecione pelo menos duas paradas com localização.",
     "clear": "Limpar",
-    "total": "Total"
+    "total": "Total",
+    "editAppointment": "Editar compromisso",
+    "noCustomFields": "Esta área de trabalho ainda não definiu campos personalizados para compromissos.",
+    "loadFailed": "Não foi possível carregar o compromisso.",
+    "saveFailed": "Não foi possível guardar o compromisso."
   }
 }

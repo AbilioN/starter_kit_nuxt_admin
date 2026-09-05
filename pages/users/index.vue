@@ -2,6 +2,11 @@
 import { ref, computed, onMounted } from 'vue';
 import UiChildCard from '@/components/shared/UiChildCard.vue';
 import UserAvatar from '@/components/shared/UserAvatar.vue';
+// Explicit, not auto-imported: Nuxt derives the auto-import name from the
+// DIRECTORY, so components/CustomFields/CustomFieldFormSection.vue would be
+// `CustomFieldsCustomFieldFormSection`. A name that does not resolve renders
+// nothing at all — no error, and `nuxt build` still passes.
+import CustomFieldFormSection from '~/components/CustomFields/CustomFieldFormSection.vue';
 
 // Definir middleware de autenticação
 definePageMeta({
@@ -23,8 +28,20 @@ const {
   changePerPage,
   canGoNext,
   canGoPrev,
-  pageNumbers
+  pageNumbers,
+  saving,
+  customFields,
+  customValues,
+  fetchUser,
+  updateUser,
 } = useUsers();
+
+const notification = useNotification();
+
+/** The edit form's own draft — core fields and the tenant's fields. */
+const editName = ref('');
+const customDraft = ref<Record<string, unknown>>({});
+const loadingUser = ref(false);
 
 // Estados reativos para filtros
 const search = ref('');
@@ -75,9 +92,41 @@ const addUser = () => {
   showAddDialog.value = true;
 };
 
-const editUser = (user: any) => {
+const editUser = async (user: any) => {
   selectedUser.value = { ...user };
+  editName.value = user.name ?? '';
+  customDraft.value = {};
   showEditDialog.value = true;
+
+  // Fetched when the form OPENS, not on render. The read carries the field
+  // context and this record's values together, so the form draws its controls
+  // and fills them from one response.
+  loadingUser.value = true;
+  await fetchUser(user.id);
+  loadingUser.value = false;
+};
+
+const saveUser = async () => {
+  if (!selectedUser.value) return;
+
+  const ignored = await updateUser(selectedUser.value.id, {
+    name: editName.value,
+    custom: customDraft.value,
+  });
+
+  if (ignored === null) return;
+
+  if (ignored.length > 0) {
+    // Dropped, not refused — a form loaded before somebody changed the
+    // per-role rules must still be submittable, and a silent drop is the
+    // failure this feature rejects everywhere else.
+    notification.warning(t('pages.users.someFieldsIgnored', { count: ignored.length }));
+  } else {
+    notification.success(t('common.actions.save'));
+  }
+
+  showEditDialog.value = false;
+  await loadUsers(pagination.value?.current_page ?? 1, pagination.value?.per_page ?? 15);
 };
 
 const deleteUser = (user: any) => {
@@ -431,16 +480,57 @@ onMounted(() => {
     </v-dialog>
 
     <!-- Dialog de Editar Usuário -->
-    <v-dialog v-model="showEditDialog" max-width="600px">
+    <v-dialog v-model="showEditDialog" max-width="640px">
       <v-card>
         <v-card-title class="text-h5">
           {{ t('pages.users.editDialogTitle') }}
         </v-card-title>
+
         <v-card-text>
-          <p class="text-body-2 text-medium-emphasis">
-            {{ t('pages.users.editDialogBody') }}
-          </p>
+          <div v-if="loadingUser" class="d-flex justify-center py-6">
+            <v-progress-circular indeterminate color="primary" />
+          </div>
+
+          <template v-else>
+            <v-text-field
+              v-model="editName"
+              :label="t('pages.users.name')"
+              variant="outlined"
+              density="comfortable"
+              maxlength="255"
+            />
+
+            <!--
+              The e-mail is shown and not editable, and that is the line rather
+              than an omission: it is the login identity and the target of the
+              verification flow, so changing it is a re-verification. The
+              backend refuses it here too.
+            -->
+            <v-text-field
+              :model-value="selectedUser?.email"
+              :label="t('pages.users.email')"
+              :hint="t('pages.users.emailNotEditable')"
+              persistent-hint
+              variant="outlined"
+              density="comfortable"
+              readonly
+              disabled
+              class="mb-4"
+            />
+
+            <!--
+              Whatever this tenant invented. The descriptors came with the read,
+              already filtered to what this admin may see, so there is nothing
+              to fetch and nothing to decide here.
+            -->
+            <CustomFieldFormSection
+              :descriptors="customFields"
+              :values="customValues"
+              @update:draft="customDraft = $event"
+            />
+          </template>
         </v-card-text>
+
         <v-card-actions>
           <v-spacer />
           <v-btn
@@ -452,7 +542,9 @@ onMounted(() => {
           </v-btn>
           <v-btn
             color="primary"
-            @click="showEditDialog = false"
+            :loading="saving"
+            :disabled="loadingUser"
+            @click="saveUser"
           >
             {{ t('common.actions.save') }}
           </v-btn>

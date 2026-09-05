@@ -1,5 +1,8 @@
 import type { User, UsersResponse, Pagination } from '~/types/api';
 import { AuthService } from '~/services/AuthService';
+import { UserService } from '~/services/UserService';
+import { ApiError } from '~/infrastructure/http/ApiClient';
+import type { CustomFieldDescriptor, CustomFieldValue } from '~/types/custom-fields';
 
 export const useUsers = () => {
   // Estados reativos
@@ -10,6 +13,23 @@ export const useUsers = () => {
   
   // Instância do serviço
   const authService = new AuthService();
+  const userService = new UserService();
+  const notification = useNotification();
+
+  const saving = ref(false);
+
+  /**
+   * The tenant's own fields for this entity, described once.
+   *
+   * It arrives WITH the list rather than from a separate call: a screen that
+   * draws user rows or a user form needs to know which fields exist before it
+   * knows any values, and a second round trip for that is a second chance for
+   * the two to disagree.
+   */
+  const customFields = ref<CustomFieldDescriptor[]>([]);
+
+  /** One user's values, loaded when a form opens. */
+  const customValues = ref<CustomFieldValue[]>([]);
 
   // Função para carregar usuários
   const loadUsers = async (page: number = 1, perPage: number = 15) => {
@@ -22,6 +42,7 @@ export const useUsers = () => {
       if (result.success && result.data) {
         users.value = result.data.users;
         pagination.value = result.data.pagination;
+        customFields.value = (result.data as any).custom_fields ?? [];
       } else {
         error.value = result.error || 'Failed to load users';
       }
@@ -115,9 +136,65 @@ export const useUsers = () => {
     return pages;
   });
 
+  /**
+   * One user, with its custom values.
+   *
+   * Called when an edit form opens — never on render, and never as a side
+   * effect of this composable being invoked.
+   */
+  const fetchUser = async (id: string) => {
+    try {
+      const detail = await userService.get(id);
+      customFields.value = detail.custom_fields ?? [];
+      customValues.value = detail.custom ?? [];
+
+      return detail.user;
+    } catch (e: any) {
+      error.value = e?.message ?? 'Could not load the user.';
+      notification.error(error.value as string);
+
+      return null;
+    }
+  };
+
+  /**
+   * @returns the columns the server dropped because this admin may not write
+   *          them, or null when the save failed. An empty array means a clean
+   *          save; a non-empty one is worth telling the person about.
+   */
+  const updateUser = async (id: string, payload: Record<string, unknown>): Promise<string[] | null> => {
+    saving.value = true;
+    error.value = null;
+
+    try {
+      const result = await userService.update(id, payload);
+      customValues.value = result.custom ?? [];
+      customFields.value = result.custom_fields ?? customFields.value;
+
+      return result.ignored_fields ?? [];
+    } catch (e: any) {
+      error.value = e?.message ?? 'Could not save the user.';
+
+      // A 422 belongs on the fields the server named, so it is rethrown for
+      // the form to place rather than flattened into a snackbar.
+      if (e instanceof ApiError && Object.keys(e.errors).length > 0) throw e;
+
+      notification.error(error.value as string);
+
+      return null;
+    } finally {
+      saving.value = false;
+    }
+  };
+
   return {
     // Estados
     users: readonly(users),
+    saving: readonly(saving),
+    customFields: readonly(customFields),
+    customValues: readonly(customValues),
+    fetchUser,
+    updateUser,
     pagination: readonly(pagination),
     loading: readonly(loading),
     error: readonly(error),

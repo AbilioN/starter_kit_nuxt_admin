@@ -1,7 +1,9 @@
+import { ApiError } from '~/infrastructure/http/ApiClient';
 import { AgendaService } from '~/services/AgendaService';
 import type {
   Agenda, AgendaFilters, AgendaGroupBy, AgendaView, AppointmentCard,
 } from '~/types/agenda';
+import type { CustomFieldValue } from '~/types/custom-fields';
 
 /**
  * The agenda screen's state.
@@ -97,8 +99,57 @@ export const useAgenda = () => {
   const routableCards = computed<AppointmentCard[]>(() =>
     visibleCards.value.filter(card => card.location.geocoded));
 
+  const saving = ref(false);
+
+  /** One appointment's custom values, loaded when its form opens. */
+  const appointmentValues = ref<CustomFieldValue[]>([]);
+
+  /**
+   * One appointment, with its custom values.
+   *
+   * `GET /api/admin/appointments/{id}` did not exist until 2026-09-05 —
+   * routes/api.php registered create/update/delete and no way to read a single
+   * record, so a form had nothing to open with.
+   */
+  const fetchAppointment = async (id: string) => {
+    const detail = await new AgendaService().getAppointment(id);
+    appointmentValues.value = detail.custom ?? [];
+
+    return detail.data;
+  };
+
+  /**
+   * @returns the columns the server dropped because this admin may not write
+   *          them, or null when the save failed.
+   */
+  const saveAppointment = async (id: string, payload: Record<string, unknown>): Promise<string[] | null> => {
+    saving.value = true;
+
+    try {
+      const result = await new AgendaService().updateAppointment(id, payload);
+      appointmentValues.value = result.custom ?? [];
+      await load();
+
+      return result.ignored_fields ?? [];
+    } catch (e: any) {
+      // A 422 belongs on the fields the server named; anything else is a
+      // failure the person cannot fix by editing an input.
+      if (e instanceof ApiError && Object.keys(e.errors).length > 0) throw e;
+
+      error.value = e?.message ?? 'Could not save the appointment.';
+
+      return null;
+    } finally {
+      saving.value = false;
+    }
+  };
+
   return {
     agenda: readonly(agenda),
+    saving: readonly(saving),
+    appointmentValues: readonly(appointmentValues),
+    fetchAppointment,
+    saveAppointment,
     view: readonly(view),
     date: readonly(date),
     groupBy: readonly(groupBy),

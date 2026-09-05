@@ -103,6 +103,11 @@ const sidebarItem: menu[] = [
         title: "nav.settingsFeatureFlags",
         to: "/settings/features",
       },
+      {
+        title: "nav.settingsCustomFields",
+        to: "/settings/custom-fields",
+        permission: "custom-field-read",
+      },
     ],
   },
 ];

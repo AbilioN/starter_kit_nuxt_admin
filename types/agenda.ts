@@ -1,3 +1,5 @@
+import type { CustomFieldDescriptor, CustomFieldValue } from '~/types/custom-fields';
+
 // The agenda's JSON contract.
 //
 // Mirrors what the backend builds in BuildAgendaUseCase. The server computes
@@ -73,6 +75,15 @@ export interface AppointmentCard {
   location: AppointmentLocation;
   subject: { type: string; id: string } | null;
   actions: AppointmentActions;
+  /**
+   * The tenant's own values for this appointment — compact on purpose.
+   *
+   * What each field LOOKS like travels once, in `Agenda.custom_fields`, and is
+   * joined to these by `field`. A week is around a hundred cards; carrying a
+   * label, an icon and two colours on each of them would make the tenant's
+   * presentation config most of the payload.
+   */
+  custom: CustomFieldValue[];
 }
 
 export interface AgendaDay extends AgendaTotals {
@@ -115,6 +126,16 @@ export interface Agenda {
   filters: AgendaFilters;
   totals: AgendaTotals;
   groups: AgendaGroup[];
+  /**
+   * The tenant's custom fields for this screen, described ONCE.
+   *
+   * Sent with the agenda rather than fetched separately, so the panel makes no
+   * second request to find out what the chips on the cards mean — and so the
+   * two can never disagree about which fields exist. Already filtered to what
+   * this reader may see: a field hidden from their role is not described here
+   * either.
+   */
+  custom_fields: CustomFieldDescriptor[];
 }
 
 export interface AgendaResponse {

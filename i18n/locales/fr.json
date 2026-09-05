@@ -15,7 +15,8 @@
     "settings": "Paramètres",
     "settingsGeneral": "Général",
     "settingsFeatureFlags": "Feature Flags",
-    "agenda": "Agenda"
+    "agenda": "Agenda",
+    "settingsCustomFields": "Custom fields"
   },
   "profileMenu": {
     "myProfile": "Mon Profil",
@@ -163,7 +164,11 @@
       "deleteDialogTitle": "Confirmer la suppression",
       "deleteDialogBody": "Êtes-vous sûr de vouloir supprimer l'utilisateur {name} ?",
       "deleteDialogWarning": "Cette action est irréversible.",
-      "chatWith": "Discussion avec {name}"
+      "chatWith": "Discussion avec {name}",
+      "name": "Name",
+      "email": "E-mail",
+      "emailNotEditable": "The e-mail is the login identity and is changed through re-verification, not here.",
+      "someFieldsIgnored": "{count} field(s) were not saved: your role may not edit them."
     },
     "admins": {
       "title": "Administrateurs",
@@ -503,6 +508,68 @@
       "title": "Espace de travail suspendu",
       "message": "Cet espace de travail a été suspendu. Veuillez contacter le support pour plus d'informations.",
       "supportHint": "Si vous pensez qu'il s'agit d'une erreur, contactez l'administrateur de votre compte ou notre équipe de support."
+    },
+    "customFields": {
+      "title": "Custom fields",
+      "subtitle": "Fields your workspace invents, stored as real columns.",
+      "newField": "New field",
+      "reconcile": "Sync schema",
+      "budget": "Fields used",
+      "unlimited": "unlimited",
+      "indexBudget": "Up to {max} filterable fields on this table",
+      "label": "Name",
+      "helpText": "Help text",
+      "fieldType": "Type",
+      "slot": "Show on the card",
+      "section": "Form section",
+      "icon": "Icon",
+      "colour": "Colour",
+      "colourDark": "Colour (dark theme)",
+      "filterable": "Filterable",
+      "filterableHint": "Decides how the column is stored. It cannot be changed later without rewriting the table.",
+      "roleRules": "Per-role rules",
+      "status": "Status",
+      "storage": "Storage",
+      "storageIndexed": "Indexed",
+      "storageDisplayOnly": "Display only",
+      "formOnly": "Form only",
+      "empty": "No fields defined yet.",
+      "queued": "Field created. The column is being added.",
+      "featureDisabled": "Custom fields are not enabled for this workspace.",
+      "readOnlySession": "This is a read-only support session, so saving is disabled.",
+      "unsupportedType": "This panel cannot draw a field of type \"{type}\" yet.",
+      "hosts": {
+        "appointments": "Appointments",
+        "users": "Users"
+      },
+      "types": {
+        "text": "Single-line text"
+      },
+      "rules": {
+        "hidden": "Hidden for",
+        "readonly": "Read-only for",
+        "required": "Required for"
+      },
+      "state": {
+        "pending": "Creating column",
+        "live": "Live",
+        "retiring": "Retiring",
+        "retired": "Retired",
+        "purged": "Purged",
+        "failed": "Failed",
+        "missing": "Column missing"
+      },
+      "errors": {
+        "index_budget_exhausted": "No filterable fields left on this table.",
+        "column_budget_exhausted": "This table has no room for another column (limit {limit}).",
+        "row_byte_budget_exhausted": "This field needs {needed} bytes and only {remaining} are left.",
+        "row_version_budget_exhausted": "This table has been altered too many times ({limit}) to add a column instantly.",
+        "type_change_not_supported_yet": "Changing storage from {from} to {to} is not supported yet.",
+        "illegal_column_name": "Refused: {column} is not a custom-field column."
+      },
+      "showEntities": "Entities to show",
+      "noneSelected": "Pick an entity above to see its fields.",
+      "fieldCount": "{count} field(s)"
     }
   },
   "components": {
@@ -661,7 +728,7 @@
     }
   },
   "agenda": {
-    "title": "Agenda",
+    "title": "Title",
     "today": "Aujourd'hui",
     "day": "Jour",
     "week": "Semaine",
@@ -684,6 +751,10 @@
     "estimated": "Estimation à vol d'oiseau",
     "selectStops": "Sélectionnez au moins deux arrêts avec une localisation.",
     "clear": "Effacer",
-    "total": "Total"
+    "total": "Total",
+    "editAppointment": "Edit appointment",
+    "noCustomFields": "This workspace has not defined any custom fields for appointments yet.",
+    "loadFailed": "Could not load the appointment.",
+    "saveFailed": "Could not save the appointment."
   }
 }
