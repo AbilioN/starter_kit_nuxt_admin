@@ -17,7 +17,8 @@
     "settingsFeatureFlags": "Feature Flags",
     "agenda": "Agenda",
     "settingsCustomFields": "Campos personalizados",
-    "settingsAssistant": "Assistente de IA"
+    "settingsAssistant": "Assistente de IA",
+    "settingsLanguages": "Idiomas"
   },
   "profileMenu": {
     "myProfile": "Meu Perfil",
@@ -793,5 +794,16 @@
     "instructionsInternalHelp": "Apenas a sua equipa. Nunca mostrado aos seus clientes.",
     "instructionsInternalPlaceholder": "O nosso preço mínimo é 800 EUR. O salão pequeno leva 55 mas só o vendemos como 40.",
     "instructionsSaveFailed": "Não foi possível guardar as instruções."
+  },
+  "languages": {
+    "title": "Idiomas",
+    "subtitle": "Os idiomas em que o seu negócio funciona. Tudo o que precisa de tradução pede apenas estes.",
+    "offeredTitle": "Idiomas oferecidos",
+    "offeredHelp": "Os rótulos dos campos personalizados, os templates e o seletor de idiomas saem todos desta lista.",
+    "isDefault": "padrão",
+    "defaultLabel": "Idioma padrão",
+    "defaultHelp": "O idioma em que os ecrãs abrem, e o usado quando falta uma tradução.",
+    "disablingIsSafe": "Desativar um idioma esconde o separador. Nunca apaga uma tradução — volte a ativá-lo e o texto continua lá.",
+    "saveFailed": "Não foi possível guardar os idiomas."
   }
 }

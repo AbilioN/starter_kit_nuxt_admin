@@ -113,6 +113,11 @@ const sidebarItem: menu[] = [
         to: "/settings/assistant",
         permission: "document-read",
       },
+      {
+        title: "nav.settingsLanguages",
+        to: "/settings/languages",
+        permission: "setting-read",
+      },
     ],
   },
 ];

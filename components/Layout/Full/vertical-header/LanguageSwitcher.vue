@@ -1,5 +1,12 @@
 <script setup lang="ts">
+import { computed, onMounted } from 'vue';
+import { PANEL_LANGUAGES } from '~/utils/languages';
+
 const { locale, setLocale } = useI18n();
+const { enabled, load } = useTenantLocales();
+const { updateProfile } = useProfile();
+
+onMounted(() => load());
 
 // As bandeiras eram emoji (🇫🇷 = U+1F1EB U+1F1F7, um par de REGIONAL INDICATOR
 // SYMBOL LETTER). Cabe à fonte reconhecer o par e desenhar a bandeira: a Apple
@@ -8,24 +15,54 @@ const { locale, setLocale } = useI18n();
 // e o seletor virava "FR EN ES PT". Trocado por SVG inline: mesmo desenho em
 // qualquer SO, sem dependência nova (são 4 bandeiras; o flag-icons traria CSS de
 // ~250 países pra isso).
-const languages = [
-  { code: 'fr', label: 'Français' },
-  { code: 'en', label: 'English' },
-  { code: 'es', label: 'Español' },
-  { code: 'pt', label: 'Português' },
-] as const;
+// The shared list, so this and the languages settings screen cannot
+// disagree about which four exist. Order here is display order.
+const languages = PANEL_LANGUAGES;
 
 type LanguageCode = (typeof languages)[number]['code'];
 
-const switchLanguage = (code: LanguageCode) => {
+/**
+ * Only the languages this organisation operates in.
+ *
+ * Offering all four regardless was the panel disagreeing with its own
+ * settings: a tenant that runs in Portuguese and English had two flags it
+ * could never usefully pick. Falls back to the full list while the tenant's
+ * own is still loading, or if it could not be read — a switcher showing
+ * everything beats one showing nothing.
+ */
+const visibleLanguages = computed(() => {
+  const offered = languages.filter(l => enabled.value.includes(l.code));
+
+  // Tested on the FILTERED result, not on the tenant list's length: a tenant
+  // offering only a language this panel has no flag for would otherwise render
+  // zero buttons and leave no way to change the interface language at all.
+  return offered.length ? offered : languages;
+});
+
+const switchLanguage = async (code: LanguageCode) => {
   setLocale(code);
+
+  // And REMEMBER it. The switcher used to call vue-i18n and nothing else, so
+  // the choice died on refresh — while `SetLocale` on the backend puts the
+  // admin's stored `locale` above everything else, meaning e-mails and API
+  // messages kept arriving in the old language. The one feature whose whole
+  // justification is reading in your own language shipped with its control
+  // disconnected from the field that decides it.
+  //
+  // Not awaited, and not wrapped: `updateProfile` never throws — it catches
+  // internally, returns a boolean, and raises its own snackbar. Awaiting it
+  // made every flag click pop a "Profile updated" toast for something the
+  // person can already see happen, and the try/catch guarded an exception that
+  // cannot occur. The UI has already switched; whether the preference
+  // persisted is not something they can act on mid-click.
+  void updateProfile({ locale: code });
 };
 </script>
 
 <template>
   <div class="d-flex align-center ga-2">
     <button
-      v-for="lang in languages"
+      v-for="lang in visibleLanguages"
       :key="lang.code"
       type="button"
       class="lang-flag-btn"

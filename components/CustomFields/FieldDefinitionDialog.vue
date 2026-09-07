@@ -12,6 +12,8 @@ const props = defineProps<{
   types: CustomFieldTypeOption[];
   roles: CustomFieldRoleOption[];
   locales: string[];
+  /** The tenant's default — the tab that opens, and the one marked. */
+  defaultLocale?: string;
   saving: boolean;
 }>();
 
@@ -63,7 +65,12 @@ const blankLabels = (locales: string[]) =>
   Object.fromEntries(locales.map(l => [l, { label: '', help_text: '' }]));
 
 const labels = ref<Record<string, { label: string; help_text: string }>>(blankLabels(props.locales));
-const activeLocale = ref<string>(props.locales[0] ?? '');
+const openingLocale = () =>
+  (props.defaultLocale && props.locales.includes(props.defaultLocale))
+    ? props.defaultLocale
+    : (props.locales[0] ?? '');
+
+const activeLocale = ref<string>(openingLocale());
 
 const roleRules = ref<Record<'hidden' | 'readonly' | 'required', string[]>>({
   hidden: [],
@@ -95,7 +102,7 @@ const reset = () => {
   fieldErrors.value = {};
 
   labels.value = blankLabels(props.locales);
-  activeLocale.value = props.locales[0] ?? '';
+  activeLocale.value = openingLocale();
 };
 
 // `immediate` because the dialog is mounted already open; without it the first
@@ -199,6 +206,12 @@ defineExpose({ setFieldErrors: (errors: Record<string, string[]>) => { fieldErro
              locale tabs already follow. -->
         <v-tabs v-model="activeLocale" density="compact" class="mt-4">
           <v-tab v-for="locale in props.locales" :key="locale" :value="locale">
+            <v-icon
+              v-if="locale === props.defaultLocale"
+              icon="mdi-star"
+              size="12"
+              class="mr-1 text-medium-emphasis"
+            />
             {{ locale.toUpperCase() }}
             <v-icon v-if="labels[locale]?.label" icon="mdi-check" size="12" class="ml-1" />
           </v-tab>

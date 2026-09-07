@@ -27,6 +27,7 @@ const {
   hosts,
   roles,
   locales,
+  defaultLocale,
   types,
   pending,
   loading,
@@ -161,7 +162,9 @@ const submit = async (payload: CreateCustomFieldRequest) => {
 };
 
 const localeLabel = (labels: Record<string, { label: string }>) => {
-  const preferred = labels[locales.value[0]] ?? Object.values(labels)[0];
+  // The tenant's default, not simply the first offered language — the two
+  // differ as soon as somebody reorders the list.
+  const preferred = labels[defaultLocale.value] ?? labels[locales.value[0]] ?? Object.values(labels)[0];
 
   return preferred?.label ?? '—';
 };
@@ -349,6 +352,7 @@ const localeLabel = (labels: Record<string, { label: string }>) => {
       :types="types"
       :roles="roles"
       :locales="locales"
+      :default-locale="defaultLocale"
       :saving="saving"
       @submit="submit"
     />

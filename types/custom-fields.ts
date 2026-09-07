@@ -145,7 +145,19 @@ export interface CustomFieldCatalogue {
   hosts: CustomFieldHost[];
   types: CustomFieldTypeOption[];
   roles: CustomFieldRoleOption[];
-  locales: string[];
+  /**
+   * The tenant's OWN languages, not the platform's.
+   *
+   * `enabled` is what the authoring tabs are drawn from; `default` is the tab
+   * that opens; `available` is what a WRITE is validated against, and is wider
+   * on purpose — a label authored before a locale was switched off must still
+   * render and still save.
+   */
+  locales: {
+    enabled: string[];
+    default: string;
+    available: string[];
+  };
 }
 
 export interface CreateCustomFieldRequest {

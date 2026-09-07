@@ -17,7 +17,8 @@
     "settingsFeatureFlags": "Feature Flags",
     "agenda": "Agenda",
     "settingsCustomFields": "Custom fields",
-    "settingsAssistant": "AI assistant"
+    "settingsAssistant": "AI assistant",
+    "settingsLanguages": "Languages"
   },
   "profileMenu": {
     "myProfile": "My Profile",
@@ -793,5 +794,16 @@
     "instructionsInternalHelp": "Only your team. Never shown to your customers.",
     "instructionsInternalPlaceholder": "Our floor price is 800 EUR. The small hall seats 55 but we only sell it as 40.",
     "instructionsSaveFailed": "Could not save the instructions."
+  },
+  "languages": {
+    "title": "Languages",
+    "subtitle": "The languages your business operates in. Everything that needs translating asks only for these.",
+    "offeredTitle": "Offered languages",
+    "offeredHelp": "Custom field labels, templates and the language switcher are all drawn from this list.",
+    "isDefault": "default",
+    "defaultLabel": "Default language",
+    "defaultHelp": "The language screens open in, and the one used when a translation is missing.",
+    "disablingIsSafe": "Turning a language off hides its tab. It never deletes a translation — turn it back on and the text is still there.",
+    "saveFailed": "Could not save the languages."
   }
 }

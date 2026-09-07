@@ -533,6 +533,14 @@ export interface UpdateAdminProfileRequest {
   // Só aceite pelo backend para tenant owners (403 caso contrário) — a UI
   // esconde o campo, mas a validação real está no servidor.
   notification_email?: string | null;
+  /**
+   * The admin's own reading language, written by the header switcher.
+   *
+   * Bounded by what the PRODUCT can render, not by the tenant's
+   * `locales.enabled` — that says what the business publishes in, which is a
+   * different question from what one person reads in.
+   */
+  locale?: string | null;
 }
 
 export interface ChangeAdminPasswordRequest {

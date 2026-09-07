@@ -73,7 +73,11 @@ export const useCustomFields = () => {
   const definitions = computed<CustomFieldDefinition[]>(() => catalogue.value?.definitions ?? []);
   const hosts = computed<CustomFieldHost[]>(() => catalogue.value?.hosts ?? []);
   const roles = computed(() => catalogue.value?.roles ?? []);
-  const locales = computed(() => catalogue.value?.locales ?? []);
+  // The tenant's offered languages, defaulting to the one the panel is
+  // rendering in rather than to an empty list — a dialog with no tab to draw
+  // renders a form nobody can fill.
+  const locales = computed(() => catalogue.value?.locales?.enabled ?? []);
+  const defaultLocale = computed(() => catalogue.value?.locales?.default ?? locales.value[0] ?? 'en');
   const types = computed(() => catalogue.value?.types ?? []);
 
   const definitionsFor = (host: string) =>
@@ -135,6 +139,7 @@ export const useCustomFields = () => {
     hosts,
     roles,
     locales,
+    defaultLocale,
     types,
     pending,
     failed,
